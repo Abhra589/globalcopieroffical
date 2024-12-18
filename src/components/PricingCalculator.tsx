@@ -1,33 +1,14 @@
 import { useState, useCallback } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
 import { PriceList } from "./pricing/PriceList";
 import { DeliveryOptions } from "./pricing/DeliveryOptions";
 import { CopiesInput } from "./pricing/CopiesInput";
-
-interface PricingOption {
-  gsm: "70" | "100";
-  type: "bw" | "color";
-  sides: "single" | "double";
-  pricePerPage: number;
-}
-
-const pricingOptions: PricingOption[] = [
-  { gsm: "70", type: "bw", sides: "single", pricePerPage: 0.8 },
-  { gsm: "70", type: "bw", sides: "double", pricePerPage: 1.0 },
-  { gsm: "70", type: "color", sides: "single", pricePerPage: 2.5 },
-  { gsm: "70", type: "color", sides: "double", pricePerPage: 4.5 },
-  { gsm: "100", type: "bw", sides: "single", pricePerPage: 2.0 },
-  { gsm: "100", type: "bw", sides: "double", pricePerPage: 3.0 },
-  { gsm: "100", type: "color", sides: "single", pricePerPage: 3.0 },
-  { gsm: "100", type: "color", sides: "double", pricePerPage: 5.0 },
-];
-
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB limit
+import { FileUpload } from "./pricing/FileUpload";
+import { Calculator } from "lucide-react";
 
 export const PricingCalculator = () => {
   const navigate = useNavigate();
@@ -40,43 +21,34 @@ export const PricingCalculator = () => {
   const [copies, setCopies] = useState(1);
   const { toast } = useToast();
 
-  const calculateCourierCharge = (pages: number) => {
+  const calculateCourierCharge = useCallback((pages: number) => {
     return deliveryType === "pickup" ? 0 : (pages <= 400 ? 80 : 150);
-  };
+  }, [deliveryType]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > MAX_FILE_SIZE) {
-      toast({
-        title: "File too large",
-        description: "Maximum file size is 100MB. Please compress your PDF or contact us for larger files.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.type === "application/pdf") {
-      setFile(file);
-      // In a real application, you would parse the PDF to get page count
-      // For demo purposes, we'll set a random number
-      const demoPageCount = Math.floor(Math.random() * 500) + 1;
-      setPageCount(demoPageCount);
-      toast({
-        title: "File uploaded successfully",
-        description: `Document has ${demoPageCount} pages`,
-      });
-    } else {
-      toast({
-        title: "Invalid file format",
-        description: "Please upload a PDF file",
-        variant: "destructive",
-      });
-    }
+  const handleFileChange = (newFile: File | null) => {
+    if (!newFile) return;
+    setFile(newFile);
+    // In a real application, you would parse the PDF to get page count
+    const demoPageCount = Math.floor(Math.random() * 500) + 1;
+    setPageCount(demoPageCount);
+    toast({
+      title: "File uploaded successfully",
+      description: `Document has ${demoPageCount} pages`,
+    });
   };
 
   const calculateTotal = useCallback(() => {
+    const pricingOptions = [
+      { gsm: "70", type: "bw", sides: "single", pricePerPage: 0.8 },
+      { gsm: "70", type: "bw", sides: "double", pricePerPage: 1.0 },
+      { gsm: "70", type: "color", sides: "single", pricePerPage: 2.5 },
+      { gsm: "70", type: "color", sides: "double", pricePerPage: 4.5 },
+      { gsm: "100", type: "bw", sides: "single", pricePerPage: 2.0 },
+      { gsm: "100", type: "bw", sides: "double", pricePerPage: 3.0 },
+      { gsm: "100", type: "color", sides: "single", pricePerPage: 3.0 },
+      { gsm: "100", type: "color", sides: "double", pricePerPage: 5.0 },
+    ];
+
     const selectedOption = pricingOptions.find(
       (option) =>
         option.gsm === selectedGsm &&
@@ -89,7 +61,7 @@ export const PricingCalculator = () => {
     const printingCost = selectedOption.pricePerPage * pageCount * copies;
     const courierCharge = calculateCourierCharge(pageCount);
     return printingCost + courierCharge;
-  }, [selectedGsm, selectedType, selectedSides, pageCount, copies, deliveryType]);
+  }, [selectedGsm, selectedType, selectedSides, pageCount, copies, calculateCourierCharge]);
 
   const handleWhatsAppRedirect = () => {
     const total = calculateTotal();
@@ -108,10 +80,13 @@ export const PricingCalculator = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg animate-fade-in">
-      <h2 className="text-2xl font-bold text-[#1A1F2C] mb-6">Calculate Printing Cost</h2>
+      <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+        <Calculator className="w-6 h-6" />
+        Calculate Printing Cost
+      </h2>
       
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
           <Label>Paper Weight</Label>
           <RadioGroup
             value={selectedGsm}
@@ -131,7 +106,7 @@ export const PricingCalculator = () => {
 
         <PriceList selectedGsm={selectedGsm} />
 
-        <div>
+        <div className="space-y-2">
           <Label>Print Type</Label>
           <RadioGroup
             value={selectedType}
@@ -149,7 +124,7 @@ export const PricingCalculator = () => {
           </RadioGroup>
         </div>
 
-        <div>
+        <div className="space-y-2">
           <Label>Printing Sides</Label>
           <RadioGroup
             value={selectedSides}
@@ -171,22 +146,13 @@ export const PricingCalculator = () => {
 
         <DeliveryOptions deliveryType={deliveryType} setDeliveryType={setDeliveryType} />
 
-        <div>
-          <Label htmlFor="file">Upload PDF Document (Max 100MB)</Label>
-          <Input
-            id="file"
-            type="file"
-            accept=".pdf"
-            onChange={handleFileChange}
-            className="mt-2"
-          />
-        </div>
+        <FileUpload onFileChange={handleFileChange} />
 
         {pageCount > 0 && (
-          <div className="p-4 bg-[#F1F1F1] rounded-lg space-y-2 animate-scale-in">
-            <p className="text-[#1A1F2C]">Document Pages: {pageCount}</p>
-            <p className="text-[#1A1F2C]">Courier Charge: ₹{calculateCourierCharge(pageCount)}</p>
-            <p className="text-lg font-bold text-[#1A1F2C]">
+          <div className="p-6 bg-primary/5 rounded-lg space-y-3 animate-scale-in">
+            <p className="text-primary">Document Pages: {pageCount}</p>
+            <p className="text-primary">Courier Charge: ₹{calculateCourierCharge(pageCount)}</p>
+            <p className="text-xl font-bold text-primary">
               Total Amount: ₹{calculateTotal().toFixed(2)}
             </p>
           </div>
@@ -195,14 +161,14 @@ export const PricingCalculator = () => {
         <div className="flex gap-4">
           <Button
             onClick={handleWhatsAppRedirect}
-            className="bg-[#9b87f5] hover:bg-[#8b77e5] text-white animate-scale-in"
+            className="bg-[#25D366] hover:bg-[#128C7E] text-white animate-scale-in flex-1"
             disabled={!pageCount}
           >
             Enquire on WhatsApp
           </Button>
           <Button
             onClick={() => navigate("/payment")}
-            className="bg-[#1A1F2C] hover:bg-[#2A2F3C] text-white animate-scale-in"
+            className="bg-primary hover:bg-primary/90 text-white animate-scale-in flex-1"
             disabled={!pageCount}
           >
             Proceed to Payment
