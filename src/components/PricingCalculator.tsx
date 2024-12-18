@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface PricingOption {
   gsm: "70" | "100";
@@ -24,6 +25,7 @@ const pricingOptions: PricingOption[] = [
 ];
 
 export const PricingCalculator = () => {
+  const navigate = useNavigate();
   const [selectedGsm, setSelectedGsm] = useState<"70" | "100">("70");
   const [selectedType, setSelectedType] = useState<"bw" | "color">("bw");
   const [selectedSides, setSelectedSides] = useState<"single" | "double">("single");
