@@ -23,26 +23,28 @@ const PaymentPage = () => {
       <Navbar />
       <div className="container mx-auto py-8">
         <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow">
-          <h1 className="text-3xl font-bold mb-6">Complete Payment</h1>
+          <h1 className="text-3xl font-bold mb-6 text-[#1A1F2C]">Complete Payment</h1>
           <div className="space-y-4">
             <div className="border-b pb-4">
-              <h2 className="text-lg font-semibold mb-2">Order Summary</h2>
+              <h2 className="text-lg font-semibold mb-2 text-[#1A1F2C]">Order Summary</h2>
               <p>Pages: {orderDetails.pages}</p>
               <p>Copies: {orderDetails.copies}</p>
               <p>Courier Charge: ₹{orderDetails.courierCharge}</p>
+              <p className="text-xl font-bold mt-2">Total: ₹{orderDetails.total}</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-semibold mb-4">Scan QR Code to Pay</p>
-              {/* Replace with actual QR code image */}
-              <div className="w-48 h-48 bg-gray-200 mx-auto mb-4 flex items-center justify-center">
-                <p className="text-gray-500">QR Code Placeholder</p>
-              </div>
+              <img 
+                src="/lovable-uploads/e84eef7f-372e-4d25-8662-a19ca94ea777.png"
+                alt="Payment QR Code"
+                className="w-48 h-48 mx-auto mb-4"
+              />
               <p className="text-sm text-gray-600 mb-4">
                 After payment, our team will verify and process your order
               </p>
               <Button
                 onClick={() => navigate("/order-confirmation")}
-                className="w-full"
+                className="w-full bg-[#9b87f5] hover:bg-[#8b77e5] text-white"
               >
                 I have completed the payment
               </Button>
