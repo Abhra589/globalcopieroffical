@@ -65,7 +65,7 @@ export const PricingCalculator = () => {
 
   const handleWhatsAppRedirect = () => {
     const total = calculateTotal();
-    const message = encodeURIComponent(
+    const customerMessage = encodeURIComponent(
       `Hi, I would like to place an order:\n` +
       `Pages: ${pageCount}\n` +
       `Copies: ${copies}\n` +
@@ -75,7 +75,28 @@ export const PricingCalculator = () => {
       `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
       `Total Amount: ₹${total.toFixed(2)}`
     );
-    window.open(`https://wa.me/918777060249?text=${message}`, '_blank');
+
+    // Send to customer service WhatsApp
+    window.open(`https://wa.me/918777060249?text=${customerMessage}`, '_blank');
+
+    // Send order confirmation to admin
+    const adminMessage = encodeURIComponent(
+      `New order received:\n` +
+      `Pages: ${pageCount}\n` +
+      `Copies: ${copies}\n` +
+      `Paper: ${selectedGsm}gsm\n` +
+      `Type: ${selectedType === 'bw' ? 'Black & White' : 'Color'}\n` +
+      `Sides: ${selectedSides === 'single' ? 'Single side' : 'Both sides'}\n` +
+      `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
+      `Total Amount: ₹${total.toFixed(2)}\n` +
+      `Status: Pending Payment`
+    );
+    window.open(`https://wa.me/918777060249?text=${adminMessage}`, '_blank');
+
+    toast({
+      title: "Order Submitted",
+      description: "Your order details have been sent via WhatsApp. We'll contact you shortly.",
+    });
   };
 
   return (
