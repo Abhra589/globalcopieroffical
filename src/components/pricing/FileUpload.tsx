@@ -7,7 +7,7 @@ import { s3Client } from "@/utils/s3Config";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 interface FileUploadProps {
-  onFileChange: (file: File | null) => void;
+  onFileChange: (file: File | null, uploadedUrl: string) => void;
 }
 
 export const FileUpload = ({ onFileChange }: FileUploadProps) => {
@@ -50,7 +50,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
       setIsUploading(true);
       try {
         const s3Url = await uploadToS3(file);
-        onFileChange(file);
+        onFileChange(file, s3Url);
         toast({
           title: "File uploaded successfully",
           description: `Document uploaded: ${file.name}`,
