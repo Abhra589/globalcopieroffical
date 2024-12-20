@@ -1,22 +1,22 @@
 import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { Calculator } from "lucide-react";
 import { PriceList } from "./pricing/PriceList";
 import { DeliveryOptions } from "./pricing/DeliveryOptions";
 import { CopiesInput } from "./pricing/CopiesInput";
 import { FileUpload } from "./pricing/FileUpload";
-import { Calculator } from "lucide-react";
+import { OrderSummary } from "./pricing/OrderSummary";
+import { OrderActions } from "./pricing/OrderActions";
+import { PrintOptions } from "./pricing/PrintOptions";
+import { sendWhatsAppMessage, createOrderMessage, createAdminMessage } from "./pricing/WhatsAppService";
 
 export const PricingCalculator = () => {
-  const navigate = useNavigate();
   const [selectedGsm, setSelectedGsm] = useState<"70" | "100">("70");
   const [selectedType, setSelectedType] = useState<"bw" | "color">("bw");
   const [selectedSides, setSelectedSides] = useState<"single" | "double">("single");
   const [deliveryType, setDeliveryType] = useState<"pickup" | "delivery">("delivery");
   const [file, setFile] = useState<File | null>(null);
+  const [fileUrl, setFileUrl] = useState<string>("");
   const [pageCount, setPageCount] = useState<number>(0);
   const [copies, setCopies] = useState(1);
   const { toast } = useToast();
@@ -25,12 +25,27 @@ export const PricingCalculator = () => {
     return deliveryType === "pickup" ? 0 : (pages <= 400 ? 80 : 150);
   }, [deliveryType]);
 
-  const handleFileChange = (newFile: File | null) => {
+  const handleFileChange = async (newFile: File | null, uploadedUrl: string) => {
     if (!newFile) return;
     setFile(newFile);
+    setFileUrl(uploadedUrl);
     // In a real application, you would parse the PDF to get page count
     const demoPageCount = Math.floor(Math.random() * 500) + 1;
     setPageCount(demoPageCount);
+    
+    // Send notification to admin about new file upload
+    const adminFileMessage = createAdminMessage(
+      demoPageCount,
+      copies,
+      selectedGsm,
+      selectedType,
+      selectedSides,
+      deliveryType,
+      calculateTotal(),
+      uploadedUrl
+    );
+    sendWhatsAppMessage(adminFileMessage);
+
     toast({
       title: "File uploaded successfully",
       description: `Document has ${demoPageCount} pages`,
@@ -65,33 +80,32 @@ export const PricingCalculator = () => {
 
   const handleWhatsAppRedirect = () => {
     const total = calculateTotal();
-    const customerMessage = encodeURIComponent(
-      `Hi, I would like to place an order:\n` +
-      `Pages: ${pageCount}\n` +
-      `Copies: ${copies}\n` +
-      `Paper: ${selectedGsm}gsm\n` +
-      `Type: ${selectedType === 'bw' ? 'Black & White' : 'Color'}\n` +
-      `Sides: ${selectedSides === 'single' ? 'Single side' : 'Both sides'}\n` +
-      `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
-      `Total Amount: ₹${total.toFixed(2)}`
+    
+    // Send customer message
+    const customerMessage = createOrderMessage(
+      pageCount,
+      copies,
+      selectedGsm,
+      selectedType,
+      selectedSides,
+      deliveryType,
+      total,
+      fileUrl
     );
+    sendWhatsAppMessage(customerMessage);
 
-    // Send to customer service WhatsApp
-    window.open(`https://wa.me/918777060249?text=${customerMessage}`, '_blank');
-
-    // Send order confirmation to admin
-    const adminMessage = encodeURIComponent(
-      `New order received:\n` +
-      `Pages: ${pageCount}\n` +
-      `Copies: ${copies}\n` +
-      `Paper: ${selectedGsm}gsm\n` +
-      `Type: ${selectedType === 'bw' ? 'Black & White' : 'Color'}\n` +
-      `Sides: ${selectedSides === 'single' ? 'Single side' : 'Both sides'}\n` +
-      `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
-      `Total Amount: ₹${total.toFixed(2)}\n` +
-      `Status: Pending Payment`
+    // Send admin notification
+    const adminMessage = createAdminMessage(
+      pageCount,
+      copies,
+      selectedGsm,
+      selectedType,
+      selectedSides,
+      deliveryType,
+      total,
+      fileUrl
     );
-    window.open(`https://wa.me/918777060249?text=${adminMessage}`, '_blank');
+    sendWhatsAppMessage(adminMessage);
 
     toast({
       title: "Order Submitted",
@@ -107,94 +121,30 @@ export const PricingCalculator = () => {
       </h2>
       
       <div className="space-y-6">
-        <div className="space-y-2">
-          <Label>Paper Weight</Label>
-          <RadioGroup
-            value={selectedGsm}
-            onValueChange={(value: "70" | "100") => setSelectedGsm(value)}
-            className="flex gap-4 mt-2"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="70" id="gsm-70" />
-              <Label htmlFor="gsm-70">70 GSM</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="100" id="gsm-100" />
-              <Label htmlFor="gsm-100">100 GSM</Label>
-            </div>
-          </RadioGroup>
-        </div>
+        <PrintOptions
+          selectedGsm={selectedGsm}
+          setSelectedGsm={setSelectedGsm}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          selectedSides={selectedSides}
+          setSelectedSides={setSelectedSides}
+        />
 
         <PriceList selectedGsm={selectedGsm} />
-
-        <div className="space-y-2">
-          <Label>Print Type</Label>
-          <RadioGroup
-            value={selectedType}
-            onValueChange={(value: "bw" | "color") => setSelectedType(value)}
-            className="flex gap-4 mt-2"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="bw" id="type-bw" />
-              <Label htmlFor="type-bw">Black & White</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="color" id="type-color" />
-              <Label htmlFor="type-color">Color</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Printing Sides</Label>
-          <RadioGroup
-            value={selectedSides}
-            onValueChange={(value: "single" | "double") => setSelectedSides(value)}
-            className="flex gap-4 mt-2"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="single" id="sides-single" />
-              <Label htmlFor="sides-single">Single Side</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="double" id="sides-double" />
-              <Label htmlFor="sides-double">Both Sides</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
         <CopiesInput copies={copies} setCopies={setCopies} />
-
         <DeliveryOptions deliveryType={deliveryType} setDeliveryType={setDeliveryType} />
-
         <FileUpload onFileChange={handleFileChange} />
-
-        {pageCount > 0 && (
-          <div className="p-6 bg-primary/5 rounded-lg space-y-3 animate-scale-in">
-            <p className="text-primary">Document Pages: {pageCount}</p>
-            <p className="text-primary">Courier Charge: ₹{calculateCourierCharge(pageCount)}</p>
-            <p className="text-xl font-bold text-primary">
-              Total Amount: ₹{calculateTotal().toFixed(2)}
-            </p>
-          </div>
-        )}
-
-        <div className="flex gap-4">
-          <Button
-            onClick={handleWhatsAppRedirect}
-            className="bg-[#25D366] hover:bg-[#128C7E] text-white animate-scale-in flex-1"
-            disabled={!pageCount}
-          >
-            Enquire on WhatsApp
-          </Button>
-          <Button
-            onClick={() => navigate("/payment")}
-            className="bg-primary hover:bg-primary/90 text-white animate-scale-in flex-1"
-            disabled={!pageCount}
-          >
-            Proceed to Payment
-          </Button>
-        </div>
+        
+        <OrderSummary
+          pageCount={pageCount}
+          calculateCourierCharge={calculateCourierCharge}
+          calculateTotal={calculateTotal}
+        />
+        
+        <OrderActions
+          pageCount={pageCount}
+          onWhatsAppRedirect={handleWhatsAppRedirect}
+        />
       </div>
     </div>
   );
