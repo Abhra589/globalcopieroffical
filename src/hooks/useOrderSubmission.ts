@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { NavigateFunction } from "react-router-dom";
-import { Toast } from "@/components/ui/use-toast";
+import { type ToastProps } from "@/components/ui/toast";
 
 interface OrderSubmissionProps {
   pageCount: number;
@@ -12,7 +12,7 @@ interface OrderSubmissionProps {
   fileUrl: string;
   navigate: NavigateFunction;
   toast: {
-    toast: (props: Toast) => void;
+    toast: (props: Omit<ToastProps, "id">) => void;
   };
 }
 
@@ -60,9 +60,9 @@ export const useOrderSubmission = ({
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          customer_name: "Customer", // This will be updated in the order page
-          customer_email: "customer@example.com", // This will be updated in the order page
-          customer_phone: "1234567890", // This will be updated in the order page
+          customer_name: "Customer",
+          customer_email: "customer@example.com",
+          customer_phone: "1234567890",
           pages: pageCount,
           copies,
           gsm: selectedGsm,
@@ -78,7 +78,6 @@ export const useOrderSubmission = ({
 
       if (orderError) throw orderError;
 
-      // Store order details for the next page
       localStorage.setItem('currentOrder', JSON.stringify({
         orderId: orderData.id,
         pageCount,
@@ -91,7 +90,6 @@ export const useOrderSubmission = ({
         total,
       }));
 
-      // Trigger WhatsApp notification to admin
       await supabase.functions.invoke('send-whatsapp-notification', {
         body: {
           type: 'new_order',
@@ -112,7 +110,7 @@ export const useOrderSubmission = ({
       navigate(redirectPath);
     } catch (error) {
       console.error('Error creating order:', error);
-      toast({
+      toast.toast({
         title: "Error",
         description: "Failed to create order. Please try again.",
         variant: "destructive",

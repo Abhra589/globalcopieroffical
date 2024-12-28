@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Calculator } from "lucide-react";
 import { PriceList } from "./PriceList";
 import { DeliveryOptions } from "./DeliveryOptions";
@@ -32,7 +32,7 @@ export const OrderForm = () => {
     deliveryType,
     fileUrl,
     navigate,
-    toast,
+    toast: { toast },
   });
 
   const calculateCourierCharge = useCallback((pages: number) => {
