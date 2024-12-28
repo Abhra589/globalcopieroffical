@@ -32,25 +32,17 @@ export const OrderForm = () => {
     deliveryType,
     fileUrl,
     navigate,
-    toast: { toast },
+    toast,
   });
 
   const calculateCourierCharge = useCallback((pages: number) => {
     return deliveryType === "pickup" ? 0 : (pages <= 400 ? 80 : 150);
   }, [deliveryType]);
 
-  const handleFileChange = async (newFile: File | null, uploadedUrl: string) => {
-    if (!newFile) return;
+  const handleFileChange = async (newFile: File | null, uploadedUrl: string, pdfPageCount: number) => {
     setFile(newFile);
     setFileUrl(uploadedUrl);
-    // In a real application, you would parse the PDF to get page count
-    const demoPageCount = Math.floor(Math.random() * 500) + 1;
-    setPageCount(demoPageCount);
-    
-    toast({
-      title: "File uploaded successfully",
-      description: `Document has ${demoPageCount} pages`,
-    });
+    setPageCount(pdfPageCount);
   };
 
   const calculateTotal = useCallback(() => {
@@ -97,9 +89,9 @@ export const OrderForm = () => {
         />
 
         <PriceList selectedGsm={selectedGsm} />
+        <FileUpload onFileChange={handleFileChange} />
         <CopiesInput copies={copies} setCopies={setCopies} />
         <DeliveryOptions deliveryType={deliveryType} setDeliveryType={setDeliveryType} />
-        <FileUpload onFileChange={handleFileChange} />
         
         <OrderSummary
           pageCount={pageCount}
