@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { NavigateFunction } from "react-router-dom";
-import { ToastType } from "@/components/ui/use-toast";
+import { Toast } from "@/components/ui/use-toast";
 
 interface OrderSubmissionProps {
   pageCount: number;
@@ -11,7 +11,9 @@ interface OrderSubmissionProps {
   deliveryType: string;
   fileUrl: string;
   navigate: NavigateFunction;
-  toast: ToastType;
+  toast: {
+    toast: (props: Toast) => void;
+  };
 }
 
 export const useOrderSubmission = ({

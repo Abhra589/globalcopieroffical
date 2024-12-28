@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 interface OrderActionsProps {
   pageCount: number;
   onWhatsAppRedirect: () => void;
+  onProceedToPayment: () => void;
 }
 
-export const OrderActions = ({ pageCount, onWhatsAppRedirect }: OrderActionsProps) => {
+export const OrderActions = ({ pageCount, onWhatsAppRedirect, onProceedToPayment }: OrderActionsProps) => {
   const navigate = useNavigate();
 
   return (
@@ -20,7 +21,7 @@ export const OrderActions = ({ pageCount, onWhatsAppRedirect }: OrderActionsProp
         Enquire on WhatsApp
       </Button>
       <Button
-        onClick={() => navigate("/payment")}
+        onClick={onProceedToPayment}
         className="bg-primary hover:bg-primary/90 text-white animate-scale-in flex-1"
         disabled={!pageCount}
       >
