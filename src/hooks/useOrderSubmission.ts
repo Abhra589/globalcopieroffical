@@ -12,7 +12,7 @@ interface OrderSubmissionProps {
   fileUrl: string;
   navigate: NavigateFunction;
   toast: {
-    toast: (props: Omit<ToastProps, "id">) => void;
+    toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => void;
   };
 }
 
