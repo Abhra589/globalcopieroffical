@@ -32,7 +32,14 @@ export const OrderForm = () => {
     deliveryType,
     fileUrl,
     navigate,
-    toast,
+    toast: {
+      toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => {
+        toast({
+          ...props,
+          duration: 3000,
+        });
+      }
+    },
   });
 
   const calculateCourierCharge = useCallback((pages: number) => {
