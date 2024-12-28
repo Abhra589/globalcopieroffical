@@ -8,9 +8,11 @@ import { FileUpload } from "./pricing/FileUpload";
 import { OrderSummary } from "./pricing/OrderSummary";
 import { OrderActions } from "./pricing/OrderActions";
 import { PrintOptions } from "./pricing/PrintOptions";
-import { sendWhatsAppMessage, createOrderMessage, createAdminMessage } from "./pricing/WhatsAppService";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export const PricingCalculator = () => {
+  const navigate = useNavigate();
   const [selectedGsm, setSelectedGsm] = useState<"70" | "100">("70");
   const [selectedType, setSelectedType] = useState<"bw" | "color">("bw");
   const [selectedSides, setSelectedSides] = useState<"single" | "double">("single");
@@ -33,19 +35,6 @@ export const PricingCalculator = () => {
     const demoPageCount = Math.floor(Math.random() * 500) + 1;
     setPageCount(demoPageCount);
     
-    // Send notification to admin about new file upload
-    const adminFileMessage = createAdminMessage(
-      demoPageCount,
-      copies,
-      selectedGsm,
-      selectedType,
-      selectedSides,
-      deliveryType,
-      calculateTotal(),
-      uploadedUrl
-    );
-    sendWhatsAppMessage(adminFileMessage);
-
     toast({
       title: "File uploaded successfully",
       description: `Document has ${demoPageCount} pages`,
@@ -78,39 +67,104 @@ export const PricingCalculator = () => {
     return printingCost + courierCharge;
   }, [selectedGsm, selectedType, selectedSides, pageCount, copies, calculateCourierCharge]);
 
-  const handleWhatsAppRedirect = () => {
+  const handleWhatsAppRedirect = async () => {
     const total = calculateTotal();
     
-    // Send customer message
-    const customerMessage = createOrderMessage(
-      pageCount,
-      copies,
-      selectedGsm,
-      selectedType,
-      selectedSides,
-      deliveryType,
-      total,
-      fileUrl
-    );
-    sendWhatsAppMessage(customerMessage);
+    try {
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          customer_name: "Customer", // This will be updated in the order page
+          customer_email: "customer@example.com", // This will be updated in the order page
+          customer_phone: "1234567890", // This will be updated in the order page
+          pages: pageCount,
+          copies,
+          gsm: selectedGsm,
+          print_type: selectedType,
+          print_sides: selectedSides,
+          delivery_type: deliveryType,
+          file_path: fileUrl,
+          file_url: fileUrl,
+          amount: total,
+        })
+        .select()
+        .single();
 
-    // Send admin notification
-    const adminMessage = createAdminMessage(
-      pageCount,
-      copies,
-      selectedGsm,
-      selectedType,
-      selectedSides,
-      deliveryType,
-      total,
-      fileUrl
-    );
-    sendWhatsAppMessage(adminMessage);
+      if (orderError) throw orderError;
 
-    toast({
-      title: "Order Submitted",
-      description: "Your order details have been sent via WhatsApp. We'll contact you shortly.",
-    });
+      // Store order details for the order page
+      localStorage.setItem('currentOrder', JSON.stringify({
+        orderId: orderData.id,
+        pageCount,
+        copies,
+        selectedGsm,
+        selectedType,
+        selectedSides,
+        deliveryType,
+        fileUrl,
+        total,
+      }));
+
+      // Redirect to order page
+      navigate('/order');
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create order. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleProceedToPayment = async () => {
+    const total = calculateTotal();
+    
+    try {
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          customer_name: "Customer", // This will be updated in the order page
+          customer_email: "customer@example.com", // This will be updated in the order page
+          customer_phone: "1234567890", // This will be updated in the order page
+          pages: pageCount,
+          copies,
+          gsm: selectedGsm,
+          print_type: selectedType,
+          print_sides: selectedSides,
+          delivery_type: deliveryType,
+          file_path: fileUrl,
+          file_url: fileUrl,
+          amount: total,
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Store order details for the payment page
+      localStorage.setItem('currentOrder', JSON.stringify({
+        orderId: orderData.id,
+        pageCount,
+        copies,
+        selectedGsm,
+        selectedType,
+        selectedSides,
+        deliveryType,
+        fileUrl,
+        total,
+      }));
+
+      // Redirect to payment page
+      navigate('/payment');
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create order. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -141,10 +195,22 @@ export const PricingCalculator = () => {
           calculateTotal={calculateTotal}
         />
         
-        <OrderActions
-          pageCount={pageCount}
-          onWhatsAppRedirect={handleWhatsAppRedirect}
-        />
+        <div className="flex gap-4">
+          <button
+            onClick={handleWhatsAppRedirect}
+            className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!pageCount}
+          >
+            Enquire on WhatsApp
+          </button>
+          <button
+            onClick={handleProceedToPayment}
+            className="flex-1 bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!pageCount}
+          >
+            Proceed to Payment
+          </button>
+        </div>
       </div>
     </div>
   );
