@@ -5,6 +5,10 @@ const MERCHANT_ID = Deno.env.get('PHONEPE_MERCHANT_ID')
 const SALT_KEY = Deno.env.get('PHONEPE_KEY')
 const SALT_INDEX = Deno.env.get('PHONEPE_KEY_INDEX')
 
+if (!MERCHANT_ID || !SALT_KEY || !SALT_INDEX) {
+  throw new Error('Required environment variables are not set')
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -20,9 +24,10 @@ serve(async (req) => {
     const { orderId, amount } = await req.json()
     console.log('Received payment request:', { orderId, amount })
 
+    const merchantTransactionId = `${orderId}_${Date.now()}`
     const payload = {
       merchantId: MERCHANT_ID,
-      merchantTransactionId: orderId,
+      merchantTransactionId: merchantTransactionId,
       merchantUserId: "MUID" + orderId,
       amount: amount * 100, // Convert to paise
       redirectUrl: `${req.headers.get("origin")}/payment-status`,
@@ -45,8 +50,9 @@ serve(async (req) => {
     const xVerify = sha256 + "###" + SALT_INDEX
 
     console.log('Sending request to PhonePe:', {
-      base64Payload,
-      xVerify: xVerify.substring(0, 10) + '...' // Log only part of the verification string
+      merchantTransactionId,
+      base64Payload: base64Payload.substring(0, 50) + '...', // Log partial payload for security
+      xVerify: xVerify.substring(0, 10) + '...' // Log partial verification string
     })
 
     const response = await fetch("https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay", {
@@ -62,6 +68,10 @@ serve(async (req) => {
 
     const data = await response.json()
     console.log('PhonePe response:', data)
+
+    if (!response.ok) {
+      throw new Error(`PhonePe API error: ${data.message || 'Unknown error'}`)
+    }
 
     return new Response(
       JSON.stringify(data),
