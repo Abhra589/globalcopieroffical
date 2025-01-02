@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createHash } from "https://deno.land/std@0.168.0/hash/mod.ts"
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
+import { crypto } from "https://deno.land/std@0.177.0/crypto/mod.ts"
 
 const MERCHANT_ID = Deno.env.get('PHONEPE_MERCHANT_ID')
 const SALT_KEY = Deno.env.get('PHONEPE_KEY')
@@ -11,12 +11,14 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const { orderId, amount } = await req.json()
+    console.log('Received payment request:', { orderId, amount })
 
     const payload = {
       merchantId: MERCHANT_ID,
@@ -32,9 +34,20 @@ serve(async (req) => {
     }
 
     const base64Payload = btoa(JSON.stringify(payload))
-    const string = base64Payload + "/pg/v1/pay" + SALT_KEY
-    const sha256 = createHash("sha256").update(string).toString()
+    
+    // Create SHA256 hash
+    const encoder = new TextEncoder()
+    const data = encoder.encode(base64Payload + "/pg/v1/pay" + SALT_KEY)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const sha256 = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    
     const xVerify = sha256 + "###" + SALT_INDEX
+
+    console.log('Sending request to PhonePe:', {
+      base64Payload,
+      xVerify: xVerify.substring(0, 10) + '...' // Log only part of the verification string
+    })
 
     const response = await fetch("https://api-preprod.phonepe.com/apis/pg-sandbox/pg/v1/pay", {
       method: "POST",
@@ -48,12 +61,14 @@ serve(async (req) => {
     })
 
     const data = await response.json()
+    console.log('PhonePe response:', data)
 
     return new Response(
       JSON.stringify(data),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Error processing payment:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
