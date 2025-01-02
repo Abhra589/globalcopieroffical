@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const PaymentPage = () => {
   const navigate = useNavigate();
   const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const order = localStorage.getItem("currentOrder");
@@ -15,6 +19,37 @@ const PaymentPage = () => {
     }
     setOrderDetails(JSON.parse(order));
   }, [navigate]);
+
+  const handlePhonePePayment = async () => {
+    if (!orderDetails) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('handle-phonepe-payment', {
+        body: {
+          orderId: orderDetails.orderId,
+          amount: orderDetails.total
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        // Redirect to PhonePe payment page
+        window.location.href = data.data.instrumentResponse.redirectInfo.url;
+      } else {
+        throw new Error(data.message || 'Payment initialization failed');
+      }
+    } catch (error) {
+      toast({
+        title: "Payment Error",
+        description: error.message || "Failed to initialize payment",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!orderDetails) return null;
 
@@ -27,27 +62,21 @@ const PaymentPage = () => {
           <div className="space-y-4">
             <div className="border-b pb-4">
               <h2 className="text-lg font-semibold mb-2 text-[#1A1F2C]">Order Summary</h2>
-              <p>Pages: {orderDetails.pages}</p>
+              <p>Pages: {orderDetails.pageCount}</p>
               <p>Copies: {orderDetails.copies}</p>
-              <p>Courier Charge: ₹{orderDetails.courierCharge}</p>
               <p className="text-xl font-bold mt-2">Total: ₹{orderDetails.total}</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-semibold mb-4">Scan QR Code to Pay</p>
-              <img 
-                src="/lovable-uploads/e84eef7f-372e-4d25-8662-a19ca94ea777.png"
-                alt="Payment QR Code"
-                className="w-48 h-48 mx-auto mb-4"
-              />
-              <p className="text-sm text-gray-600 mb-4">
-                After payment, our team will verify and process your order
-              </p>
               <Button
-                onClick={() => navigate("/order-confirmation")}
-                className="w-full bg-[#9b87f5] hover:bg-[#8b77e5] text-white"
+                onClick={handlePhonePePayment}
+                disabled={isLoading}
+                className="w-full bg-[#5f259f] hover:bg-[#4a1d7a] text-white"
               >
-                I have completed the payment
+                {isLoading ? "Processing..." : "Pay with PhonePe"}
               </Button>
+              <p className="text-sm text-gray-600 mt-4">
+                You will be redirected to PhonePe's secure payment page
+              </p>
             </div>
           </div>
         </div>
