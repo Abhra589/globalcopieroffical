@@ -12,18 +12,15 @@ serve(async (req) => {
   }
 
   try {
-    const { phoneNumber, message } = await req.json()
+    const { message } = await req.json()
     
     // Validate input
-    if (!phoneNumber || !message) {
-      throw new Error('Missing required parameters: phoneNumber and message are required')
+    if (!message) {
+      throw new Error('Missing required parameter: message')
     }
 
-    // Clean phone number (remove spaces, dashes, etc.)
-    const cleanPhoneNumber = phoneNumber.replace(/\D/g, '')
-    
-    // Create WhatsApp URL
-    const whatsappUrl = `https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`
+    // Create WhatsApp URL with fixed admin number
+    const whatsappUrl = `https://wa.me/918777060249?text=${encodeURIComponent(message)}`
     
     console.log('Generated WhatsApp URL:', whatsappUrl)
 
