@@ -10,6 +10,7 @@ interface OrderSubmissionProps {
   selectedSides: string;
   deliveryType: string;
   fileUrl: string;
+  userProfile: any;
   navigate: NavigateFunction;
   toast: {
     toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => void;
@@ -24,6 +25,7 @@ export const useOrderSubmission = ({
   selectedSides,
   deliveryType,
   fileUrl,
+  userProfile,
   navigate,
   toast,
 }: OrderSubmissionProps) => {
@@ -60,9 +62,9 @@ export const useOrderSubmission = ({
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          customer_name: "Customer",
-          customer_email: "customer@example.com",
-          customer_phone: "1234567890",
+          customer_name: `${userProfile.first_name} ${userProfile.last_name}`,
+          customer_email: userProfile.email,
+          customer_phone: userProfile.phone,
           pages: pageCount,
           copies,
           gsm: selectedGsm,
@@ -90,29 +92,30 @@ export const useOrderSubmission = ({
         total,
       }));
 
-      await supabase.functions.invoke('send-whatsapp-notification', {
-        body: {
-          type: 'new_order',
-          orderDetails: {
+      if (redirectPath === '/payment') {
+        const { data: paymentData, error: paymentError } = await supabase.functions.invoke('handle-phonepe-payment', {
+          body: {
             orderId: orderData.id,
-            pageCount,
-            copies,
-            selectedGsm,
-            selectedType,
-            selectedSides,
-            deliveryType,
-            fileUrl,
-            total,
+            amount: total,
           }
-        }
-      });
+        });
 
-      navigate(redirectPath);
-    } catch (error) {
-      console.error('Error creating order:', error);
+        if (paymentError) throw paymentError;
+
+        if (paymentData.success) {
+          window.location.href = paymentData.data.instrumentResponse.redirectInfo.url;
+          return;
+        } else {
+          throw new Error(paymentData.message || 'Payment initialization failed');
+        }
+      } else {
+        navigate(redirectPath);
+      }
+    } catch (error: any) {
+      console.error('Error:', error);
       toast.toast({
         title: "Error",
-        description: "Failed to create order. Please try again.",
+        description: error.message || "Failed to process your request",
         variant: "destructive",
       });
     }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Calculator } from "lucide-react";
 import { PriceList } from "./PriceList";
@@ -10,6 +10,7 @@ import { PrintOptions } from "./PrintOptions";
 import { OrderActions } from "./OrderActions";
 import { useOrderSubmission } from "@/hooks/useOrderSubmission";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const OrderForm = () => {
   const navigate = useNavigate();
@@ -21,7 +22,32 @@ export const OrderForm = () => {
   const [fileUrl, setFileUrl] = useState<string>("");
   const [pageCount, setPageCount] = useState<number>(0);
   const [copies, setCopies] = useState(1);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/login");
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .single();
+
+      if (error || !profile) {
+        navigate("/profile");
+        return;
+      }
+
+      setUserProfile(profile);
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const { handleWhatsAppRedirect, handleProceedToPayment } = useOrderSubmission({
     pageCount,
@@ -31,6 +57,7 @@ export const OrderForm = () => {
     selectedSides,
     deliveryType,
     fileUrl,
+    userProfile,
     navigate,
     toast: {
       toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => {
@@ -77,6 +104,10 @@ export const OrderForm = () => {
     const courierCharge = calculateCourierCharge(pageCount);
     return printingCost + courierCharge;
   }, [selectedGsm, selectedType, selectedSides, pageCount, copies, calculateCourierCharge]);
+
+  if (!userProfile) {
+    return null;
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg animate-fade-in">
