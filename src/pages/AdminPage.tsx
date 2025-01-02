@@ -21,10 +21,8 @@ interface Order {
   payment_status: string;
   created_at: string;
   file_url: string;
-  street: string;
-  city: string;
-  state: string;
-  pincode: string;
+  file_path: string;
+  organization: string | null;
 }
 
 const AdminPage = () => {

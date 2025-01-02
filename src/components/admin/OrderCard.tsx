@@ -18,10 +18,8 @@ interface Order {
   payment_status: string;
   created_at: string;
   file_url: string;
-  street: string;
-  city: string;
-  state: string;
-  pincode: string;
+  file_path: string;
+  organization: string | null;
 }
 
 interface OrderCardProps {
@@ -94,13 +92,11 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
             <span className="font-medium">Phone:</span> {order.customer_phone}
           </p>
           
-          {/* Address Information */}
-          <div className="mt-2 p-3 bg-gray-50 rounded-md">
-            <h4 className="text-sm font-medium mb-1">Delivery Address</h4>
-            <p className="text-sm text-gray-600">{order.street}</p>
-            <p className="text-sm text-gray-600">{order.city}, {order.state}</p>
-            <p className="text-sm text-gray-600">{order.pincode}</p>
-          </div>
+          {order.organization && (
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Organization:</span> {order.organization}
+            </p>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
             <div>
