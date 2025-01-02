@@ -1,6 +1,10 @@
 export const sendWhatsAppMessage = (message: string, phoneNumber: string = "918777060249") => {
+  // Clean the phone number to ensure it's in the correct format
+  const cleanedNumber = phoneNumber.replace(/\D/g, '');
+  // Add country code if not present
+  const formattedNumber = cleanedNumber.startsWith('91') ? cleanedNumber : `91${cleanedNumber}`;
   const encodedMessage = encodeURIComponent(message);
-  window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+  window.open(`https://wa.me/${formattedNumber}?text=${encodedMessage}`, '_blank');
 };
 
 export const createOrderMessage = (

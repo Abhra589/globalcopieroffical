@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { createAdminMessage } from "@/components/pricing/WhatsAppService";
+import { createAdminMessage, sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
+import { useNavigate } from "react-router-dom";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 interface Order {
   id: string;
@@ -26,10 +28,36 @@ const AdminPage = () => {
   const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { supabaseClient } = useSessionContext();
 
   useEffect(() => {
+    checkAdminStatus();
     fetchOrders();
   }, []);
+
+  const checkAdminStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate('/login');
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!profile?.is_admin) {
+      navigate('/');
+      toast({
+        title: "Access Denied",
+        description: "You don't have admin privileges",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -52,7 +80,24 @@ const AdminPage = () => {
     }
   };
 
-  const handleSendWhatsAppConfirmation = async (order: Order) => {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/login');
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSendWhatsAppConfirmation = (order: Order) => {
     try {
       const message = createAdminMessage(
         order.pages,
@@ -65,15 +110,8 @@ const AdminPage = () => {
         order.file_url
       );
 
-      const { data, error } = await supabase.functions.invoke('send-whatsapp', {
-        body: { message, phoneNumber: order.customer_phone }
-      });
-
-      if (error) throw error;
-
-      if (data.url) {
-        window.open(data.url, '_blank');
-      }
+      // Use the WhatsApp service to send the message
+      sendWhatsAppMessage(message, order.customer_phone);
 
       toast({
         title: "Success",
@@ -107,7 +145,16 @@ const AdminPage = () => {
       <Navbar />
       <div className="container mx-auto py-8">
         <div className="bg-white p-8 rounded-lg shadow">
-          <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="hover:bg-red-50 hover:text-red-600"
+            >
+              Logout
+            </Button>
+          </div>
           <div className="space-y-4">
             {orders.map((order) => (
               <div
@@ -115,12 +162,16 @@ const AdminPage = () => {
                 className="border p-6 rounded-lg space-y-3 hover:shadow-md transition-shadow"
               >
                 <div className="flex justify-between items-start">
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex-grow">
                     <h3 className="font-semibold text-lg">{order.customer_name}</h3>
                     <p className="text-sm text-gray-600">Order ID: {order.id}</p>
-                    <p className="text-sm text-gray-600">Email: {order.customer_email}</p>
-                    <p className="text-sm text-gray-600">Phone: {order.customer_phone}</p>
-                    <div className="grid grid-cols-2 gap-4 mt-2">
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Email:</span> {order.customer_email}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Phone:</span> {order.customer_phone}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                       <div>
                         <p className="text-sm font-medium">Print Details</p>
                         <p className="text-sm text-gray-600">Pages: {order.pages}</p>
@@ -129,24 +180,44 @@ const AdminPage = () => {
                       </div>
                       <div>
                         <p className="text-sm font-medium">Service Details</p>
-                        <p className="text-sm text-gray-600">Type: {order.print_type}</p>
-                        <p className="text-sm text-gray-600">Sides: {order.print_sides}</p>
-                        <p className="text-sm text-gray-600">Delivery: {order.delivery_type}</p>
+                        <p className="text-sm text-gray-600">
+                          Type: {order.print_type === 'bw' ? 'Black & White' : 'Color'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Sides: {order.print_sides === 'single' ? 'Single side' : 'Both sides'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Delivery: {order.delivery_type === 'pickup' ? 'Store Pickup' : 'Home Delivery'}
+                        </p>
                       </div>
                     </div>
-                    <p className="text-lg font-semibold text-primary mt-2">
-                      Total Amount: ₹{order.amount}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Status: <span className="capitalize">{order.payment_status}</span>
-                    </p>
+                    <div className="mt-3">
+                      <p className="text-lg font-semibold text-primary">
+                        Total Amount: ₹{order.amount.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Status: <span className="capitalize">{order.payment_status}</span>
+                      </p>
+                      {order.file_url && (
+                        <a
+                          href={order.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          View Document
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <Button
-                    onClick={() => handleSendWhatsAppConfirmation(order)}
-                    className="bg-[#25D366] hover:bg-[#128C7E] text-white"
-                  >
-                    Send WhatsApp Confirmation
-                  </Button>
+                  <div className="ml-4">
+                    <Button
+                      onClick={() => handleSendWhatsAppConfirmation(order)}
+                      className="bg-[#25D366] hover:bg-[#128C7E] text-white whitespace-nowrap"
+                    >
+                      Send WhatsApp
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
