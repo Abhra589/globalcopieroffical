@@ -7,7 +7,7 @@ import { useState } from "react";
 export const AuthForm = () => {
   const [error, setError] = useState<string | null>(null);
 
-  // Handle auth state changes to catch and display errors
+  // Handle auth state changes
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === "SIGNED_IN") {
       console.log("Signed in:", session);
@@ -18,18 +18,20 @@ export const AuthForm = () => {
     } else if (event === "USER_UPDATED") {
       console.log("User updated:", session);
       setError(null);
-    } else if (event === "USER_DELETED") {
-      console.log("User deleted");
-      setError(null);
     } else if (event === "PASSWORD_RECOVERY") {
       console.log("Password recovery requested");
       setError(null);
     }
   });
 
+  const handleError = (error: Error) => {
+    console.error("Auth error:", error);
+    setError(error.message);
+  };
+
   return (
     <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-center mb-6">Welcome</h2>
+      <h2 className="text-2xl font-bold text-center mb-6">Admin Login</h2>
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
@@ -49,11 +51,8 @@ export const AuthForm = () => {
           },
         }}
         providers={[]}
-        redirectTo={`${window.location.origin}/order`}
-        onError={(error) => {
-          console.error("Auth error:", error);
-          setError(error.message);
-        }}
+        redirectTo={`${window.location.origin}/admin`}
+        onAuthError={handleError}
       />
     </div>
   );

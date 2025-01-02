@@ -11,6 +11,7 @@ import { OrderActions } from "./OrderActions";
 import { useOrderSubmission } from "@/hooks/useOrderSubmission";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
 
 export const OrderForm = () => {
   const navigate = useNavigate();
@@ -22,52 +23,34 @@ export const OrderForm = () => {
   const [fileUrl, setFileUrl] = useState<string>("");
   const [pageCount, setPageCount] = useState<number>(0);
   const [copies, setCopies] = useState(1);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [customerInfo, setCustomerInfo] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const loadCustomerInfo = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/login");
-        return;
+      if (session) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .single();
+
+        if (profile) {
+          setCustomerInfo({
+            name: `${profile.first_name} ${profile.last_name}`,
+            email: profile.email,
+            phone: profile.phone,
+          });
+        }
       }
-
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .single();
-
-      if (error || !profile) {
-        navigate("/profile");
-        return;
-      }
-
-      setUserProfile(profile);
     };
 
-    checkAuth();
-  }, [navigate]);
-
-  const { handleWhatsAppRedirect, handleProceedToPayment } = useOrderSubmission({
-    pageCount,
-    copies,
-    selectedGsm,
-    selectedType,
-    selectedSides,
-    deliveryType,
-    fileUrl,
-    userProfile,
-    navigate,
-    toast: {
-      toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => {
-        toast({
-          ...props,
-          duration: 3000,
-        });
-      }
-    },
-  });
+    loadCustomerInfo();
+  }, []);
 
   const calculateCourierCharge = useCallback((pages: number) => {
     return deliveryType === "pickup" ? 0 : (pages <= 400 ? 80 : 150);
@@ -105,9 +88,25 @@ export const OrderForm = () => {
     return printingCost + courierCharge;
   }, [selectedGsm, selectedType, selectedSides, pageCount, copies, calculateCourierCharge]);
 
-  if (!userProfile) {
-    return null;
-  }
+  const { handleWhatsAppRedirect, handleProceedToPayment } = useOrderSubmission({
+    pageCount,
+    copies,
+    selectedGsm,
+    selectedType,
+    selectedSides,
+    deliveryType,
+    fileUrl,
+    userProfile: customerInfo,
+    navigate,
+    toast: {
+      toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => {
+        toast({
+          ...props,
+          duration: 3000,
+        });
+      }
+    },
+  });
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg animate-fade-in">
@@ -117,6 +116,32 @@ export const OrderForm = () => {
       </h2>
       
       <div className="space-y-6">
+        {!customerInfo.name && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Contact Information</h3>
+            <Input
+              placeholder="Full Name"
+              value={customerInfo.name}
+              onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+              required
+            />
+            <Input
+              type="email"
+              placeholder="Email"
+              value={customerInfo.email}
+              onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+              required
+            />
+            <Input
+              type="tel"
+              placeholder="Phone Number"
+              value={customerInfo.phone}
+              onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+              required
+            />
+          </div>
+        )}
+
         <PrintOptions
           selectedGsm={selectedGsm}
           setSelectedGsm={setSelectedGsm}
