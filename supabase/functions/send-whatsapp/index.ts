@@ -6,22 +6,53 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const { phoneNumber, message } = await req.json()
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
     
+    // Validate input
+    if (!phoneNumber || !message) {
+      throw new Error('Missing required parameters: phoneNumber and message are required')
+    }
+
+    // Clean phone number (remove spaces, dashes, etc.)
+    const cleanPhoneNumber = phoneNumber.replace(/\D/g, '')
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/${cleanPhoneNumber}?text=${encodeURIComponent(message)}`
+    
+    console.log('Generated WhatsApp URL:', whatsappUrl)
+
     return new Response(
-      JSON.stringify({ url: whatsappUrl }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        url: whatsappUrl,
+        success: true 
+      }),
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     )
   } catch (error) {
+    console.error('Error generating WhatsApp URL:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      JSON.stringify({ 
+        error: error.message,
+        success: false 
+      }),
+      { 
+        status: 400, 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     )
   }
 })
