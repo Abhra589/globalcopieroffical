@@ -1,15 +1,17 @@
 import { Navbar } from "@/components/Navbar";
 import { OrderForm } from "@/components/pricing/OrderForm";
 import { OrderWorkflow } from "@/components/OrderWorkflow";
+import { Footer } from "@/components/Footer";
 
 const OrderPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="container mx-auto py-8 space-y-8">
+      <main className="flex-grow container mx-auto py-8 space-y-8">
         <OrderWorkflow />
         <OrderForm />
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };
