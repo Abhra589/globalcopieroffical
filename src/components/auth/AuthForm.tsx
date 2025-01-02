@@ -24,11 +24,6 @@ export const AuthForm = () => {
     }
   });
 
-  const handleError = (error: Error) => {
-    console.error("Auth error:", error);
-    setError(error.message);
-  };
-
   return (
     <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-center mb-6">Admin Login</h2>
@@ -52,7 +47,6 @@ export const AuthForm = () => {
         }}
         providers={[]}
         redirectTo={`${window.location.origin}/admin`}
-        onAuthError={handleError}
       />
     </div>
   );
