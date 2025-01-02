@@ -2,24 +2,50 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const AuthForm = () => {
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .single();
+
+        if (profile?.is_admin) {
+          navigate('/admin');
+        }
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
 
   // Handle auth state changes
-  supabase.auth.onAuthStateChange((event, session) => {
+  supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === "SIGNED_IN") {
       console.log("Signed in:", session);
-      setError(null);
+      
+      // Check if the user is an admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .single();
+
+      if (profile?.is_admin) {
+        navigate('/admin');
+      } else {
+        setError("You don't have admin privileges");
+        await supabase.auth.signOut();
+      }
     } else if (event === "SIGNED_OUT") {
       console.log("Signed out");
-      setError(null);
-    } else if (event === "USER_UPDATED") {
-      console.log("User updated:", session);
-      setError(null);
-    } else if (event === "PASSWORD_RECOVERY") {
-      console.log("Password recovery requested");
       setError(null);
     }
   });
