@@ -8,6 +8,7 @@ import { FileUpload } from "./FileUpload";
 import { OrderSummary } from "./OrderSummary";
 import { PrintOptions } from "./PrintOptions";
 import { OrderActions } from "./OrderActions";
+import { ManualPageCount } from "./ManualPageCount";
 import { useOrderSubmission } from "@/hooks/useOrderSubmission";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -42,7 +43,10 @@ export const OrderForm = () => {
   const handleFileChange = async (newFile: File | null, uploadedUrl: string, pdfPageCount: number) => {
     setFile(newFile);
     setFileUrl(uploadedUrl);
-    setPageCount(pdfPageCount);
+    // Set initial page count from PDF, but allow manual override
+    if (pdfPageCount > 0) {
+      setPageCount(pdfPageCount);
+    }
   };
 
   const calculateTotal = useCallback(() => {
@@ -218,6 +222,7 @@ export const OrderForm = () => {
 
         <PriceList selectedGsm={selectedGsm} />
         <FileUpload onFileChange={handleFileChange} />
+        <ManualPageCount pageCount={pageCount} onPageCountChange={setPageCount} />
         <CopiesInput copies={copies} setCopies={setCopies} />
         <DeliveryOptions deliveryType={deliveryType} setDeliveryType={setDeliveryType} />
         
