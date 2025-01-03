@@ -31,7 +31,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
             break;
           }
         }
-        resolve(count || 1); // Default to 1 if count cannot be determined
+        resolve(count || 1);
       };
       reader.readAsArrayBuffer(file);
     });
@@ -55,7 +55,6 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
 
     setIsUploading(true);
     try {
-      // Count PDF pages
       const pageCount = await countPdfPages(file);
       console.log(`PDF has ${pageCount} pages`);
 

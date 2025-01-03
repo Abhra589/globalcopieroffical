@@ -55,14 +55,28 @@ export const useOrderSubmission = ({
     return printingCost + courierCharge;
   };
 
-  const createOrder = async (redirectPath: string) => {
+  const handleWhatsAppRedirect = () => {
+    const message = `Hi, I would like to enquire about printing ${pageCount} pages:\n` +
+      `Copies: ${copies}\n` +
+      `Paper: ${selectedGsm}gsm\n` +
+      `Type: ${selectedType === 'bw' ? 'Black & White' : 'Color'}\n` +
+      `Sides: ${selectedSides === 'single' ? 'Single side' : 'Both sides'}\n` +
+      `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
+      `Total Amount: ₹${calculateTotal().toFixed(2)}`;
+
+    const phoneNumber = "918777060249";
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+  };
+
+  const createOrder = async () => {
     const total = calculateTotal();
     
     try {
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          customer_name: `${userProfile.first_name} ${userProfile.last_name}`,
+          customer_name: `${userProfile.firstName} ${userProfile.lastName}`,
           customer_email: userProfile.email,
           customer_phone: userProfile.phone,
           pages: pageCount,
@@ -92,24 +106,19 @@ export const useOrderSubmission = ({
         total,
       }));
 
-      if (redirectPath === '/payment') {
-        const { data: paymentData, error: paymentError } = await supabase.functions.invoke('handle-phonepe-payment', {
-          body: {
-            orderId: orderData.id,
-            amount: total,
-          }
-        });
-
-        if (paymentError) throw paymentError;
-
-        if (paymentData.success) {
-          window.location.href = paymentData.data.instrumentResponse.redirectInfo.url;
-          return;
-        } else {
-          throw new Error(paymentData.message || 'Payment initialization failed');
+      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('handle-phonepe-payment', {
+        body: {
+          orderId: orderData.id,
+          amount: total,
         }
+      });
+
+      if (paymentError) throw paymentError;
+
+      if (paymentData.success) {
+        window.location.href = paymentData.data.instrumentResponse.redirectInfo.url;
       } else {
-        navigate(redirectPath);
+        throw new Error(paymentData.message || 'Payment initialization failed');
       }
     } catch (error: any) {
       console.error('Error:', error);
@@ -121,11 +130,8 @@ export const useOrderSubmission = ({
     }
   };
 
-  const handleWhatsAppRedirect = () => createOrder('/order');
-  const handleProceedToPayment = () => createOrder('/payment');
-
   return {
     handleWhatsAppRedirect,
-    handleProceedToPayment,
+    handleProceedToPayment: createOrder,
   };
 };
