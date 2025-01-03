@@ -17,7 +17,7 @@ export const createOrderMessage = (
   total: number,
   fileUrl?: string
 ) => {
-  return `Hi, I would like to place an order:\n` +
+  return `Hi, I would like to enquire about placing an order:\n` +
     `Pages: ${pageCount}\n` +
     `Copies: ${copies}\n` +
     `Paper: ${selectedGsm}gsm\n` +
