@@ -8,20 +8,36 @@ interface ManualPageCountProps {
 }
 
 export const ManualPageCount = ({ pageCount, onPageCountChange }: ManualPageCountProps) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string to clear input
+    if (value === '') {
+      onPageCountChange(0);
+      return;
+    }
+    // Convert to number and ensure it's positive
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0) {
+      onPageCountChange(numValue);
+    }
+  };
+
   return (
     <div className="space-y-2">
-      <Label htmlFor="manual-pages">Number of pages in your document</Label>
+      <Label htmlFor="manual-pages" className="text-base font-medium">
+        Number of pages in your document to be printed
+      </Label>
       <Input
         id="manual-pages"
         type="number"
-        min="1"
-        value={pageCount}
-        onChange={(e) => onPageCountChange(Math.max(1, parseInt(e.target.value) || 1))}
-        className="w-full"
+        min="0"
+        value={pageCount || ''}
+        onChange={handleInputChange}
+        className="w-full text-lg py-2 px-3"
         placeholder="Enter number of pages"
       />
       <p className="text-sm text-muted-foreground">
-        You can manually adjust the page count if needed
+        Please enter the total number of pages in your document
       </p>
     </div>
   );
