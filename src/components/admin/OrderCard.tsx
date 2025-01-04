@@ -1,5 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
 import { OrderHeader } from "./OrderHeader";
 import { DeliveryAddress } from "./DeliveryAddress";
 import { OrderDetails } from "./OrderDetails";
@@ -34,6 +35,38 @@ interface OrderCardProps {
 }
 
 export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
+  const handleSendWhatsAppConfirmation = () => {
+    try {
+      const deliveryInfo = order.delivery_type === 'delivery' 
+        ? `\nDelivery Address: ${order.street}, ${order.city}, ${order.state} ${order.pincode}`
+        : '\nStore Pickup';
+
+      const message = `Hi ${order.customer_name}, your order details:\n` +
+        `Pages: ${order.pages}\n` +
+        `Copies: ${order.copies}\n` +
+        `Paper: ${order.gsm}gsm\n` +
+        `Print Type: ${order.print_type === 'bw' ? 'Black & White' : 'Color'}\n` +
+        `Print Sides: ${order.print_sides === 'single' ? 'Single side' : 'Both sides'}\n` +
+        `Delivery: ${order.delivery_type === 'pickup' ? 'Store Pickup' : 'Home Delivery'}` +
+        `${deliveryInfo}\n` +
+        `Total Amount: ₹${order.amount.toFixed(2)}\n` +
+        `Document Link: ${order.file_url}`;
+      
+      sendWhatsAppMessage(message, order.customer_phone);
+      toast({
+        title: "Success",
+        description: "WhatsApp confirmation initiated",
+      });
+    } catch (error) {
+      console.error('Error sending WhatsApp confirmation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send WhatsApp confirmation",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDelete = async () => {
     try {
       // Delete file from storage if it exists
@@ -133,6 +166,7 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         </div>
         
         <OrderActions
+          onWhatsAppClick={handleSendWhatsAppConfirmation}
           onDelete={handleDelete}
         />
       </div>
