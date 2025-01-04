@@ -57,12 +57,22 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
+      // First delete the file from storage if it exists
+      if (order.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from('print_files')
+          .remove([order.file_path]);
+
+        if (storageError) throw storageError;
+      }
+
+      // Then delete the order from the database
+      const { error: dbError } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
       
       onDelete(order.id);
       toast({

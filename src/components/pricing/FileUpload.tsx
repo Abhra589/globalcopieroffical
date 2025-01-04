@@ -6,41 +6,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload } from "lucide-react";
 
 interface FileUploadProps {
-  onFileChange: (file: File | null, uploadedUrl: string, pageCount: number) => void;
+  onFileChange: (file: File | null, uploadedUrl: string) => void;
 }
 
 export const FileUpload = ({ onFileChange }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
-  const countPdfPages = async (file: File): Promise<number> => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const data = new Uint8Array(event.target?.result as ArrayBuffer);
-        let count = 0;
-        for (let i = 0; i < data.length; i++) {
-          if (data[i] === 0x0A && data.slice(i - 6, i).toString() === "/Count") {
-            let num = "";
-            i++;
-            while (data[i] >= 0x30 && data[i] <= 0x39) {
-              num += String.fromCharCode(data[i]);
-              i++;
-            }
-            count = parseInt(num);
-            break;
-          }
-        }
-        resolve(count || 1);
-      };
-      reader.readAsArrayBuffer(file);
-    });
-  };
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     if (!file) {
-      onFileChange(null, "", 0);
+      onFileChange(null, "");
       return;
     }
 
@@ -55,9 +31,6 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
 
     setIsUploading(true);
     try {
-      const pageCount = await countPdfPages(file);
-      console.log(`PDF has ${pageCount} pages`);
-
       const fileExt = file.name.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `${fileName}`;
@@ -72,11 +45,11 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
         .from('print_files')
         .getPublicUrl(filePath);
 
-      onFileChange(file, publicUrl, pageCount);
+      onFileChange(file, publicUrl);
       
       toast({
         title: "File uploaded successfully",
-        description: `Document has ${pageCount} pages`,
+        description: "Your document has been uploaded",
       });
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -106,7 +79,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
       />
       {isUploading && (
         <p className="text-sm text-muted-foreground animate-pulse">
-          Uploading and analyzing document...
+          Uploading document...
         </p>
       )}
     </div>

@@ -1,4 +1,3 @@
-"use client";
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { OrderSummary } from '../components/pricing/OrderSummary';
@@ -13,7 +12,6 @@ const PaymentPage = () => {
   const copies = Number(searchParams.get("copies")) || 0;
   const printType = searchParams.get("printType") || "";
   const deliveryType = searchParams.get("deliveryType") || "";
-  const upiLink = "upi://pay?pa=9999999999@upi&pn=MERCHANT&mc=0000&tid=cxnkjcnkjdfdvjk&tr=4894398cndhcd23&tn=Payment%20for%20a%20specific%20order&am=1000&cu=INR&refUrl=https://merchantwebsite.com/";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -24,8 +22,8 @@ const PaymentPage = () => {
           calculateCourierCharge={(pages) => pages <= 400 ? 80 : 150}
           calculateTotal={() => amount}
         />
-        <QRCodeSection upiLink={upiLink} />
-        <PaymentActions upiLink={upiLink} />
+        <QRCodeSection amount={amount} />
+        <PaymentActions />
       </div>
     </div>
   );

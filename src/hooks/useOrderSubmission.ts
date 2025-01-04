@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { NavigateFunction } from "react-router-dom";
-import { type ToastProps } from "@/components/ui/toast";
 
 interface OrderSubmissionProps {
   pageCount: number;
@@ -16,6 +15,8 @@ interface OrderSubmissionProps {
     toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => void;
   };
 }
+
+const ADMIN_PHONE = "918777060249"; // Replace with actual admin phone number
 
 export const useOrderSubmission = ({
   pageCount,
@@ -55,6 +56,13 @@ export const useOrderSubmission = ({
     return printingCost + courierCharge;
   };
 
+  const sendAdminWhatsAppNotification = () => {
+    const message = encodeURIComponent(
+      "New order received from globalcopierofficial.com! Please check the admin panel and review the order!"
+    );
+    window.open(`https://wa.me/${ADMIN_PHONE}?text=${message}`, '_blank');
+  };
+
   const handleWhatsAppRedirect = () => {
     const message = `Hi, I would like to enquire about printing ${pageCount} pages:\n` +
       `Copies: ${copies}\n` +
@@ -64,7 +72,7 @@ export const useOrderSubmission = ({
       `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
       `Total Amount: ₹${calculateTotal().toFixed(2)}`;
 
-    const phoneNumber = "918777060249";
+    const phoneNumber = ADMIN_PHONE;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
@@ -94,32 +102,12 @@ export const useOrderSubmission = ({
 
       if (orderError) throw orderError;
 
-      localStorage.setItem('currentOrder', JSON.stringify({
-        orderId: orderData.id,
-        pageCount,
-        copies,
-        selectedGsm,
-        selectedType,
-        selectedSides,
-        deliveryType,
-        fileUrl,
-        total,
-      }));
+      // Send WhatsApp notification to admin
+      sendAdminWhatsAppNotification();
 
-      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('handle-phonepe-payment', {
-        body: {
-          orderId: orderData.id,
-          amount: total,
-        }
-      });
-
-      if (paymentError) throw paymentError;
-
-      if (paymentData.success) {
-        window.location.href = paymentData.data.instrumentResponse.redirectInfo.url;
-      } else {
-        throw new Error(paymentData.message || 'Payment initialization failed');
-      }
+      // Navigate to payment page with order details
+      navigate(`/payment?amount=${total}&orderId=${orderData.id}&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
+      
     } catch (error: any) {
       console.error('Error:', error);
       toast.toast({
