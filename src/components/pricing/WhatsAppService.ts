@@ -1,3 +1,4 @@
+// Manual inquiry function using wa.me links
 export const sendWhatsAppMessage = (message: string, phoneNumber: string = "918777060249") => {
   const cleanedNumber = phoneNumber.replace(/\D/g, '');
   const formattedNumber = cleanedNumber.startsWith('91') ? cleanedNumber : `91${cleanedNumber}`;
@@ -5,6 +6,7 @@ export const sendWhatsAppMessage = (message: string, phoneNumber: string = "9187
   window.open(`https://wa.me/${formattedNumber}?text=${encodedMessage}`, '_blank');
 };
 
+// Message templates
 export const createOrderMessage = (
   pageCount: number,
   copies: number,
@@ -26,34 +28,31 @@ export const createOrderMessage = (
     (fileUrl ? `\nFile URL: ${fileUrl}` : '');
 };
 
-export const createAdminMessage = (
-  pageCount: number,
-  copies: number,
-  selectedGsm: string,
-  selectedType: string,
-  selectedSides: string,
-  deliveryType: string,
-  total: number,
-  fileUrl?: string
-) => {
-  return createOrderMessage(
-    pageCount,
-    copies,
-    selectedGsm,
-    selectedType,
-    selectedSides,
-    deliveryType,
-    total,
-    fileUrl
-  );
-};
-
 export const createAdminNotification = (customerName: string, total: number) => {
-  return `New order has been received!\n` +
-    `Customer Name: ${customerName}\n` +
-    `Total Amount: ₹${total.toFixed(2)}`;
+  return `New order has been received!\nCustomer Name: ${customerName}\nTotal Amount: ₹${total.toFixed(2)}`;
 };
 
 export const createUserPaymentNotification = (total: number) => {
   return `Please complete the payment of ₹${total.toFixed(2)} to receive a confirmation message from our side.`;
+};
+
+// Automated WhatsApp API functions
+export const sendAutomatedWhatsAppMessage = async (
+  to: string,
+  message: string
+) => {
+  try {
+    const { data, error } = await supabase.functions.invoke('send-whatsapp-message', {
+      body: {
+        to,
+        message
+      }
+    });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error sending WhatsApp message:', error);
+    throw error;
+  }
 };

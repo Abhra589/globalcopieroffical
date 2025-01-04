@@ -1,17 +1,48 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { sendWhatsAppMessage, createOrderMessage } from './WhatsAppService';
 
 interface OrderActionsProps {
   pageCount: number;
-  onWhatsAppRedirect: () => void;
+  copies: number;
+  selectedGsm: string;
+  selectedType: string;
+  selectedSides: string;
+  deliveryType: string;
+  total: number;
+  fileUrl: string;
   onProceedToPayment: () => void;
 }
 
-export const OrderActions = ({ pageCount, onWhatsAppRedirect, onProceedToPayment }: OrderActionsProps) => {
+export const OrderActions = ({ 
+  pageCount,
+  copies,
+  selectedGsm,
+  selectedType,
+  selectedSides,
+  deliveryType,
+  total,
+  fileUrl,
+  onProceedToPayment
+}: OrderActionsProps) => {
+  const handleWhatsAppEnquiry = () => {
+    const message = createOrderMessage(
+      pageCount,
+      copies,
+      selectedGsm,
+      selectedType,
+      selectedSides,
+      deliveryType,
+      total,
+      fileUrl
+    );
+    sendWhatsAppMessage(message);
+  };
+
   return (
     <div className="flex gap-4">
       <Button
-        onClick={onWhatsAppRedirect}
+        onClick={handleWhatsAppEnquiry}
         className="bg-[#25D366] hover:bg-[#128C7E] text-white animate-scale-in flex-1"
       >
         Enquire on WhatsApp

@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { NavigateFunction } from 'react-router-dom';
 import { 
-  sendWhatsAppMessage, 
-  createOrderMessage, 
+  sendAutomatedWhatsAppMessage,
   createAdminNotification,
+  createOrderMessage,
   createUserPaymentNotification
 } from '@/components/pricing/WhatsAppService';
 
@@ -66,40 +66,46 @@ export const useOrderSubmission = ({
     return printingCost + courierCharge;
   }, [pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType]);
 
-  const handleWhatsAppRedirect = useCallback(() => {
-    const total = calculateTotal();
-    const message = createOrderMessage(
-      pageCount,
-      copies,
-      selectedGsm,
-      selectedType,
-      selectedSides,
-      deliveryType,
-      total,
-      fileUrl
-    );
-    sendWhatsAppMessage(message);
-  }, [pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType, fileUrl, calculateTotal]);
+  const handleProceedToPayment = useCallback(async () => {
+    try {
+      const total = calculateTotal();
 
-  const handleProceedToPayment = useCallback(() => {
-    const total = calculateTotal();
+      // Send admin notification
+      await sendAutomatedWhatsAppMessage(
+        "918777060249",
+        createAdminNotification(userProfile.name, total)
+      );
 
-    // Send admin notification
-    const adminMessage = createAdminNotification(userProfile.name, total);
-    sendWhatsAppMessage(adminMessage);
+      // Send user notification if phone number is available
+      if (userProfile.phone) {
+        const userMessage = createOrderMessage(
+          pageCount,
+          copies,
+          selectedGsm,
+          selectedType,
+          selectedSides,
+          deliveryType,
+          total,
+          fileUrl
+        ) + "\n\n" + createUserPaymentNotification(total);
 
-    // Send user notification
-    const userMessage = createUserPaymentNotification(total);
-    if (userProfile.phone) {
-      sendWhatsAppMessage(userMessage, userProfile.phone);
+        await sendAutomatedWhatsAppMessage(userProfile.phone, userMessage);
+      }
+
+      // Navigate to payment page
+      navigate(`/payment?amount=${total}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
+    } catch (error) {
+      console.error('Error sending WhatsApp notifications:', error);
+      toast.toast({
+        title: "Warning",
+        description: "Proceeding to payment, but WhatsApp notifications may have failed.",
+        variant: "destructive",
+      });
+      navigate(`/payment?amount=${calculateTotal()}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
     }
-
-    // Navigate to payment page
-    navigate(`/payment?amount=${total}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
-  }, [calculateTotal, userProfile, navigate, pageCount, copies, selectedType, deliveryType]);
+  }, [calculateTotal, userProfile, navigate, pageCount, copies, selectedType, deliveryType, fileUrl]);
 
   return {
-    handleWhatsAppRedirect,
     handleProceedToPayment,
   };
 };
