@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 // Manual inquiry function using wa.me links
 export const sendWhatsAppMessage = (message: string, phoneNumber: string = "918777060249") => {
   const cleanedNumber = phoneNumber.replace(/\D/g, '');
@@ -18,6 +20,27 @@ export const createOrderMessage = (
   fileUrl?: string
 ) => {
   return `Hi, I would like to enquire about placing an order:\n` +
+    `Pages: ${pageCount}\n` +
+    `Copies: ${copies}\n` +
+    `Paper: ${selectedGsm}gsm\n` +
+    `Type: ${selectedType === 'bw' ? 'Black & White' : 'Color'}\n` +
+    `Sides: ${selectedSides === 'single' ? 'Single side' : 'Both sides'}\n` +
+    `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
+    `Total Amount: ₹${total.toFixed(2)}` +
+    (fileUrl ? `\nFile URL: ${fileUrl}` : '');
+};
+
+export const createAdminMessage = (
+  pageCount: number,
+  copies: number,
+  selectedGsm: string,
+  selectedType: string,
+  selectedSides: string,
+  deliveryType: string,
+  total: number,
+  fileUrl?: string
+) => {
+  return `New order inquiry received!\n` +
     `Pages: ${pageCount}\n` +
     `Copies: ${copies}\n` +
     `Paper: ${selectedGsm}gsm\n` +

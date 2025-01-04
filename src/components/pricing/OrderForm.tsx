@@ -70,7 +70,7 @@ export const OrderForm = () => {
     return printingCost + courierCharge;
   }, [selectedGsm, selectedType, selectedSides, pageCount, copies, calculateCourierCharge]);
 
-  const { handleWhatsAppRedirect, handleProceedToPayment } = useOrderSubmission({
+  const { handleProceedToPayment } = useOrderSubmission({
     pageCount,
     copies,
     selectedGsm,
@@ -151,7 +151,13 @@ export const OrderForm = () => {
         
         <OrderActions
           pageCount={pageCount}
-          onWhatsAppRedirect={handleWhatsAppRedirect}
+          copies={copies}
+          selectedGsm={selectedGsm}
+          selectedType={selectedType}
+          selectedSides={selectedSides}
+          deliveryType={deliveryType}
+          total={calculateTotal()}
+          fileUrl={fileUrl}
           onProceedToPayment={handleProceedToPayment}
         />
       </div>
