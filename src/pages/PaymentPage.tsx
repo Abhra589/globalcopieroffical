@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import OrderSummary from '../components/pricing/OrderSummary';
+import { OrderSummary } from '../components/pricing/OrderSummary';
 import QRCodeSection from '../components/payment/QRCodeSection';
 import PaymentActions from '../components/payment/PaymentActions';
 
@@ -20,12 +20,9 @@ const PaymentPage = () => {
       <div className="flex flex-col items-center gap-8">
         <h1 className="text-2xl font-bold text-center">Complete Your Payment</h1>
         <OrderSummary
-          amount={amount}
-          orderId={orderId}
-          pages={pages}
-          copies={copies}
-          printType={printType}
-          deliveryType={deliveryType}
+          pageCount={pages}
+          calculateCourierCharge={(pages) => pages <= 400 ? 80 : 150}
+          calculateTotal={() => amount}
         />
         <QRCodeSection upiLink={upiLink} />
         <PaymentActions upiLink={upiLink} />
