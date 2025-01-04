@@ -13,6 +13,9 @@ const PaymentPage = () => {
   const printType = searchParams.get("printType") || "";
   const deliveryType = searchParams.get("deliveryType") || "";
 
+  // Generate UPI link with dynamic amount
+  const upiLink = `upi://pay?pa=9884098840@ybl&pn=Global%20Copier&am=${amount}&cu=INR`;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col items-center gap-8">
@@ -23,7 +26,7 @@ const PaymentPage = () => {
           calculateTotal={() => amount}
         />
         <QRCodeSection amount={amount} />
-        <PaymentActions />
+        <PaymentActions upiLink={upiLink} />
       </div>
     </div>
   );
