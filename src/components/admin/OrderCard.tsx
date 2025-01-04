@@ -1,18 +1,10 @@
-import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { createAdminMessage, sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { OrderHeader } from "./OrderHeader";
+import { DeliveryAddress } from "./DeliveryAddress";
+import { OrderDetails } from "./OrderDetails";
+import { OrderActions } from "./OrderActions";
 
 interface Order {
   id: string;
@@ -72,7 +64,6 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
   const handleDelete = async () => {
     try {
-      // First delete the file from storage if it exists
       if (order.file_path) {
         const { error: storageError } = await supabase.storage
           .from('print_files')
@@ -81,7 +72,6 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         if (storageError) throw storageError;
       }
 
-      // Then delete the order from the database
       const { error: dbError } = await supabase
         .from('orders')
         .delete()
@@ -104,59 +94,37 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
     }
   };
 
-  // Format the customer name properly
   const customerName = order.customer_name || "Unknown Customer";
 
   return (
     <div className="border p-4 md:p-6 rounded-lg space-y-3 hover:shadow-md transition-shadow">
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div className="space-y-2 flex-grow">
-          <h3 className="font-semibold text-lg">{customerName}</h3>
-          <p className="text-sm text-gray-600">Order ID: {order.id}</p>
-          <p className="text-sm text-gray-600">
-            <span className="font-medium">Email:</span> {order.customer_email}
-          </p>
-          <p className="text-sm text-gray-600">
-            <span className="font-medium">Phone:</span> {order.customer_phone}
-          </p>
+          <OrderHeader
+            customerName={customerName}
+            orderId={order.id}
+            customerEmail={order.customer_email}
+            customerPhone={order.customer_phone}
+            organization={order.organization}
+          />
           
-          {order.organization && (
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Organization:</span> {order.organization}
-            </p>
-          )}
-
-          {/* Delivery Address Section */}
           {order.delivery_type === 'delivery' && (
-            <div className="mt-2">
-              <p className="text-sm font-medium">Delivery Address:</p>
-              <p className="text-sm text-gray-600">{order.street}</p>
-              <p className="text-sm text-gray-600">
-                {order.city}, {order.state} {order.pincode}
-              </p>
-            </div>
+            <DeliveryAddress
+              street={order.street}
+              city={order.city}
+              state={order.state}
+              pincode={order.pincode}
+            />
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-            <div>
-              <p className="text-sm font-medium">Print Details</p>
-              <p className="text-sm text-gray-600">Pages: {order.pages}</p>
-              <p className="text-sm text-gray-600">Copies: {order.copies}</p>
-              <p className="text-sm text-gray-600">Paper: {order.gsm}gsm</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Service Details</p>
-              <p className="text-sm text-gray-600">
-                Type: {order.print_type === 'bw' ? 'Black & White' : 'Color'}
-              </p>
-              <p className="text-sm text-gray-600">
-                Sides: {order.print_sides === 'single' ? 'Single side' : 'Both sides'}
-              </p>
-              <p className="text-sm text-gray-600">
-                Delivery: {order.delivery_type === 'pickup' ? 'Store Pickup' : 'Home Delivery'}
-              </p>
-            </div>
-          </div>
+          <OrderDetails
+            pages={order.pages}
+            copies={order.copies}
+            gsm={order.gsm}
+            printType={order.print_type}
+            printSides={order.print_sides}
+            deliveryType={order.delivery_type}
+          />
           
           <div className="mt-3">
             <p className="text-lg font-semibold text-primary">
@@ -178,40 +146,10 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
           </div>
         </div>
         
-        <div className="flex flex-col gap-2 w-full md:w-auto">
-          <Button
-            onClick={handleSendWhatsAppConfirmation}
-            className="w-full md:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white"
-          >
-            Send WhatsApp
-          </Button>
-          
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                className="w-full md:w-auto"
-              >
-                Delete Order
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the order
-                  and remove the data from our servers.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Yes, delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <OrderActions
+          onWhatsAppClick={handleSendWhatsAppConfirmation}
+          onDelete={handleDelete}
+        />
       </div>
     </div>
   );
