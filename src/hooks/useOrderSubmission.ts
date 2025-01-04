@@ -1,5 +1,17 @@
-import { supabase } from "@/integrations/supabase/client";
-import { NavigateFunction } from "react-router-dom";
+import { useCallback } from 'react';
+import { NavigateFunction } from 'react-router-dom';
+import { 
+  sendWhatsAppMessage, 
+  createOrderMessage, 
+  createAdminNotification,
+  createUserPaymentNotification
+} from '@/components/pricing/WhatsAppService';
+
+interface UserProfile {
+  name: string;
+  email: string;
+  phone: string;
+}
 
 interface OrderSubmissionProps {
   pageCount: number;
@@ -9,14 +21,12 @@ interface OrderSubmissionProps {
   selectedSides: string;
   deliveryType: string;
   fileUrl: string;
-  userProfile: any;
+  userProfile: UserProfile;
   navigate: NavigateFunction;
   toast: {
     toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => void;
   };
 }
-
-const ADMIN_PHONE = "918777060249"; // Replace with actual admin phone number
 
 export const useOrderSubmission = ({
   pageCount,
@@ -30,7 +40,7 @@ export const useOrderSubmission = ({
   navigate,
   toast,
 }: OrderSubmissionProps) => {
-  const calculateTotal = () => {
+  const calculateTotal = useCallback(() => {
     const pricingOptions = [
       { gsm: "70", type: "bw", sides: "single", pricePerPage: 0.8 },
       { gsm: "70", type: "bw", sides: "double", pricePerPage: 1.0 },
@@ -54,72 +64,42 @@ export const useOrderSubmission = ({
     const printingCost = selectedOption.pricePerPage * pageCount * copies;
     const courierCharge = deliveryType === "pickup" ? 0 : (pageCount <= 400 ? 80 : 150);
     return printingCost + courierCharge;
-  };
+  }, [pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType]);
 
-  const sendAdminWhatsAppNotification = () => {
-    const message = encodeURIComponent(
-      "New order received from globalcopierofficial.com! Please check the admin panel and review the order!"
-    );
-    window.open(`https://wa.me/${ADMIN_PHONE}?text=${message}`, '_blank');
-  };
-
-  const handleWhatsAppRedirect = () => {
-    const message = `Hi, I would like to enquire about printing ${pageCount} pages:\n` +
-      `Copies: ${copies}\n` +
-      `Paper: ${selectedGsm}gsm\n` +
-      `Type: ${selectedType === 'bw' ? 'Black & White' : 'Color'}\n` +
-      `Sides: ${selectedSides === 'single' ? 'Single side' : 'Both sides'}\n` +
-      `Delivery: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
-      `Total Amount: ₹${calculateTotal().toFixed(2)}`;
-
-    const phoneNumber = ADMIN_PHONE;
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
-  };
-
-  const createOrder = async () => {
+  const handleWhatsAppRedirect = useCallback(() => {
     const total = calculateTotal();
-    
-    try {
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          customer_name: `${userProfile.firstName} ${userProfile.lastName}`,
-          customer_email: userProfile.email,
-          customer_phone: userProfile.phone,
-          pages: pageCount,
-          copies,
-          gsm: selectedGsm,
-          print_type: selectedType,
-          print_sides: selectedSides,
-          delivery_type: deliveryType,
-          file_path: fileUrl,
-          file_url: fileUrl,
-          amount: total,
-        })
-        .select()
-        .single();
+    const message = createOrderMessage(
+      pageCount,
+      copies,
+      selectedGsm,
+      selectedType,
+      selectedSides,
+      deliveryType,
+      total,
+      fileUrl
+    );
+    sendWhatsAppMessage(message);
+  }, [pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType, fileUrl, calculateTotal]);
 
-      if (orderError) throw orderError;
+  const handleProceedToPayment = useCallback(() => {
+    const total = calculateTotal();
 
-      // Send WhatsApp notification to admin
-      sendAdminWhatsAppNotification();
+    // Send admin notification
+    const adminMessage = createAdminNotification(userProfile.name, total);
+    sendWhatsAppMessage(adminMessage);
 
-      // Navigate to payment page with order details
-      navigate(`/payment?amount=${total}&orderId=${orderData.id}&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
-      
-    } catch (error: any) {
-      console.error('Error:', error);
-      toast.toast({
-        title: "Error",
-        description: error.message || "Failed to process your request",
-        variant: "destructive",
-      });
+    // Send user notification
+    const userMessage = createUserPaymentNotification(total);
+    if (userProfile.phone) {
+      sendWhatsAppMessage(userMessage, userProfile.phone);
     }
-  };
+
+    // Navigate to payment page
+    navigate(`/payment?amount=${total}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
+  }, [calculateTotal, userProfile, navigate, pageCount, copies, selectedType, deliveryType]);
 
   return {
     handleWhatsAppRedirect,
-    handleProceedToPayment: createOrder,
+    handleProceedToPayment,
   };
 };
