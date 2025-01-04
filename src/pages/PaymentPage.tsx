@@ -13,7 +13,7 @@ const PaymentPage = () => {
   const copies = Number(searchParams.get("copies")) || 0;
   const printType = searchParams.get("printType") || "";
   const deliveryType = searchParams.get("deliveryType") || "";
-  const upiLink = "upi://pay?mode=02&pa=Q079714462@ybl&purpose=00&mc=4816&pn=PhonePeMerchant&orgid=180001&sign=MEYCIQD22QosiykqT3nMOeH17s0o5EcUOM/mha6ruHpg6AA8mQIhAKfH/XccisiuxQm2HP4NkPh3v33vdLfHZN4t9HnjMgBd";
+  const upiLink = "upi://pay?pa=9999999999@upi&pn=MERCHANT&mc=0000&tid=cxnkjcnkjdfdvjk&tr=4894398cndhcd23&tn=Payment%20for%20a%20specific%20order&am=1000&cu=INR&refUrl=https://merchantwebsite.com/";
 
   return (
     <div className="container mx-auto px-4 py-8">
