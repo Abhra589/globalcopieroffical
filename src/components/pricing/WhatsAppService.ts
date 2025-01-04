@@ -26,6 +26,28 @@ export const createOrderMessage = (
     (fileUrl ? `\nFile URL: ${fileUrl}` : '');
 };
 
+export const createAdminMessage = (
+  pageCount: number,
+  copies: number,
+  selectedGsm: string,
+  selectedType: string,
+  selectedSides: string,
+  deliveryType: string,
+  total: number,
+  fileUrl?: string
+) => {
+  return createOrderMessage(
+    pageCount,
+    copies,
+    selectedGsm,
+    selectedType,
+    selectedSides,
+    deliveryType,
+    total,
+    fileUrl
+  );
+};
+
 export const createAdminNotification = (customerName: string, total: number) => {
   return `New order has been received!\n` +
     `Customer Name: ${customerName}\n` +
