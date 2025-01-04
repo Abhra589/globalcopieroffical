@@ -2,6 +2,17 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { createAdminMessage, sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Order {
   id: string;
@@ -20,6 +31,10 @@ interface Order {
   file_url: string;
   file_path: string;
   organization: string | null;
+  street?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
 }
 
 interface OrderCardProps {
@@ -89,11 +104,14 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
     }
   };
 
+  // Format the customer name properly
+  const customerName = order.customer_name || "Unknown Customer";
+
   return (
     <div className="border p-4 md:p-6 rounded-lg space-y-3 hover:shadow-md transition-shadow">
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div className="space-y-2 flex-grow">
-          <h3 className="font-semibold text-lg">{order.customer_name}</h3>
+          <h3 className="font-semibold text-lg">{customerName}</h3>
           <p className="text-sm text-gray-600">Order ID: {order.id}</p>
           <p className="text-sm text-gray-600">
             <span className="font-medium">Email:</span> {order.customer_email}
@@ -106,6 +124,17 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
             <p className="text-sm text-gray-600">
               <span className="font-medium">Organization:</span> {order.organization}
             </p>
+          )}
+
+          {/* Delivery Address Section */}
+          {order.delivery_type === 'delivery' && (
+            <div className="mt-2">
+              <p className="text-sm font-medium">Delivery Address:</p>
+              <p className="text-sm text-gray-600">{order.street}</p>
+              <p className="text-sm text-gray-600">
+                {order.city}, {order.state} {order.pincode}
+              </p>
+            </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -156,13 +185,32 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
           >
             Send WhatsApp
           </Button>
-          <Button
-            onClick={handleDelete}
-            variant="destructive"
-            className="w-full md:w-auto"
-          >
-            Delete Order
-          </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                className="w-full md:w-auto"
+              >
+                Delete Order
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the order
+                  and remove the data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>
+                  Yes, delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>
