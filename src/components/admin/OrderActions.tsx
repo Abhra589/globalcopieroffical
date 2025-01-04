@@ -13,20 +13,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface OrderActionsProps {
-  onWhatsAppClick: () => void;
   onDelete: () => void;
 }
 
-export const OrderActions = ({ onWhatsAppClick, onDelete }: OrderActionsProps) => {
+export const OrderActions = ({ onDelete }: OrderActionsProps) => {
   return (
     <div className="flex flex-col gap-2 w-full md:w-auto">
-      <Button
-        onClick={onWhatsAppClick}
-        className="w-full md:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white"
-      >
-        Send WhatsApp
-      </Button>
-      
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button

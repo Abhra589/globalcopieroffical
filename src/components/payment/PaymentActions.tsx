@@ -26,27 +26,22 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const handlePaymentDone = async () => {
     const orderId = searchParams.get("orderId");
     
-    // Validate order ID
-    if (!orderId || orderId === 'new') {
+    if (!orderId) {
       toast({
         title: "Error",
-        description: "Invalid order ID. Please try again or contact support.",
+        description: "Order ID not found",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      // Update payment status in database
       const { error } = await supabase
         .from('orders')
         .update({ payment_status: 'payment done from user side' })
         .eq('id', orderId);
 
-      if (error) {
-        console.error('Error updating payment status:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       setShowConfirmation(true);
       let currentProgress = 0;
@@ -71,7 +66,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       console.error('Error updating payment status:', error);
       toast({
         title: "Error",
-        description: "Failed to update payment status. Please try again.",
+        description: "Failed to update payment status",
         variant: "destructive",
       });
     }

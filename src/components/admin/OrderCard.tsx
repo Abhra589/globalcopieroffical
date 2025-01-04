@@ -1,6 +1,5 @@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
 import { OrderHeader } from "./OrderHeader";
 import { DeliveryAddress } from "./DeliveryAddress";
 import { OrderDetails } from "./OrderDetails";
@@ -35,49 +34,38 @@ interface OrderCardProps {
 }
 
 export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
-  const handleSendWhatsAppConfirmation = () => {
-    try {
-      const message = `Hi ${order.customer_name}, your order details:\n` +
-        `Pages: ${order.pages}\n` +
-        `Copies: ${order.copies}\n` +
-        `Paper: ${order.gsm}gsm\n` +
-        `Print Type: ${order.print_type === 'bw' ? 'Black & White' : 'Color'}\n` +
-        `Print Sides: ${order.print_sides === 'single' ? 'Single side' : 'Both sides'}\n` +
-        `Delivery: ${order.delivery_type === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
-        `Total Amount: ₹${order.amount.toFixed(2)}\n` +
-        `Document Link: ${order.file_url}`;
-      
-      sendWhatsAppMessage(message, order.customer_phone);
-      toast({
-        title: "Success",
-        description: "WhatsApp confirmation initiated",
-      });
-    } catch (error) {
-      console.error('Error sending WhatsApp confirmation:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send WhatsApp confirmation",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleDelete = async () => {
     try {
+      // Delete file from storage if it exists
       if (order.file_path) {
         const { error: storageError } = await supabase.storage
           .from('print_files')
           .remove([order.file_path]);
 
-        if (storageError) throw storageError;
+        if (storageError) {
+          toast({
+            title: "Error",
+            description: "Failed to delete file from storage",
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
+      // Delete order from database
       const { error: dbError } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        toast({
+          title: "Error",
+          description: "Failed to delete order from database",
+          variant: "destructive",
+        });
+        return;
+      }
       
       onDelete(order.id);
       toast({
@@ -145,7 +133,6 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         </div>
         
         <OrderActions
-          onWhatsAppClick={handleSendWhatsAppConfirmation}
           onDelete={handleDelete}
         />
       </div>
