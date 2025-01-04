@@ -1,6 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { createAdminMessage, sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
+import { sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
 import { OrderHeader } from "./OrderHeader";
 import { DeliveryAddress } from "./DeliveryAddress";
 import { OrderDetails } from "./OrderDetails";
@@ -37,16 +37,16 @@ interface OrderCardProps {
 export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const handleSendWhatsAppConfirmation = () => {
     try {
-      const message = createAdminMessage(
-        order.pages,
-        order.copies,
-        order.gsm,
-        order.print_type,
-        order.print_sides,
-        order.delivery_type,
-        order.amount,
-        order.file_url
-      );
+      const message = `Hi ${order.customer_name}, your order details:\n` +
+        `Pages: ${order.pages}\n` +
+        `Copies: ${order.copies}\n` +
+        `Paper: ${order.gsm}gsm\n` +
+        `Print Type: ${order.print_type === 'bw' ? 'Black & White' : 'Color'}\n` +
+        `Print Sides: ${order.print_sides === 'single' ? 'Single side' : 'Both sides'}\n` +
+        `Delivery: ${order.delivery_type === 'pickup' ? 'Store Pickup' : 'Home Delivery'}\n` +
+        `Total Amount: ₹${order.amount.toFixed(2)}\n` +
+        `Document Link: ${order.file_url}`;
+      
       sendWhatsAppMessage(message, order.customer_phone);
       toast({
         title: "Success",
@@ -94,14 +94,12 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
     }
   };
 
-  const customerName = order.customer_name || "Unknown Customer";
-
   return (
     <div className="border p-4 md:p-6 rounded-lg space-y-3 hover:shadow-md transition-shadow">
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div className="space-y-2 flex-grow">
           <OrderHeader
-            customerName={customerName}
+            customerName={order.customer_name}
             orderId={order.id}
             customerEmail={order.customer_email}
             customerPhone={order.customer_phone}

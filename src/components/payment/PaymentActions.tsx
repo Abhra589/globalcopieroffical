@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,24 +18,50 @@ interface PaymentActionsProps {
 
 const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const handlePaymentDone = () => {
-    setShowConfirmation(true);
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += 2.5;
-      setProgress(currentProgress);
-      
-      if (currentProgress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setShowConfirmation(false);
-          navigate('/');
-        }, 100);
-      }
-    }, 100); // 4000ms / 40 steps = 100ms per step
+  const handlePaymentDone = async () => {
+    const orderId = searchParams.get("orderId");
+    
+    try {
+      // Update payment status in database
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: 'payment done from user side' })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      setShowConfirmation(true);
+      let currentProgress = 0;
+      const interval = setInterval(() => {
+        currentProgress += 2.5;
+        setProgress(currentProgress);
+        
+        if (currentProgress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setShowConfirmation(false);
+            navigate('/');
+          }, 100);
+        }
+      }, 100);
+
+      toast({
+        title: "Success",
+        description: "Payment status updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update payment status",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleUPIClick = () => {

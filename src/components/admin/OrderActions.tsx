@@ -38,10 +38,10 @@ export const OrderActions = ({ onWhatsAppClick, onDelete }: OrderActionsProps) =
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure you want to delete this order?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the order
-              and remove the data from our servers.
+              and remove all associated data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
