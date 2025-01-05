@@ -8,13 +8,12 @@ interface WhatsAppMessage {
 
 export class WhatsAppBusinessService {
   private static async getApiCredentials() {
-    const { data: secrets } = await supabase
+    const { data: secrets, error } = await supabase
       .from('secrets')
-      .select('value')
-      .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID'])
-      .throwOnError();
+      .select('name, value')
+      .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID']);
 
-    if (!secrets || secrets.length < 2) {
+    if (error || !secrets || secrets.length < 2) {
       throw new Error('WhatsApp Business API credentials not found');
     }
 
@@ -28,6 +27,10 @@ export class WhatsAppBusinessService {
     try {
       const { token, phoneId } = await this.getApiCredentials();
       
+      if (!token || !phoneId) {
+        throw new Error('Missing WhatsApp Business API credentials');
+      }
+
       const response = await fetch(
         `https://graph.facebook.com/v17.0/${phoneId}/messages`,
         {
