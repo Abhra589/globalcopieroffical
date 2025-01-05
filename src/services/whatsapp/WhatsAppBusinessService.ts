@@ -8,28 +8,49 @@ interface WhatsAppMessage {
 
 export class WhatsAppBusinessService {
   private static async getApiCredentials() {
-    const { data: secrets, error } = await supabase
-      .from('secrets')
-      .select('*')
-      .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID']);
+    try {
+      const { data: secrets, error } = await supabase
+        .from('secrets')
+        .select('*')
+        .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID']);
 
-    if (error || !secrets || secrets.length < 2) {
-      throw new Error('WhatsApp Business API credentials not found');
+      if (error) {
+        console.error('Error fetching WhatsApp credentials:', error);
+        return null;
+      }
+
+      if (!secrets || secrets.length < 2) {
+        console.error('WhatsApp Business API credentials not found in Supabase secrets');
+        return null;
+      }
+
+      return {
+        token: secrets.find(s => s.name === 'WHATSAPP_BUSINESS_TOKEN')?.value,
+        phoneId: secrets.find(s => s.name === 'WHATSAPP_BUSINESS_PHONE_ID')?.value,
+      };
+    } catch (error) {
+      console.error('Error in getApiCredentials:', error);
+      return null;
     }
-
-    return {
-      token: secrets.find(s => s.name === 'WHATSAPP_BUSINESS_TOKEN')?.value,
-      phoneId: secrets.find(s => s.name === 'WHATSAPP_BUSINESS_PHONE_ID')?.value,
-    };
   }
 
   public static async sendMessage({ to, template, text }: WhatsAppMessage) {
     try {
-      const { token, phoneId } = await this.getApiCredentials();
+      const credentials = await this.getApiCredentials();
       
-      if (!token || !phoneId) {
-        throw new Error('Missing WhatsApp Business API credentials');
+      if (!credentials) {
+        // If credentials are not available, fall back to wa.me links
+        if (text) {
+          const cleanedNumber = to.replace(/\D/g, '');
+          const formattedNumber = cleanedNumber.startsWith('91') ? cleanedNumber : `91${cleanedNumber}`;
+          const encodedMessage = encodeURIComponent(text);
+          window.open(`https://wa.me/${formattedNumber}?text=${encodedMessage}`, '_blank');
+          return { success: true, fallback: true };
+        }
+        throw new Error('WhatsApp Business API credentials not found');
       }
+
+      const { token, phoneId } = credentials;
 
       // Clean the phone number
       const cleanedNumber = to.replace(/\D/g, '');
