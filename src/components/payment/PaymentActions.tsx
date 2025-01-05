@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,22 +30,34 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     const customerPhone = searchParams.get("customerPhone");
     const amount = searchParams.get("amount");
     
-    if (!orderId) {
+    if (!orderId || orderId === 'new') {
       toast({
         title: "Error",
-        description: "Order ID not found",
+        description: "Invalid order ID",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const { error } = await supabase
+      // First check if the order exists
+      const { data: existingOrder, error: fetchError } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('id', orderId)
+        .single();
+
+      if (fetchError || !existingOrder) {
+        throw new Error('Order not found');
+      }
+
+      // Update the order
+      const { error: updateError } = await supabase
         .from('orders')
         .update({ payment_status: `₹${amount} Paid` })
         .eq('id', orderId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       // Send confirmation to admin
       await WhatsAppBusinessService.sendMessage({
