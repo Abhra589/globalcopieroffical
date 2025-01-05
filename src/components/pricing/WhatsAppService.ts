@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-
 // Manual inquiry function using wa.me links
 export const sendWhatsAppMessage = (message: string, phoneNumber: string = "918777060249") => {
   const cleanedNumber = phoneNumber.replace(/\D/g, '');
@@ -57,25 +55,4 @@ export const createAdminNotification = (customerName: string, total: number) => 
 
 export const createUserPaymentNotification = (total: number) => {
   return `Please complete the payment of ₹${total.toFixed(2)} to receive a confirmation message from our side.`;
-};
-
-// Automated WhatsApp API functions
-export const sendAutomatedWhatsAppMessage = async (
-  to: string,
-  message: string
-) => {
-  try {
-    const { data, error } = await supabase.functions.invoke('send-whatsapp-message', {
-      body: {
-        to,
-        message
-      }
-    });
-
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Error sending WhatsApp message:', error);
-    throw error;
-  }
 };

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { NavigateFunction } from 'react-router-dom';
 import { 
-  sendAutomatedWhatsAppMessage,
+  sendWhatsAppMessage,
   createAdminNotification,
   createOrderMessage,
   createUserPaymentNotification
@@ -70,10 +70,10 @@ export const useOrderSubmission = ({
     try {
       const total = calculateTotal();
 
-      // Send admin notification
-      await sendAutomatedWhatsAppMessage(
-        "918777060249",
-        createAdminNotification(userProfile.name, total)
+      // Send admin notification via WhatsApp
+      sendWhatsAppMessage(
+        createAdminNotification(userProfile.name, total),
+        "918777060249"
       );
 
       // Send user notification if phone number is available
@@ -89,7 +89,7 @@ export const useOrderSubmission = ({
           fileUrl
         ) + "\n\n" + createUserPaymentNotification(total);
 
-        await sendAutomatedWhatsAppMessage(userProfile.phone, userMessage);
+        sendWhatsAppMessage(userMessage, userProfile.phone);
       }
 
       // Navigate to payment page
