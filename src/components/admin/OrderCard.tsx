@@ -1,14 +1,13 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { OrderHeader } from './OrderHeader';
 import { OrderDetails } from './OrderDetails';
 import { OrderPaymentStatus } from './OrderPaymentStatus';
 import { DeliveryAddress } from './DeliveryAddress';
 import { DocumentLink } from './DocumentLink';
+import { OrderActions } from './OrderActions';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2 } from "lucide-react";
 
 interface Order {
   id: string;
@@ -61,23 +60,13 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
   return (
     <Card className="p-6 space-y-4">
-      <div className="flex justify-between items-start">
-        <OrderHeader
-          customerName={order.customer_name}
-          orderId={order.id}
-          customerEmail={order.customer_email}
-          customerPhone={order.customer_phone}
-          organization={order.organization}
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-red-500 hover:text-red-700"
-          onClick={handleDelete}
-        >
-          <Trash2 className="h-5 w-5" />
-        </Button>
-      </div>
+      <OrderHeader
+        customerName={order.customer_name}
+        orderId={order.id}
+        customerEmail={order.customer_email}
+        customerPhone={order.customer_phone}
+        organization={order.organization}
+      />
 
       <OrderDetails
         pages={order.pages}
@@ -101,6 +90,12 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
       />
 
       <DocumentLink fileUrl={order.file_url} />
+
+      <OrderActions
+        customerPhone={order.customer_phone}
+        orderId={order.id}
+        onDelete={handleDelete}
+      />
     </Card>
   );
 };

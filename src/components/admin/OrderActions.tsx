@@ -11,17 +11,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { sendWhatsAppMessage } from '../pricing/WhatsAppService';
 
 interface OrderActionsProps {
-  onWhatsAppClick: () => void;
+  customerPhone: string;
+  orderId: string;
   onDelete: () => void;
 }
 
-export const OrderActions = ({ onWhatsAppClick, onDelete }: OrderActionsProps) => {
+export const OrderActions = ({ customerPhone, orderId, onDelete }: OrderActionsProps) => {
+  const handleWhatsAppClick = () => {
+    const message = `Hello! This is regarding your order ${orderId}. How may we assist you today?`;
+    sendWhatsAppMessage(message, customerPhone);
+  };
+
   return (
     <div className="flex flex-col gap-2 w-full md:w-auto">
       <Button
-        onClick={onWhatsAppClick}
+        onClick={handleWhatsAppClick}
         className="w-full md:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white"
       >
         Send WhatsApp Update
