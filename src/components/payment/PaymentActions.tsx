@@ -73,7 +73,9 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   };
 
   const handleUPIClick = () => {
-    window.location.href = upiLink;
+    // Using the correct UPI ID format
+    const upiUrl = `upi://pay?pa=9831162681-2@axl&pn=GlobalCopier&am=${searchParams.get("amount")}&cu=INR`;
+    window.location.href = upiUrl;
   };
 
   return (

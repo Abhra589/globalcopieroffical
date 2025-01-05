@@ -25,7 +25,8 @@ export const OrderActions = ({
   fileUrl,
   onProceedToPayment
 }: OrderActionsProps) => {
-  const handleWhatsAppEnquiry = () => {
+  const handleWhatsAppEnquiry = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
     const message = createOrderMessage(
       pageCount,
       copies,
@@ -36,20 +37,26 @@ export const OrderActions = ({
       total,
       fileUrl
     );
-    // Only send WhatsApp message, don't proceed to payment
     sendWhatsAppMessage(message);
+  };
+
+  const handleProceedToPayment = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    onProceedToPayment();
   };
 
   return (
     <div className="flex gap-4">
       <Button
         onClick={handleWhatsAppEnquiry}
+        type="button" // Prevent form submission
         className="bg-[#25D366] hover:bg-[#128C7E] text-white animate-scale-in flex-1"
       >
         Enquire on WhatsApp
       </Button>
       <Button
-        onClick={onProceedToPayment}
+        onClick={handleProceedToPayment}
+        type="button" // Prevent form submission
         className="bg-primary hover:bg-primary/90 text-white animate-scale-in flex-1"
         disabled={!pageCount}
       >
