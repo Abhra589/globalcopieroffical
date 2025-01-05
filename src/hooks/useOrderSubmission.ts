@@ -1,11 +1,5 @@
 import { useCallback } from 'react';
 import { NavigateFunction } from 'react-router-dom';
-import { 
-  sendWhatsAppMessage,
-  createAdminNotification,
-  createOrderMessage,
-  createUserPaymentNotification
-} from '@/components/pricing/WhatsAppService';
 
 interface UserProfile {
   name: string;
@@ -69,41 +63,17 @@ export const useOrderSubmission = ({
   const handleProceedToPayment = useCallback(async () => {
     try {
       const total = calculateTotal();
-
-      // Send admin notification via WhatsApp
-      sendWhatsAppMessage(
-        createAdminNotification(userProfile.name, total),
-        "918777060249"
-      );
-
-      // Send user notification if phone number is available
-      if (userProfile.phone) {
-        const userMessage = createOrderMessage(
-          pageCount,
-          copies,
-          selectedGsm,
-          selectedType,
-          selectedSides,
-          deliveryType,
-          total,
-          fileUrl
-        ) + "\n\n" + createUserPaymentNotification(total);
-
-        sendWhatsAppMessage(userMessage, userProfile.phone);
-      }
-
-      // Navigate to payment page
+      // Only navigate to payment page, no WhatsApp integration
       navigate(`/payment?amount=${total}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
     } catch (error) {
-      console.error('Error sending WhatsApp notifications:', error);
+      console.error('Error proceeding to payment:', error);
       toast.toast({
-        title: "Warning",
-        description: "Proceeding to payment, but WhatsApp notifications may have failed.",
+        title: "Error",
+        description: "Failed to proceed to payment",
         variant: "destructive",
       });
-      navigate(`/payment?amount=${calculateTotal()}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
     }
-  }, [calculateTotal, userProfile, navigate, pageCount, copies, selectedType, deliveryType, fileUrl]);
+  }, [calculateTotal, navigate, pageCount, copies, selectedType, deliveryType]);
 
   return {
     handleProceedToPayment,
