@@ -10,7 +10,7 @@ export class WhatsAppBusinessService {
   private static async getApiCredentials() {
     const { data: secrets, error } = await supabase
       .from('secrets')
-      .select('name, value')
+      .select('*')
       .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID']);
 
     if (error || !secrets || secrets.length < 2) {
@@ -31,6 +31,10 @@ export class WhatsAppBusinessService {
         throw new Error('Missing WhatsApp Business API credentials');
       }
 
+      // Clean the phone number
+      const cleanedNumber = to.replace(/\D/g, '');
+      const formattedNumber = cleanedNumber.startsWith('91') ? cleanedNumber : `91${cleanedNumber}`;
+
       const response = await fetch(
         `https://graph.facebook.com/v17.0/${phoneId}/messages`,
         {
@@ -41,7 +45,7 @@ export class WhatsAppBusinessService {
           },
           body: JSON.stringify({
             messaging_product: 'whatsapp',
-            to,
+            to: formattedNumber,
             type: template ? 'template' : 'text',
             ...(template ? { template: { name: template } } : { text: { body: text } }),
           }),

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { WhatsAppBusinessService } from '@/services/whatsapp/WhatsAppBusinessService';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -22,9 +23,12 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const { toast } = useToast();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [countdown, setCountdown] = useState(4);
 
   const handlePaymentDone = async () => {
     const orderId = searchParams.get("orderId");
+    const customerPhone = searchParams.get("customerPhone");
+    const amount = searchParams.get("amount");
     
     if (!orderId) {
       toast({
@@ -38,30 +42,40 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ payment_status: 'payment done from user side' })
+        .update({ payment_status: `₹${amount} Paid` })
         .eq('id', orderId);
 
       if (error) throw error;
 
-      setShowConfirmation(true);
-      let currentProgress = 0;
-      const interval = setInterval(() => {
-        currentProgress += 2.5;
-        setProgress(currentProgress);
-        
-        if (currentProgress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setShowConfirmation(false);
-            navigate('/');
-          }, 100);
-        }
-      }, 100);
-
-      toast({
-        title: "Success",
-        description: "Payment status updated successfully",
+      // Send confirmation to admin
+      await WhatsAppBusinessService.sendMessage({
+        to: "918777060249",
+        text: `Payment confirmed for order ${orderId}. Amount: ₹${amount}`
       });
+
+      // Send confirmation to user
+      if (customerPhone) {
+        await WhatsAppBusinessService.sendMessage({
+          to: customerPhone,
+          text: `Thank you! Your payment of ₹${amount} has been confirmed. We'll process your order shortly.`
+        });
+      }
+
+      setShowConfirmation(true);
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          const newCount = prev - 1;
+          setProgress((4 - newCount) * 25);
+          return newCount;
+        });
+      }, 1000);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        setShowConfirmation(false);
+        navigate('/');
+      }, 4000);
+
     } catch (error) {
       console.error('Error updating payment status:', error);
       toast({
@@ -73,9 +87,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   };
 
   const handleUPIClick = () => {
-    // Using the correct UPI ID format
-    const upiUrl = `upi://pay?pa=9831162681-2@axl&pn=GlobalCopier&am=${searchParams.get("amount")}&cu=INR`;
-    window.location.href = upiUrl;
+    window.location.href = upiLink;
   };
 
   return (
@@ -101,7 +113,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Thank you for choosing Global Copier</AlertDialogTitle>
             <AlertDialogDescription>
-              You will soon receive a payment confirmation message.
+              Redirecting in {countdown} seconds...
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Progress value={progress} className="w-full" />

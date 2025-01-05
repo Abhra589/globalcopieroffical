@@ -24,7 +24,7 @@ export const OrderActions = ({ onWhatsAppClick, onDelete }: OrderActionsProps) =
         onClick={onWhatsAppClick}
         className="w-full md:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white"
       >
-        Send WhatsApp
+        Send WhatsApp Update
       </Button>
       
       <AlertDialog>
