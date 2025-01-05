@@ -36,6 +36,7 @@ export const OrderActions = ({
       total,
       fileUrl
     );
+    // Only send WhatsApp message, don't proceed to payment
     sendWhatsAppMessage(message);
   };
 
