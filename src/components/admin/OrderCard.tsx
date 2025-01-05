@@ -1,10 +1,12 @@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { sendWhatsAppMessage } from "@/components/pricing/WhatsAppService";
+import { WhatsAppBusinessService } from "@/services/whatsapp/WhatsAppBusinessService";
 import { OrderHeader } from "./OrderHeader";
 import { DeliveryAddress } from "./DeliveryAddress";
 import { OrderDetails } from "./OrderDetails";
 import { OrderActions } from "./OrderActions";
+import { OrderPaymentStatus } from "./OrderPaymentStatus";
+import { DocumentLink } from "./DocumentLink";
 
 interface Order {
   id: string;
@@ -35,7 +37,7 @@ interface OrderCardProps {
 }
 
 export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
-  const handleSendWhatsAppConfirmation = () => {
+  const handleSendWhatsAppConfirmation = async () => {
     try {
       const deliveryInfo = order.delivery_type === 'delivery' 
         ? `\nDelivery Address: ${order.street}, ${order.city}, ${order.state} ${order.pincode}`
@@ -52,10 +54,14 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         `Total Amount: ₹${order.amount.toFixed(2)}\n` +
         `Document Link: ${order.file_url}`;
       
-      sendWhatsAppMessage(message, order.customer_phone);
+      await WhatsAppBusinessService.sendMessage({
+        to: order.customer_phone,
+        text: message
+      });
+
       toast({
         title: "Success",
-        description: "WhatsApp confirmation initiated",
+        description: "WhatsApp confirmation sent successfully",
       });
     } catch (error) {
       console.error('Error sending WhatsApp confirmation:', error);
@@ -69,36 +75,20 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
   const handleDelete = async () => {
     try {
-      // Delete file from storage if it exists
       if (order.file_path) {
         const { error: storageError } = await supabase.storage
           .from('print_files')
           .remove([order.file_path]);
 
-        if (storageError) {
-          toast({
-            title: "Error",
-            description: "Failed to delete file from storage",
-            variant: "destructive",
-          });
-          return;
-        }
+        if (storageError) throw storageError;
       }
 
-      // Delete order from database
       const { error: dbError } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
 
-      if (dbError) {
-        toast({
-          title: "Error",
-          description: "Failed to delete order from database",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (dbError) throw dbError;
       
       onDelete(order.id);
       toast({
@@ -145,24 +135,12 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
             deliveryType={order.delivery_type}
           />
           
-          <div className="mt-3">
-            <p className="text-lg font-semibold text-primary">
-              Total Amount: ₹{order.amount.toFixed(2)}
-            </p>
-            <p className="text-sm text-gray-600">
-              Status: <span className="capitalize">{order.payment_status}</span>
-            </p>
-            {order.file_url && (
-              <a
-                href={order.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline"
-              >
-                View Document
-              </a>
-            )}
-          </div>
+          <OrderPaymentStatus
+            status={order.payment_status}
+            amount={order.amount}
+          />
+          
+          <DocumentLink fileUrl={order.file_url} />
         </div>
         
         <OrderActions
