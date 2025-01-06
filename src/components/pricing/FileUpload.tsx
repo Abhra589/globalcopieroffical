@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload } from "lucide-react";
 
 interface FileUploadProps {
-  onFileChange: (file: File | null, uploadedUrl: string) => void;
+  onFileChange: (file: File | null, uploadedUrl: string, filePath?: string) => void;
 }
 
 export const FileUpload = ({ onFileChange }: FileUploadProps) => {
@@ -16,7 +16,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     if (!file) {
-      onFileChange(null, "");
+      onFileChange(null, "", "");
       return;
     }
 
@@ -47,8 +47,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
 
       console.log('File uploaded successfully:', { filePath, publicUrl });
       
-      // Ensure we're passing both the file and the URL
-      onFileChange(file, publicUrl);
+      onFileChange(file, publicUrl, filePath);
       
       toast({
         title: "File uploaded successfully",
@@ -61,7 +60,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
         description: "Failed to upload file. Please try again.",
         variant: "destructive",
       });
-      onFileChange(null, ""); // Reset on error
+      onFileChange(null, "", "");
     } finally {
       setIsUploading(false);
     }

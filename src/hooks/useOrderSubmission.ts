@@ -21,6 +21,7 @@ interface OrderSubmissionProps {
   pickupDate?: string;
   pickupTime?: string;
   fileUrl: string;
+  filePath: string;
   userProfile: UserProfile;
   navigate: NavigateFunction;
   toast: {
@@ -38,6 +39,7 @@ export const useOrderSubmission = ({
   pickupDate,
   pickupTime,
   fileUrl,
+  filePath,
   userProfile,
   navigate,
   toast,
@@ -81,6 +83,10 @@ export const useOrderSubmission = ({
         customerName: userProfile.name,
         customerEmail: userProfile.email,
         customerPhone: userProfile.phone,
+        gsm: selectedGsm,
+        printSides: selectedSides,
+        fileUrl: fileUrl,
+        filePath: filePath,
         street: userProfile.street || '',
         city: userProfile.city || '',
         state: userProfile.state || '',
@@ -101,7 +107,7 @@ export const useOrderSubmission = ({
         variant: "destructive",
       });
     }
-  }, [calculateTotal, navigate, pageCount, copies, selectedType, deliveryType, pickupDate, pickupTime, userProfile]);
+  }, [calculateTotal, navigate, pageCount, copies, selectedType, deliveryType, pickupDate, pickupTime, userProfile, fileUrl, filePath]);
 
   return {
     handleProceedToPayment,

@@ -17,6 +17,7 @@ export const OrderForm = () => {
   const [deliveryType, setDeliveryType] = useState<"pickup" | "delivery">("delivery");
   const [file, setFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState<string>("");
+  const [filePath, setFilePath] = useState<string>("");
   const [pageCount, setPageCount] = useState<number>(0);
   const [copies, setCopies] = useState(1);
   const [pickupDate, setPickupDate] = useState("");
@@ -33,9 +34,12 @@ export const OrderForm = () => {
   });
   const { toast } = useToast();
 
-  const handleFileChange = (newFile: File | null, uploadedUrl: string) => {
+  const handleFileChange = (newFile: File | null, uploadedUrl: string, path?: string) => {
     setFile(newFile);
     setFileUrl(uploadedUrl);
+    if (path) {
+      setFilePath(path);
+    }
   };
 
   const { handleProceedToPayment } = useOrderSubmission({
@@ -48,6 +52,7 @@ export const OrderForm = () => {
     pickupDate,
     pickupTime,
     fileUrl,
+    filePath,
     userProfile: {
       name: `${customerInfo.firstName} ${customerInfo.lastName}`,
       email: customerInfo.email,

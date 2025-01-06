@@ -40,6 +40,8 @@ export const usePaymentProcessor = () => {
         copies,
         printType,
         deliveryType,
+        fileUrl,
+        filePath,
         street,
         city,
         state,
