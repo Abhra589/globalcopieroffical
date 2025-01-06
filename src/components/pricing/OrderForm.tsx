@@ -25,6 +25,8 @@ export const OrderForm = () => {
   const [fileUrl, setFileUrl] = useState<string>("");
   const [pageCount, setPageCount] = useState<number>(0);
   const [copies, setCopies] = useState(1);
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
   const [customerInfo, setCustomerInfo] = useState({
     firstName: "",
     lastName: "",
@@ -50,6 +52,8 @@ export const OrderForm = () => {
     selectedSides,
     deliveryType,
     fileUrl,
+    pickupDate,
+    pickupTime,
     userProfile: {
       name: `${customerInfo.firstName} ${customerInfo.lastName}`,
       email: customerInfo.email,
@@ -87,6 +91,15 @@ export const OrderForm = () => {
       return;
     }
 
+    if (deliveryType === "pickup" && (!pickupDate || !pickupTime)) {
+      toast({
+        title: "Missing Pickup Information",
+        description: "Please select pickup date and time",
+        variant: "destructive",
+      });
+      return;
+    }
+
     handleProceedToPayment();
   };
 
@@ -110,7 +123,14 @@ export const OrderForm = () => {
         <FileUpload onFileChange={handleFileChange} />
         <ManualPageCount pageCount={pageCount} onPageCountChange={setPageCount} />
         <CopiesInput copies={copies} setCopies={setCopies} />
-        <DeliveryOptions deliveryType={deliveryType} setDeliveryType={setDeliveryType} />
+        <DeliveryOptions 
+          deliveryType={deliveryType} 
+          setDeliveryType={setDeliveryType}
+          pickupDate={pickupDate}
+          pickupTime={pickupTime}
+          onPickupDateChange={setPickupDate}
+          onPickupTimeChange={setPickupTime}
+        />
         
         <OrderSummary
           pageCount={pageCount}
@@ -125,6 +145,8 @@ export const OrderForm = () => {
           selectedType={selectedType}
           selectedSides={selectedSides}
           deliveryType={deliveryType}
+          pickupDate={pickupDate}
+          pickupTime={pickupTime}
           total={calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
           fileUrl={fileUrl}
           onProceedToPayment={handleProceedToPayment}
