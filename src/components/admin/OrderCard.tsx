@@ -48,10 +48,7 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         .delete()
         .eq('id', order.id);
 
-      if (deleteError) {
-        console.error('Error deleting order:', deleteError);
-        throw deleteError;
-      }
+      if (deleteError) throw deleteError;
 
       try {
         await WhatsAppNotificationService.sendOrderUpdate(
