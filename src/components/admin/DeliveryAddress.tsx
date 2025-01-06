@@ -13,7 +13,9 @@ export const DeliveryAddress = ({
   state,
   pincode,
 }: DeliveryAddressProps) => {
-  if (!street && !city && !state && !pincode) {
+  const hasAddress = Boolean(street || city || state || pincode);
+
+  if (!hasAddress) {
     return (
       <div className="mt-2">
         <p className="text-sm font-medium">Delivery Address:</p>
@@ -25,9 +27,9 @@ export const DeliveryAddress = ({
   return (
     <div className="mt-2">
       <p className="text-sm font-medium">Delivery Address:</p>
-      <p className="text-sm text-gray-600">{street}</p>
+      {street && <p className="text-sm text-gray-600">{street}</p>}
       <p className="text-sm text-gray-600">
-        {city && state ? `${city}, ${state}` : city || state} {pincode}
+        {[city, state, pincode].filter(Boolean).join(', ')}
       </p>
     </div>
   );

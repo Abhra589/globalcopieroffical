@@ -82,8 +82,8 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
       <OrderHeader
         customerName={order.customer_name}
         orderId={order.id}
-        customerEmail={order.customer_email}
-        customerPhone={order.customer_phone}
+        customerEmail={order.customer_email || ''}
+        customerPhone={order.customer_phone || ''}
         organization={order.organization}
       />
 
@@ -102,10 +102,10 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
       />
 
       <DeliveryAddress
-        street={order.street}
-        city={order.city}
-        state={order.state}
-        pincode={order.pincode}
+        street={order.street || ''}
+        city={order.city || ''}
+        state={order.state || ''}
+        pincode={order.pincode || ''}
       />
 
       <DocumentLink fileUrl={order.file_url} />
