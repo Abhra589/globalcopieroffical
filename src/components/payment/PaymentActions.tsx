@@ -22,11 +22,19 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const handlePaymentDone = async () => {
     const orderId = searchParams.get("orderId");
     const customerPhone = searchParams.get("customerPhone");
+    const customerName = searchParams.get("customerName");
+    const customerEmail = searchParams.get("customerEmail");
     const amount = searchParams.get("amount");
     const pages = searchParams.get("pages");
     const copies = searchParams.get("copies");
     const printType = searchParams.get("printType");
     const deliveryType = searchParams.get("deliveryType");
+    const gsm = searchParams.get("gsm") || "70";
+    const printSides = searchParams.get("printSides") || "single";
+    const fileUrl = searchParams.get("fileUrl") || "";
+    const filePath = searchParams.get("filePath") || "";
+    const pickupDate = searchParams.get("pickupDate");
+    const pickupTime = searchParams.get("pickupTime");
     
     try {
       let finalOrderId = orderId;
@@ -39,6 +47,14 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
           delivery_type: deliveryType || '',
           amount: Number(amount),
           customer_phone: customerPhone || '',
+          customer_name: customerName || '',
+          customer_email: customerEmail || '',
+          gsm,
+          print_sides: printSides,
+          file_path: filePath,
+          file_url: fileUrl,
+          pickup_date: pickupDate,
+          pickup_time: pickupTime
         });
         finalOrderId = newOrder.id;
       } else if (orderId) {
