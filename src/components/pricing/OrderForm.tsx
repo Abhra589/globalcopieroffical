@@ -1,6 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Calculator } from "lucide-react";
 import { PriceList } from "./PriceList";
 import { DeliveryOptions } from "./DeliveryOptions";
 import { CopiesInput } from "./CopiesInput";
@@ -12,6 +11,9 @@ import { ManualPageCount } from "./ManualPageCount";
 import { CustomerInfoForm } from "./CustomerInfoForm";
 import { useOrderSubmission } from "@/hooks/useOrderSubmission";
 import { useNavigate } from "react-router-dom";
+import { FormHeader } from "./FormHeader";
+import { FormContainer } from "./FormContainer";
+import { calculateCourierCharge, calculateTotal } from "@/utils/orderCalculations";
 
 export const OrderForm = () => {
   const navigate = useNavigate();
@@ -35,40 +37,10 @@ export const OrderForm = () => {
   });
   const { toast } = useToast();
 
-  const calculateCourierCharge = useCallback((pages: number) => {
-    return deliveryType === "pickup" ? 0 : (pages <= 400 ? 80 : 150);
-  }, [deliveryType]);
-
   const handleFileChange = (newFile: File | null, uploadedUrl: string) => {
     setFile(newFile);
     setFileUrl(uploadedUrl);
   };
-
-  const calculateTotal = useCallback(() => {
-    const pricingOptions = [
-      { gsm: "70", type: "bw", sides: "single", pricePerPage: 0.8 },
-      { gsm: "70", type: "bw", sides: "double", pricePerPage: 1.0 },
-      { gsm: "70", type: "color", sides: "single", pricePerPage: 2.5 },
-      { gsm: "70", type: "color", sides: "double", pricePerPage: 4.5 },
-      { gsm: "100", type: "bw", sides: "single", pricePerPage: 2.0 },
-      { gsm: "100", type: "bw", sides: "double", pricePerPage: 3.0 },
-      { gsm: "100", type: "color", sides: "single", pricePerPage: 3.0 },
-      { gsm: "100", type: "color", sides: "double", pricePerPage: 5.0 },
-    ];
-
-    const selectedOption = pricingOptions.find(
-      (option) =>
-        option.gsm === selectedGsm &&
-        option.type === selectedType &&
-        option.sides === selectedSides
-    );
-
-    if (!selectedOption || !pageCount) return 0;
-
-    const printingCost = selectedOption.pricePerPage * pageCount * copies;
-    const courierCharge = calculateCourierCharge(pageCount);
-    return printingCost + courierCharge;
-  }, [selectedGsm, selectedType, selectedSides, pageCount, copies, calculateCourierCharge]);
 
   const { handleProceedToPayment } = useOrderSubmission({
     pageCount,
@@ -119,11 +91,8 @@ export const OrderForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg animate-fade-in">
-      <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-        <Calculator className="w-6 h-6" />
-        Calculate Printing Cost
-      </h2>
+    <FormContainer onSubmit={handleSubmit}>
+      <FormHeader />
       
       <div className="space-y-6">
         <CustomerInfoForm customerInfo={customerInfo} setCustomerInfo={setCustomerInfo} />
@@ -145,8 +114,8 @@ export const OrderForm = () => {
         
         <OrderSummary
           pageCount={pageCount}
-          calculateCourierCharge={calculateCourierCharge}
-          calculateTotal={calculateTotal}
+          calculateCourierCharge={(pages) => calculateCourierCharge(pages, deliveryType)}
+          calculateTotal={() => calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
         />
         
         <OrderActions
@@ -156,11 +125,11 @@ export const OrderForm = () => {
           selectedType={selectedType}
           selectedSides={selectedSides}
           deliveryType={deliveryType}
-          total={calculateTotal()}
+          total={calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
           fileUrl={fileUrl}
           onProceedToPayment={handleProceedToPayment}
         />
       </div>
-    </form>
+    </FormContainer>
   );
 };
