@@ -46,6 +46,8 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
         .getPublicUrl(filePath);
 
       console.log('File uploaded successfully:', { filePath, publicUrl });
+      
+      // Ensure we're passing both the file and the URL
       onFileChange(file, publicUrl);
       
       toast({
@@ -59,6 +61,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
         description: "Failed to upload file. Please try again.",
         variant: "destructive",
       });
+      onFileChange(null, ""); // Reset on error
     } finally {
       setIsUploading(false);
     }

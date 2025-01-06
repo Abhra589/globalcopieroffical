@@ -39,8 +39,8 @@ export class PaymentService {
         customer_phone: orderData.customer_phone,
         gsm: orderData.gsm,
         print_sides: orderData.print_sides,
-        file_path: orderData.file_path,
-        file_url: orderData.file_url,
+        file_path: orderData.file_path || '',  // Ensure file_path is included
+        file_url: orderData.file_url || '',    // Ensure file_url is included
         street: orderData.street || null,
         city: orderData.city || null,
         state: orderData.state || null,
