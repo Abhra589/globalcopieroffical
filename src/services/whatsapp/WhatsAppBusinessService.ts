@@ -23,7 +23,7 @@ export class WhatsAppBusinessService {
 
   public static async sendMessage({ to, template, text, silent = false }: WhatsAppMessage) {
     try {
-      const credentials = await this.getApiCredentials();
+      await this.getApiCredentials();
       
       if (text && !silent) {
         // Only open WhatsApp in new window for non-silent messages
@@ -34,19 +34,15 @@ export class WhatsAppBusinessService {
         return { success: true, fallback: true };
       } else if (text && silent) {
         // For silent messages, use the Edge Function
-        const response = await fetch('/api/send-whatsapp', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+          body: {
             to,
             message: text
-          })
+          }
         });
         
-        if (!response.ok) {
-          throw new Error('Failed to send WhatsApp message');
+        if (error) {
+          throw error;
         }
         
         return { success: true, silent: true };
