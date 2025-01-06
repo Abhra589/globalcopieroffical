@@ -17,20 +17,22 @@ export const DeliveryAddress = ({
 
   if (!hasAddress) {
     return (
-      <div className="mt-2">
-        <p className="text-sm font-medium">Delivery Address:</p>
-        <p className="text-sm text-gray-600">No address provided</p>
+      <div className="mt-4">
+        <p className="text-sm font-medium mb-1">Delivery Address</p>
+        <div className="text-sm text-gray-500 bg-gray-50 p-2 rounded-md">
+          No address provided
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-2 animate-fade-in">
-      <p className="text-sm font-medium">Delivery Address:</p>
-      {street && <p className="text-sm text-gray-600">{street}</p>}
-      <p className="text-sm text-gray-600">
-        {[city, state, pincode].filter(Boolean).join(', ')}
-      </p>
+    <div className="mt-4 animate-fade-in">
+      <p className="text-sm font-medium mb-1">Delivery Address</p>
+      <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
+        {street && <p>{street}</p>}
+        <p>{[city, state, pincode].filter(Boolean).join(', ')}</p>
+      </div>
     </div>
   );
 };

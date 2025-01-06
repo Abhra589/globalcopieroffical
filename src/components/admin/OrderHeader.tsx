@@ -19,18 +19,22 @@ export const OrderHeader = ({
     <div className="space-y-2">
       <h3 className="font-semibold text-lg">{customerName}</h3>
       <p className="text-sm text-gray-600">Order ID: {orderId}</p>
-      <p className="text-sm text-gray-600">
-        <span className="font-medium">Email:</span> {customerEmail}
-      </p>
-      <p className="text-sm text-gray-600">
-        <span className="font-medium">Phone:</span> {customerPhone}
-      </p>
-      
-      {organization && (
-        <p className="text-sm text-gray-600">
-          <span className="font-medium">Organization:</span> {organization}
-        </p>
-      )}
+      <div className="grid gap-1">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm min-w-[60px]">Email:</span>
+          <span className="text-sm text-gray-600">{customerEmail}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm min-w-[60px]">Phone:</span>
+          <span className="text-sm text-gray-600">{customerPhone}</span>
+        </div>
+        {organization && (
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-sm min-w-[60px]">Org:</span>
+            <span className="text-sm text-gray-600">{organization}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
