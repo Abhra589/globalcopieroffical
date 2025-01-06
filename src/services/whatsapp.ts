@@ -45,6 +45,5 @@ export const createOrderEnquiryMessage = ({
 
 Please confirm if you'd like to proceed with this order.`;
 
-  // Use encodeURIComponent to properly encode the message for WhatsApp
   return encodeURIComponent(message.trim());
 };
