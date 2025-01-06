@@ -56,7 +56,13 @@ export class WhatsAppNotificationService {
     copies: number;
     printType: string;
     deliveryType: string;
+    pickupDate?: string;
+    pickupTime?: string;
   }) {
+    const pickupInfo = orderDetails.deliveryType === 'pickup' 
+      ? `\n📅 Pickup Date: ${orderDetails.pickupDate}\n⏰ Pickup Time: ${orderDetails.pickupTime}`
+      : '';
+
     const adminMessage = `🆕 New Order Received!\n\n` +
       `📋 Order ID: ${orderDetails.orderId}\n` +
       `👤 Customer: ${orderDetails.customerName}\n` +
@@ -66,7 +72,8 @@ export class WhatsAppNotificationService {
       `📄 Pages: ${orderDetails.pages}\n` +
       `🔢 Copies: ${orderDetails.copies}\n` +
       `🖨️ Print Type: ${orderDetails.printType}\n` +
-      `🚚 Delivery: ${orderDetails.deliveryType}`;
+      `🚚 Delivery: ${orderDetails.deliveryType}` +
+      pickupInfo;
 
     try {
       await WhatsAppBusinessService.sendMessage({

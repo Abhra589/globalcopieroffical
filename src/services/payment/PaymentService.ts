@@ -7,12 +7,14 @@ interface OrderData {
   delivery_type: string;
   amount: number;
   customer_phone: string;
-  customer_name?: string;
-  customer_email?: string;
-  gsm?: string;
-  print_sides?: string;
-  file_path?: string;
-  file_url?: string;
+  customer_name: string;
+  customer_email: string;
+  gsm: string;
+  print_sides: string;
+  file_path: string;
+  file_url: string;
+  pickup_date?: string;
+  pickup_time?: string;
 }
 
 export class PaymentService {
@@ -26,13 +28,15 @@ export class PaymentService {
         delivery_type: orderData.delivery_type,
         amount: orderData.amount,
         payment_status: 'Payment Done',
-        customer_name: orderData.customer_name || 'Customer',
-        customer_email: orderData.customer_email || 'email@example.com',
+        customer_name: orderData.customer_name,
+        customer_email: orderData.customer_email,
         customer_phone: orderData.customer_phone,
-        gsm: orderData.gsm || '70',
-        print_sides: orderData.print_sides || 'single',
-        file_path: orderData.file_path || '',
-        file_url: orderData.file_url || '',
+        gsm: orderData.gsm,
+        print_sides: orderData.print_sides,
+        file_path: orderData.file_path,
+        file_url: orderData.file_url,
+        pickup_date: orderData.pickup_date,
+        pickup_time: orderData.pickup_time
       }])
       .select()
       .single();
