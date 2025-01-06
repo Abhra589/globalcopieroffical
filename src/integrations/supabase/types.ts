@@ -26,6 +26,8 @@ export type Database = {
           organization: string | null
           pages: number
           payment_status: string | null
+          pickup_date: string | null
+          pickup_time: string | null
           pincode: string | null
           print_sides: string
           print_type: string
@@ -48,6 +50,8 @@ export type Database = {
           organization?: string | null
           pages: number
           payment_status?: string | null
+          pickup_date?: string | null
+          pickup_time?: string | null
           pincode?: string | null
           print_sides: string
           print_type: string
@@ -70,6 +74,8 @@ export type Database = {
           organization?: string | null
           pages?: number
           payment_status?: string | null
+          pickup_date?: string | null
+          pickup_time?: string | null
           pincode?: string | null
           print_sides?: string
           print_type?: string
