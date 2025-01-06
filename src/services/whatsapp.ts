@@ -23,27 +23,28 @@ export const createOrderEnquiryMessage = ({
   total,
   fileUrl,
 }: OrderDetails): string => {
-  const message = `
-🖨️ New Print Order Enquiry
+  const message = 
+`🖨️ *New Print Order Enquiry*
 
-📄 Document Details:
-- Pages: ${pageCount}
-- Copies: ${copies}
-- Paper: ${selectedGsm} GSM
-- Print: ${selectedType === 'bw' ? 'Black & White' : 'Color'}
-- Sides: ${selectedSides === 'single' ? 'Single Side' : 'Both Sides'}
+📄 *Document Details:*
+• Pages: ${pageCount}
+• Copies: ${copies}
+• Paper: ${selectedGsm} GSM
+• Print: ${selectedType === 'bw' ? 'Black & White' : 'Color'}
+• Sides: ${selectedSides === 'single' ? 'Single Side' : 'Both Sides'}
 
-🚚 Delivery Method: ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}
-${deliveryType === 'pickup' ? `
-📅 Pickup Details:
-- Date: ${pickupDate}
-- Time: ${pickupTime}` : ''}
+🚚 *Delivery Method:* ${deliveryType === 'pickup' ? 'Store Pickup' : 'Home Delivery'}${
+  deliveryType === 'pickup' 
+    ? `\n\n📅 *Pickup Details:*\n• Date: ${pickupDate}\n• Time: ${pickupTime}` 
+    : ''
+}
 
-💰 Total Amount: ₹${total}
+💰 *Total Amount:* ₹${total}
 
-🔗 Document Link: ${fileUrl}
+🔗 *Document Link:* ${fileUrl}
 
 Please confirm if you'd like to proceed with this order.`;
 
-  return encodeURIComponent(message);
+  // Use encodeURIComponent to properly encode the message for WhatsApp
+  return encodeURIComponent(message.trim());
 };

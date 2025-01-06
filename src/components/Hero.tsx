@@ -11,7 +11,7 @@ export const Hero = () => {
 
   return (
     <div className="bg-gradient-to-r from-primary to-secondary py-20 relative overflow-hidden">
-      <div className="container mx-auto text-center text-white">
+      <div className="container mx-auto text-center text-white relative">
         <h1 
           className={`text-5xl font-bold mb-6 transition-all duration-700 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
@@ -32,9 +32,12 @@ export const Hero = () => {
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
           }`}
         >
-          <p className="text-lg font-medium hover:opacity-100 transition-all duration-500 ease-in-out transform hover:-translate-x-4">
-            Color printing
-          </p>
+          <div className="group relative px-6 py-3 cursor-pointer">
+            <p className="text-lg font-medium transition-all duration-500 ease-in-out transform group-hover:-translate-x-4 group-hover:scale-110">
+              Color printing
+            </p>
+            <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-in-out" />
+          </div>
         </div>
         
         <div 
@@ -42,9 +45,12 @@ export const Hero = () => {
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
           }`}
         >
-          <p className="text-lg font-medium hover:opacity-100 transition-all duration-500 ease-in-out transform hover:translate-y-2">
-            Black & white printing
-          </p>
+          <div className="group relative px-6 py-3 cursor-pointer">
+            <p className="text-lg font-medium transition-all duration-500 ease-in-out transform group-hover:translate-y-2 group-hover:scale-110">
+              Black & white printing
+            </p>
+            <div className="absolute inset-0 bg-white/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-in-out" />
+          </div>
         </div>
 
         <Button 
