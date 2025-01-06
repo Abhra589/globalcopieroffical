@@ -6,13 +6,18 @@ interface WhatsAppMessage {
   text?: string;
 }
 
+interface Secret {
+  name: string;
+  value: string;
+}
+
 export class WhatsAppBusinessService {
   private static async getApiCredentials() {
     try {
       const { data: secrets, error } = await supabase
         .from('secrets')
         .select('*')
-        .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID']);
+        .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID']) as { data: Secret[] | null, error: any };
 
       if (error) {
         console.error('Error fetching WhatsApp credentials:', error);

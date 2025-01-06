@@ -40,10 +40,10 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     }
 
     try {
-      // First check if the order exists
+      // First check if the order exists and get its current status
       const { data: existingOrder, error: fetchError } = await supabase
         .from('orders')
-        .select('id')
+        .select('payment_status')
         .eq('id', orderId)
         .single();
 
@@ -51,17 +51,20 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         throw new Error('Order not found');
       }
 
-      // Update the order's payment status
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ payment_status: 'Payment Done' })
-        .eq('id', orderId);
+      // Only update if payment is not already done
+      if (existingOrder.payment_status !== 'Payment Done') {
+        // Update the order's payment status
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({ payment_status: 'Payment Done' })
+          .eq('id', orderId);
 
-      if (updateError) throw updateError;
+        if (updateError) throw updateError;
 
-      // Send WhatsApp notifications
-      if (customerPhone && amount) {
-        await WhatsAppNotificationService.sendOrderConfirmation(orderId, amount, customerPhone);
+        // Send WhatsApp notifications
+        if (customerPhone && amount) {
+          await WhatsAppNotificationService.sendOrderConfirmation(orderId, amount, customerPhone);
+        }
       }
 
       setShowConfirmation(true);

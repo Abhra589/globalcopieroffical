@@ -13,7 +13,7 @@ export class WhatsAppNotificationService {
       if (customerPhone) {
         await WhatsAppBusinessService.sendMessage({
           to: customerPhone,
-          text: `Thank you! Your payment of ₹${amount} has been confirmed. We'll process your order shortly.`
+          text: `Thank you! Your payment of ₹${amount} has been confirmed for order ${orderId}. We'll process your order shortly.`
         });
       }
     } catch (error) {
@@ -30,6 +30,18 @@ export class WhatsAppNotificationService {
       });
     } catch (error) {
       console.error('Error sending WhatsApp update:', error);
+      throw error;
+    }
+  }
+
+  static async sendPaymentReminder(orderId: string, amount: string, customerPhone: string) {
+    try {
+      await WhatsAppBusinessService.sendMessage({
+        to: customerPhone,
+        text: `Reminder: Your payment of ₹${amount} for order ${orderId} is pending. Please complete the payment to process your order.`
+      });
+    } catch (error) {
+      console.error('Error sending payment reminder:', error);
       throw error;
     }
   }

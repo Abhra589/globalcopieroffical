@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { OrderCard } from "@/components/admin/OrderCard";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 
-interface Order {
+export interface Order {
   id: string;
   customer_name: string;
   customer_email: string;
@@ -71,7 +71,17 @@ const AdminPage = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      
+      // Ensure all required fields are present
+      const processedOrders = (data || []).map(order => ({
+        ...order,
+        street: order.street || '',
+        city: order.city || '',
+        state: order.state || '',
+        pincode: order.pincode || '',
+      })) as Order[];
+      
+      setOrders(processedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({
