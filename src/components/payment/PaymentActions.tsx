@@ -30,63 +30,52 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     const customerPhone = searchParams.get("customerPhone");
     const amount = searchParams.get("amount");
     
-    if (!orderId || orderId === 'new') {
+    if (!orderId) {
       toast({
         title: "Error",
-        description: "Invalid order ID",
+        description: "Order ID is missing from the URL",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      // First check if the order exists and get its current status
-      const { data: existingOrder, error: fetchError } = await supabase
+      // Update the order's payment status
+      const { error: updateError } = await supabase
         .from('orders')
-        .select('payment_status')
-        .eq('id', orderId)
-        .single();
+        .update({ payment_status: 'Payment Done' })
+        .eq('id', orderId);
 
-      if (fetchError || !existingOrder) {
-        throw new Error('Order not found');
+      if (updateError) {
+        console.error('Error updating payment status:', updateError);
+        throw updateError;
       }
 
-      // Only update if payment is not already done
-      if (existingOrder.payment_status !== 'Payment Done') {
-        // Update the order's payment status
-        const { error: updateError } = await supabase
-          .from('orders')
-          .update({ payment_status: 'Payment Done' })
-          .eq('id', orderId);
-
-        if (updateError) throw updateError;
-
-        // Send WhatsApp notifications
-        if (customerPhone && amount) {
-          await WhatsAppNotificationService.sendOrderConfirmation(orderId, amount, customerPhone);
-        }
+      // Send WhatsApp notifications
+      if (customerPhone && amount) {
+        await WhatsAppNotificationService.sendOrderConfirmation(orderId, amount, customerPhone);
       }
 
+      // Show confirmation dialog with timer
       setShowConfirmation(true);
       const interval = setInterval(() => {
         setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            navigate('/');
+            return 0;
+          }
           const newCount = prev - 1;
-          setProgress((5 - newCount) * 20); // 100/5 = 20
+          setProgress((5 - newCount) * 20); // Convert to percentage (100/5 = 20)
           return newCount;
         });
       }, 1000);
-
-      setTimeout(() => {
-        clearInterval(interval);
-        setShowConfirmation(false);
-        navigate('/');
-      }, 5000);
 
     } catch (error) {
       console.error('Error updating payment status:', error);
       toast({
         title: "Error",
-        description: "Failed to update payment status",
+        description: "Failed to update payment status. Please try again.",
         variant: "destructive",
       });
     }
