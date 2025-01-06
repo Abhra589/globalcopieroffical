@@ -73,25 +73,11 @@ const AdminPage = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate('/login');
-      toast({
-        title: "Success",
-        description: "Logged out successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to log out",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteOrder = (orderId: string) => {
+  const handleDeleteOrder = async (orderId: string) => {
+    // Remove the order from the local state
     setOrders(orders.filter(order => order.id !== orderId));
+    // Refresh the orders list to ensure sync with database
+    await fetchOrders();
   };
 
   if (loading) {

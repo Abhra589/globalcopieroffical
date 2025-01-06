@@ -40,17 +40,30 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
+      // First, verify the order exists
+      const { data: existingOrder, error: fetchError } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('id', order.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching order:', fetchError);
+        throw new Error('Order not found');
+      }
+
+      // Then delete it
+      const { error: deleteError } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
 
       onDelete(order.id);
       toast({
         title: "Order deleted",
-        description: "The order has been successfully deleted",
+        description: "The order has been permanently deleted",
       });
     } catch (error) {
       console.error('Error deleting order:', error);
