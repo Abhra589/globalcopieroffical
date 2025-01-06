@@ -1,9 +1,8 @@
-import { supabase } from '@/integrations/supabase/client';
-
 interface WhatsAppMessage {
   to: string;
   template?: string;
   text?: string;
+  silent?: boolean;
 }
 
 export class WhatsAppBusinessService {
@@ -13,8 +12,6 @@ export class WhatsAppBusinessService {
       if (!session) {
         throw new Error('No active session');
       }
-
-      // Use wa.me links as fallback when credentials aren't available
       return null;
     } catch (error) {
       console.error('Error in getApiCredentials:', error);
@@ -22,17 +19,35 @@ export class WhatsAppBusinessService {
     }
   }
 
-  public static async sendMessage({ to, template, text }: WhatsAppMessage) {
+  public static async sendMessage({ to, template, text, silent = false }: WhatsAppMessage) {
     try {
       const credentials = await this.getApiCredentials();
       
-      // Always fall back to wa.me links for now
-      if (text) {
+      if (text && !silent) {
+        // Only open WhatsApp in new window for non-silent messages
         const cleanedNumber = to.replace(/\D/g, '');
         const formattedNumber = cleanedNumber.startsWith('91') ? cleanedNumber : `91${cleanedNumber}`;
         const encodedMessage = encodeURIComponent(text);
         window.open(`https://wa.me/${formattedNumber}?text=${encodedMessage}`, '_blank');
         return { success: true, fallback: true };
+      } else if (text && silent) {
+        // For silent messages, use the Edge Function
+        const response = await fetch('/api/send-whatsapp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to,
+            message: text
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to send WhatsApp message');
+        }
+        
+        return { success: true, silent: true };
       }
       
       throw new Error('Message text is required');

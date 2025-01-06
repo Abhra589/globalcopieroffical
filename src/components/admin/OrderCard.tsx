@@ -77,7 +77,11 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         />
       )}
 
-      <DocumentLink fileUrl={order.file_url} />
+      {order.file_url && (
+        <div className="mt-4">
+          <DocumentLink fileUrl={order.file_url} />
+        </div>
+      )}
 
       <OrderActions
         customerPhone={order.customer_phone}
