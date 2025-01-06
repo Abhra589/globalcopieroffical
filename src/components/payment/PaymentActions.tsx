@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { WhatsAppBusinessService } from '@/services/whatsapp/WhatsAppBusinessService';
+import { WhatsAppNotificationService } from '@/services/whatsapp/WhatsAppNotificationService';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -59,18 +59,9 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
 
       if (updateError) throw updateError;
 
-      // Send confirmation to admin
-      await WhatsAppBusinessService.sendMessage({
-        to: "918777060249",
-        text: `Payment confirmed for order ${orderId}. Amount: ₹${amount}`
-      });
-
-      // Send confirmation to user
-      if (customerPhone) {
-        await WhatsAppBusinessService.sendMessage({
-          to: customerPhone,
-          text: `Thank you! Your payment of ₹${amount} has been confirmed. We'll process your order shortly.`
-        });
+      // Send WhatsApp notifications
+      if (customerPhone && amount) {
+        await WhatsAppNotificationService.sendOrderConfirmation(orderId, amount, customerPhone);
       }
 
       setShowConfirmation(true);

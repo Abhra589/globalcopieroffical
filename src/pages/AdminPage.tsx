@@ -23,6 +23,10 @@ interface Order {
   file_url: string;
   file_path: string;
   organization: string | null;
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
 }
 
 const AdminPage = () => {

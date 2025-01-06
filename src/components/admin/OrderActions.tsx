@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { sendWhatsAppMessage } from '../pricing/WhatsAppService';
+import { WhatsAppNotificationService } from '@/services/whatsapp/WhatsAppNotificationService';
 
 interface OrderActionsProps {
   customerPhone: string;
@@ -20,9 +20,9 @@ interface OrderActionsProps {
 }
 
 export const OrderActions = ({ customerPhone, orderId, onDelete }: OrderActionsProps) => {
-  const handleWhatsAppClick = () => {
+  const handleWhatsAppClick = async () => {
     const message = `Hello! This is regarding your order ${orderId}. How may we assist you today?`;
-    sendWhatsAppMessage(message, customerPhone);
+    await WhatsAppNotificationService.sendOrderUpdate(message, customerPhone);
   };
 
   return (
