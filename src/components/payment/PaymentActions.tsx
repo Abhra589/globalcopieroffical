@@ -23,7 +23,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const { toast } = useToast();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [countdown, setCountdown] = useState(4);
+  const [countdown, setCountdown] = useState(6);
 
   const handlePaymentDone = async () => {
     const orderId = searchParams.get("orderId");
@@ -51,10 +51,10 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         throw new Error('Order not found');
       }
 
-      // Update the order
+      // Update the order's payment status
       const { error: updateError } = await supabase
         .from('orders')
-        .update({ payment_status: `₹${amount} Paid` })
+        .update({ payment_status: 'Payment Done' })
         .eq('id', orderId);
 
       if (updateError) throw updateError;
@@ -77,7 +77,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       const interval = setInterval(() => {
         setCountdown((prev) => {
           const newCount = prev - 1;
-          setProgress((4 - newCount) * 25);
+          setProgress((6 - newCount) * 16.67); // 100/6 ≈ 16.67
           return newCount;
         });
       }, 1000);
@@ -86,7 +86,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         clearInterval(interval);
         setShowConfirmation(false);
         navigate('/');
-      }, 4000);
+      }, 6000);
 
     } catch (error) {
       console.error('Error updating payment status:', error);
@@ -125,7 +125,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Thank you for choosing Global Copier</AlertDialogTitle>
             <AlertDialogDescription>
-              Redirecting in {countdown} seconds...
+              Thank You for Placing the Order with Us! Admin will send you a confirmation message. Redirecting in {countdown} seconds...
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Progress value={progress} className="w-full" />

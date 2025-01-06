@@ -24,6 +24,10 @@ interface Order {
   payment_status: string;
   file_url: string;
   organization: string | null;
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
 }
 
 interface OrderCardProps {
@@ -83,10 +87,10 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
       />
 
       <DeliveryAddress
-        street="123 Main St"
-        city="Chennai"
-        state="Tamil Nadu"
-        pincode="600001"
+        street={order.street}
+        city={order.city}
+        state={order.state}
+        pincode={order.pincode}
       />
 
       <DocumentLink fileUrl={order.file_url} />
