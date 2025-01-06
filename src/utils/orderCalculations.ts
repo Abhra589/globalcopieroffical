@@ -1,5 +1,5 @@
-export const calculateCourierCharge = (pageCount: number, deliveryType: string) => {
-  return deliveryType === "pickup" ? 0 : (pageCount <= 400 ? 80 : 150);
+export const calculateCourierCharge = (pages: number) => {
+  return pages <= 400 ? 80 : 150;
 };
 
 export const calculateTotal = (
@@ -31,6 +31,6 @@ export const calculateTotal = (
   if (!selectedOption || !pageCount) return 0;
 
   const printingCost = selectedOption.pricePerPage * pageCount * copies;
-  const courierCharge = calculateCourierCharge(pageCount, deliveryType);
+  const courierCharge = deliveryType === "pickup" ? 0 : calculateCourierCharge(pageCount);
   return printingCost + courierCharge;
 };

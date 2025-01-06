@@ -54,7 +54,11 @@ export const OrderForm = () => {
       phone: customerInfo.phone,
     },
     navigate,
-    toast,
+    toast: {
+      toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => {
+        toast(props);
+      }
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -127,7 +131,7 @@ export const OrderForm = () => {
         pickupDate={pickupDate}
         pickupTime={pickupTime}
         fileUrl={fileUrl}
-        calculateCourierCharge={calculateCourierCharge}
+        calculateCourierCharge={(pages: number) => calculateCourierCharge(pages)}
         calculateTotal={() => calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
         onProceedToPayment={handleProceedToPayment}
       />
