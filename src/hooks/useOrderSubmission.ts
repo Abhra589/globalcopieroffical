@@ -14,6 +14,8 @@ interface OrderSubmissionProps {
   selectedType: string;
   selectedSides: string;
   deliveryType: string;
+  pickupDate?: string;  // Added this
+  pickupTime?: string;  // Added this
   fileUrl: string;
   userProfile: UserProfile;
   navigate: NavigateFunction;
@@ -29,6 +31,8 @@ export const useOrderSubmission = ({
   selectedType,
   selectedSides,
   deliveryType,
+  pickupDate,
+  pickupTime,
   fileUrl,
   userProfile,
   navigate,
@@ -63,7 +67,6 @@ export const useOrderSubmission = ({
   const handleProceedToPayment = useCallback(async () => {
     try {
       const total = calculateTotal();
-      // Only navigate to payment page, no WhatsApp integration
       navigate(`/payment?amount=${total}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
     } catch (error) {
       console.error('Error proceeding to payment:', error);

@@ -10,6 +10,8 @@ interface OrderActionsProps {
   selectedType: string;
   selectedSides: string;
   deliveryType: string;
+  pickupDate?: string;  // Added this
+  pickupTime?: string;  // Added this
   total: number;
   fileUrl: string;
   onProceedToPayment: () => void;
@@ -22,6 +24,8 @@ export const OrderActions = ({
   selectedType,
   selectedSides,
   deliveryType,
+  pickupDate,
+  pickupTime,
   total,
   fileUrl,
   onProceedToPayment
@@ -35,6 +39,8 @@ export const OrderActions = ({
       selectedType,
       selectedSides,
       deliveryType,
+      pickupDate,
+      pickupTime,
       total,
       fileUrl
     });
