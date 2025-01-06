@@ -45,6 +45,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
         .from('print_files')
         .getPublicUrl(filePath);
 
+      console.log('File uploaded successfully:', { filePath, publicUrl });
       onFileChange(file, publicUrl);
       
       toast({
