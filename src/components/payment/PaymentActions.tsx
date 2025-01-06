@@ -4,14 +4,8 @@ import { Button } from '../ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { WhatsAppNotificationService } from '@/services/whatsapp/WhatsAppNotificationService';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-} from '../ui/alert-dialog';
-import { Progress } from '../ui/progress';
+import { PaymentConfirmationDialog } from './PaymentConfirmationDialog';
+import { PaymentService } from '@/services/payment/PaymentService';
 
 interface PaymentActionsProps {
   upiLink: string;
@@ -37,54 +31,24 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     try {
       let finalOrderId = orderId;
 
-      // If this is a new order, create it first
       if (orderId === 'new') {
-        const { data: newOrder, error: createError } = await supabase
-          .from('orders')
-          .insert([{
-            pages: Number(pages),
-            copies: Number(copies),
-            print_type: printType,
-            delivery_type: deliveryType,
-            amount: Number(amount),
-            payment_status: 'Payment Done',
-            // Add other required fields with default values if needed
-            customer_name: 'Customer', // You might want to get this from the form
-            customer_email: 'email@example.com', // You might want to get this from the form
-            customer_phone: customerPhone || '',
-            gsm: '70', // Default value
-            print_sides: 'single', // Default value
-            file_path: '', // You might want to get this from the form
-            file_url: '', // You might want to get this from the form
-          }])
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating order:', createError);
-          throw createError;
-        }
-
+        const newOrder = await PaymentService.createNewOrder({
+          pages: Number(pages),
+          copies: Number(copies),
+          print_type: printType || '',
+          delivery_type: deliveryType || '',
+          amount: Number(amount),
+          customer_phone: customerPhone || '',
+        });
         finalOrderId = newOrder.id;
-      } else {
-        // Update existing order's payment status
-        const { error: updateError } = await supabase
-          .from('orders')
-          .update({ payment_status: 'Payment Done' })
-          .eq('id', orderId);
-
-        if (updateError) {
-          console.error('Error updating payment status:', updateError);
-          throw updateError;
-        }
+      } else if (orderId) {
+        await PaymentService.updatePaymentStatus(orderId);
       }
 
-      // Send WhatsApp notifications
       if (customerPhone && amount && finalOrderId) {
         await WhatsAppNotificationService.sendOrderConfirmation(finalOrderId, amount, customerPhone);
       }
 
-      // Show confirmation dialog with timer
       setShowConfirmation(true);
       const interval = setInterval(() => {
         setCountdown((prev) => {
@@ -94,7 +58,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
             return 0;
           }
           const newCount = prev - 1;
-          setProgress((5 - newCount) * 20); // Convert to percentage (100/5 = 20)
+          setProgress((5 - newCount) * 20);
           return newCount;
         });
       }, 1000);
@@ -131,17 +95,11 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         Click here if payment is done
       </Button>
 
-      <AlertDialog open={showConfirmation}>
-        <AlertDialogContent className="flex flex-col items-center gap-4">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Thank you for choosing Global Copier</AlertDialogTitle>
-            <AlertDialogDescription>
-              Thank You for Placing the Order with Us! You will receive a confirmation message from Admin soon. Redirecting in {countdown} seconds...
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <Progress value={progress} className="w-full" />
-        </AlertDialogContent>
-      </AlertDialog>
+      <PaymentConfirmationDialog
+        showConfirmation={showConfirmation}
+        countdown={countdown}
+        progress={progress}
+      />
     </div>
   );
 };
