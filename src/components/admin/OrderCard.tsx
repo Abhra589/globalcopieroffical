@@ -1,5 +1,7 @@
-import React from 'react';
-import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { WhatsAppNotificationService } from "@/services/whatsapp/WhatsAppNotificationService";
+import { OrderContainer } from "./OrderContainer";
 import { OrderHeader } from './OrderHeader';
 import { OrderDetails } from './OrderDetails';
 import { OrderPaymentStatus } from './OrderPaymentStatus';
@@ -7,9 +9,6 @@ import { DeliveryAddress } from './DeliveryAddress';
 import { DocumentLink } from './DocumentLink';
 import { OrderActions } from './OrderActions';
 import { InStorePickupInfo } from './InStorePickupInfo';
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { WhatsAppNotificationService } from "@/services/whatsapp/WhatsAppNotificationService";
 
 interface Order {
   id: string;
@@ -54,11 +53,10 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         throw deleteError;
       }
 
-      // Notify admin via WhatsApp about the deletion
       try {
         await WhatsAppNotificationService.sendOrderUpdate(
           `Order ${order.id} has been deleted.`,
-          "918777060249" // Admin's number
+          "918777060249"
         );
       } catch (notificationError) {
         console.error('Error sending WhatsApp notification:', notificationError);
@@ -80,7 +78,7 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   };
 
   return (
-    <Card className="p-6 space-y-4 animate-fade-in">
+    <OrderContainer>
       <OrderHeader
         customerName={order.customer_name}
         orderId={order.id}
@@ -124,6 +122,6 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         orderId={order.id}
         onDelete={handleDelete}
       />
-    </Card>
+    </OrderContainer>
   );
 };
