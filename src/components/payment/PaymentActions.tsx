@@ -29,31 +29,59 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     const orderId = searchParams.get("orderId");
     const customerPhone = searchParams.get("customerPhone");
     const amount = searchParams.get("amount");
+    const pages = searchParams.get("pages");
+    const copies = searchParams.get("copies");
+    const printType = searchParams.get("printType");
+    const deliveryType = searchParams.get("deliveryType");
     
-    if (!orderId) {
-      toast({
-        title: "Error",
-        description: "Order ID is missing from the URL",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      // Update the order's payment status
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ payment_status: 'Payment Done' })
-        .eq('id', orderId);
+      let finalOrderId = orderId;
 
-      if (updateError) {
-        console.error('Error updating payment status:', updateError);
-        throw updateError;
+      // If this is a new order, create it first
+      if (orderId === 'new') {
+        const { data: newOrder, error: createError } = await supabase
+          .from('orders')
+          .insert([{
+            pages: Number(pages),
+            copies: Number(copies),
+            print_type: printType,
+            delivery_type: deliveryType,
+            amount: Number(amount),
+            payment_status: 'Payment Done',
+            // Add other required fields with default values if needed
+            customer_name: 'Customer', // You might want to get this from the form
+            customer_email: 'email@example.com', // You might want to get this from the form
+            customer_phone: customerPhone || '',
+            gsm: '70', // Default value
+            print_sides: 'single', // Default value
+            file_path: '', // You might want to get this from the form
+            file_url: '', // You might want to get this from the form
+          }])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating order:', createError);
+          throw createError;
+        }
+
+        finalOrderId = newOrder.id;
+      } else {
+        // Update existing order's payment status
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({ payment_status: 'Payment Done' })
+          .eq('id', orderId);
+
+        if (updateError) {
+          console.error('Error updating payment status:', updateError);
+          throw updateError;
+        }
       }
 
       // Send WhatsApp notifications
-      if (customerPhone && amount) {
-        await WhatsAppNotificationService.sendOrderConfirmation(orderId, amount, customerPhone);
+      if (customerPhone && amount && finalOrderId) {
+        await WhatsAppNotificationService.sendOrderConfirmation(finalOrderId, amount, customerPhone);
       }
 
       // Show confirmation dialog with timer
@@ -72,10 +100,10 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       }, 1000);
 
     } catch (error) {
-      console.error('Error updating payment status:', error);
+      console.error('Error processing payment:', error);
       toast({
         title: "Error",
-        description: "Failed to update payment status. Please try again.",
+        description: "Failed to process payment. Please try again.",
         variant: "destructive",
       });
     }
