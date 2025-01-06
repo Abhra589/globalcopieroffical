@@ -1,10 +1,10 @@
 import React from 'react';
 
 interface DeliveryAddressProps {
-  street?: string;
-  city?: string;
-  state?: string;
-  pincode?: string;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
 }
 
 export const DeliveryAddress = ({
@@ -25,7 +25,7 @@ export const DeliveryAddress = ({
   }
 
   return (
-    <div className="mt-2">
+    <div className="mt-2 animate-fade-in">
       <p className="text-sm font-medium">Delivery Address:</p>
       {street && <p className="text-sm text-gray-600">{street}</p>}
       <p className="text-sm text-gray-600">

@@ -6,6 +6,7 @@ import { OrderPaymentStatus } from './OrderPaymentStatus';
 import { DeliveryAddress } from './DeliveryAddress';
 import { DocumentLink } from './DocumentLink';
 import { OrderActions } from './OrderActions';
+import { InStorePickupInfo } from './InStorePickupInfo';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { WhatsAppNotificationService } from "@/services/whatsapp/WhatsAppNotificationService";
@@ -25,10 +26,12 @@ interface Order {
   payment_status: string;
   file_url: string;
   organization: string | null;
-  street: string;
-  city: string;
-  state: string;
-  pincode: string;
+  street: string | null;
+  city: string | null;
+  state: string | null;
+  pincode: string | null;
+  pickup_date?: string;
+  pickup_time?: string;
 }
 
 interface OrderCardProps {
@@ -59,7 +62,6 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         );
       } catch (notificationError) {
         console.error('Error sending WhatsApp notification:', notificationError);
-        // Don't throw here, as the order was successfully deleted
       }
 
       onDelete(order.id);
@@ -78,12 +80,12 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   };
 
   return (
-    <Card className="p-6 space-y-4">
+    <Card className="p-6 space-y-4 animate-fade-in">
       <OrderHeader
         customerName={order.customer_name}
         orderId={order.id}
-        customerEmail={order.customer_email || ''}
-        customerPhone={order.customer_phone || ''}
+        customerEmail={order.customer_email}
+        customerPhone={order.customer_phone}
         organization={order.organization}
       />
 
@@ -101,12 +103,19 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         amount={order.amount}
       />
 
-      <DeliveryAddress
-        street={order.street || ''}
-        city={order.city || ''}
-        state={order.state || ''}
-        pincode={order.pincode || ''}
-      />
+      {order.delivery_type === 'pickup' ? (
+        <InStorePickupInfo
+          pickupDate={order.pickup_date}
+          pickupTime={order.pickup_time}
+        />
+      ) : (
+        <DeliveryAddress
+          street={order.street}
+          city={order.city}
+          state={order.state}
+          pincode={order.pincode}
+        />
+      )}
 
       <DocumentLink fileUrl={order.file_url} />
 
