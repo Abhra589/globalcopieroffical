@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PaymentButtons } from './PaymentButtons';
 import { PaymentConfirmationDialog } from './PaymentConfirmationDialog';
@@ -15,15 +15,14 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const [countdown, setCountdown] = useState(5);
   const { processPayment } = usePaymentProcessor();
 
-  const handlePaymentDone = async () => {
-    const result = await processPayment();
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
     
-    if (result.success) {
-      setShowConfirmation(true);
-      const interval = setInterval(() => {
+    if (showConfirmation) {
+      timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
-            clearInterval(interval);
+            clearInterval(timer);
             navigate('/');
             return 0;
           }
@@ -32,6 +31,20 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
           return newCount;
         });
       }, 1000);
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [showConfirmation, navigate]);
+
+  const handlePaymentDone = async () => {
+    const result = await processPayment();
+    
+    if (result.success) {
+      setShowConfirmation(true);
     }
   };
 

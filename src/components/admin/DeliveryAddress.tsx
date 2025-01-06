@@ -13,7 +13,7 @@ export const DeliveryAddress = ({
   state,
   pincode,
 }: DeliveryAddressProps) => {
-  const hasAddress = Boolean(street || city || state || pincode);
+  const hasAddress = Boolean(street && city && state && pincode);
 
   if (!hasAddress) {
     return (
@@ -30,10 +30,8 @@ export const DeliveryAddress = ({
     <div className="mt-4">
       <p className="text-sm font-medium mb-1">Delivery Address</p>
       <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded-md space-y-1">
-        {street && <p>{street}</p>}
-        <p>
-          {[city, state, pincode].filter(Boolean).join(', ')}
-        </p>
+        <p>{street}</p>
+        <p>{city}, {state} - {pincode}</p>
       </div>
     </div>
   );
