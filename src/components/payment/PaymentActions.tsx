@@ -23,7 +23,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const { toast } = useToast();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [countdown, setCountdown] = useState(6);
+  const [countdown, setCountdown] = useState(5);
 
   const handlePaymentDone = async () => {
     const orderId = searchParams.get("orderId");
@@ -71,7 +71,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       const interval = setInterval(() => {
         setCountdown((prev) => {
           const newCount = prev - 1;
-          setProgress((6 - newCount) * 16.67); // 100/6 ≈ 16.67
+          setProgress((5 - newCount) * 20); // 100/5 = 20
           return newCount;
         });
       }, 1000);
@@ -80,7 +80,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         clearInterval(interval);
         setShowConfirmation(false);
         navigate('/');
-      }, 6000);
+      }, 5000);
 
     } catch (error) {
       console.error('Error updating payment status:', error);
@@ -119,7 +119,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Thank you for choosing Global Copier</AlertDialogTitle>
             <AlertDialogDescription>
-              Thank You for Placing the Order with Us! Admin will send you a confirmation message. Redirecting in {countdown} seconds...
+              Thank You for Placing the Order with Us! You will receive a confirmation message from Admin soon. Redirecting in {countdown} seconds...
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Progress value={progress} className="w-full" />

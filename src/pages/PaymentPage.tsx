@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { OrderSummary } from '../components/pricing/OrderSummary';
 import QRCodeSection from '../components/payment/QRCodeSection';
@@ -21,16 +21,21 @@ const PaymentPage = () => {
   useEffect(() => {
     const sendInitialNotifications = async () => {
       try {
+        if (!customerPhone || !amount || !customerName) {
+          console.error('Missing required parameters for notifications');
+          return;
+        }
+
         // Send admin notification
         await WhatsAppBusinessService.sendMessage({
           to: "918777060249",
-          text: `New order received!\nCustomer: ${customerName}\nAmount: ₹${amount}\nDelivery: ${deliveryType}`
+          text: `Hey! New order has been received from a customer. It has been updated in the admin panel. The customer ${customerName} has to pay ₹${amount}. Please check the payment status in the admin panel and confirm the order.`
         });
 
         // Send user notification
         await WhatsAppBusinessService.sendMessage({
           to: customerPhone,
-          text: `Please pay ₹${amount}. Once done, click the 'Payment Done' button on the payment page.`
+          text: `Thank you for filling the form on GlobalCopier. Please pay this amount (₹${amount}) on the website to confirm the order and then click on 'Click Here if Payment is Done.'`
         });
       } catch (error) {
         console.error('Error sending WhatsApp notifications:', error);
@@ -43,7 +48,7 @@ const PaymentPage = () => {
     };
 
     sendInitialNotifications();
-  }, [amount, customerName, customerPhone, deliveryType]);
+  }, [amount, customerName, customerPhone, toast]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -55,7 +60,9 @@ const PaymentPage = () => {
           calculateTotal={() => amount}
         />
         <QRCodeSection amount={amount} />
-        <PaymentActions upiLink={`upi://pay?pa=9831162681-2@axl&pn=GlobalCopier&am=${amount}&cu=INR`} />
+        <PaymentActions 
+          upiLink={`upi://pay?pa=9831162681-2@axl&pn=GlobalCopier&am=${amount}&cu=INR`}
+        />
       </div>
     </div>
   );
