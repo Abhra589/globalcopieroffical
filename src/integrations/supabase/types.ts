@@ -12,6 +12,7 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          city: string | null
           copies: number
           created_at: string
           customer_email: string
@@ -25,11 +26,15 @@ export type Database = {
           organization: string | null
           pages: number
           payment_status: string | null
+          pincode: string | null
           print_sides: string
           print_type: string
+          state: string | null
+          street: string | null
         }
         Insert: {
           amount: number
+          city?: string | null
           copies?: number
           created_at?: string
           customer_email: string
@@ -43,11 +48,15 @@ export type Database = {
           organization?: string | null
           pages: number
           payment_status?: string | null
+          pincode?: string | null
           print_sides: string
           print_type: string
+          state?: string | null
+          street?: string | null
         }
         Update: {
           amount?: number
+          city?: string | null
           copies?: number
           created_at?: string
           customer_email?: string
@@ -61,8 +70,11 @@ export type Database = {
           organization?: string | null
           pages?: number
           payment_status?: string | null
+          pincode?: string | null
           print_sides?: string
           print_type?: string
+          state?: string | null
+          street?: string | null
         }
         Relationships: []
       }

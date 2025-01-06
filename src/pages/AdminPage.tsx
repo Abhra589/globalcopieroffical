@@ -5,29 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { OrderCard } from "@/components/admin/OrderCard";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { OrdersTable } from "@/integrations/supabase/types/orders";
 
-export interface Order {
-  id: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  pages: number;
-  copies: number;
-  gsm: string;
-  print_type: string;
-  print_sides: string;
-  delivery_type: string;
-  amount: number;
-  payment_status: string;
-  created_at: string;
-  file_url: string;
-  file_path: string;
-  organization: string | null;
-  street: string;
-  city: string;
-  state: string;
-  pincode: string;
-}
+type Order = OrdersTable['Row'];
 
 const AdminPage = () => {
   const { toast } = useToast();
@@ -72,7 +52,6 @@ const AdminPage = () => {
 
       if (error) throw error;
       
-      // Ensure all required fields are present
       const processedOrders = (data || []).map(order => ({
         ...order,
         street: order.street || '',

@@ -6,33 +6,24 @@ interface WhatsAppMessage {
   text?: string;
 }
 
-interface Secret {
-  name: string;
-  value: string;
-}
-
 export class WhatsAppBusinessService {
   private static async getApiCredentials() {
     try {
-      const { data: secrets, error } = await supabase
-        .from('secrets')
-        .select('*')
-        .in('name', ['WHATSAPP_BUSINESS_TOKEN', 'WHATSAPP_BUSINESS_PHONE_ID']) as { data: Secret[] | null, error: any };
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
+      }
 
-      if (error) {
-        console.error('Error fetching WhatsApp credentials:', error);
+      // Use environment variables instead of querying secrets table
+      const token = process.env.WHATSAPP_BUSINESS_TOKEN;
+      const phoneId = process.env.WHATSAPP_BUSINESS_PHONE_ID;
+
+      if (!token || !phoneId) {
+        console.error('WhatsApp Business API credentials not found in environment variables');
         return null;
       }
 
-      if (!secrets || secrets.length < 2) {
-        console.error('WhatsApp Business API credentials not found in Supabase secrets');
-        return null;
-      }
-
-      return {
-        token: secrets.find(s => s.name === 'WHATSAPP_BUSINESS_TOKEN')?.value,
-        phoneId: secrets.find(s => s.name === 'WHATSAPP_BUSINESS_PHONE_ID')?.value,
-      };
+      return { token, phoneId };
     } catch (error) {
       console.error('Error in getApiCredentials:', error);
       return null;
