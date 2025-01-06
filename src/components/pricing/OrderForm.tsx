@@ -77,6 +77,15 @@ export const OrderForm = () => {
       return;
     }
 
+    if (deliveryType === "delivery" && (!customerInfo.street || !customerInfo.city || !customerInfo.state || !customerInfo.pincode)) {
+      toast({
+        title: "Missing Address",
+        description: "Please fill in all address fields for delivery",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!file) {
       toast({
         title: "Missing Document",

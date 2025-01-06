@@ -24,8 +24,28 @@ export const usePaymentProcessor = () => {
     const filePath = searchParams.get("filePath") || "";
     const pickupDate = searchParams.get("pickupDate");
     const pickupTime = searchParams.get("pickupTime");
+    const street = searchParams.get("street");
+    const city = searchParams.get("city");
+    const state = searchParams.get("state");
+    const pincode = searchParams.get("pincode");
     
     try {
+      console.log('Processing payment with data:', {
+        orderId,
+        customerPhone,
+        customerName,
+        customerEmail,
+        amount,
+        pages,
+        copies,
+        printType,
+        deliveryType,
+        street,
+        city,
+        state,
+        pincode
+      });
+
       let finalOrderId = orderId;
 
       if (orderId === 'new') {
@@ -42,6 +62,10 @@ export const usePaymentProcessor = () => {
           print_sides: printSides,
           file_path: filePath,
           file_url: fileUrl,
+          street: street || undefined,
+          city: city || undefined,
+          state: state || undefined,
+          pincode: pincode || undefined,
           pickup_date: pickupDate,
           pickup_time: pickupTime
         });

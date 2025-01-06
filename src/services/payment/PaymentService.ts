@@ -23,6 +23,8 @@ interface OrderData {
 
 export class PaymentService {
   static async createNewOrder(orderData: OrderData) {
+    console.log('Creating new order with data:', orderData);
+    
     const { data: newOrder, error: createError } = await supabase
       .from('orders')
       .insert([{
@@ -39,17 +41,22 @@ export class PaymentService {
         print_sides: orderData.print_sides,
         file_path: orderData.file_path,
         file_url: orderData.file_url,
-        street: orderData.street,
-        city: orderData.city,
-        state: orderData.state,
-        pincode: orderData.pincode,
-        pickup_date: orderData.pickup_date,
-        pickup_time: orderData.pickup_time
+        street: orderData.street || null,
+        city: orderData.city || null,
+        state: orderData.state || null,
+        pincode: orderData.pincode || null,
+        pickup_date: orderData.pickup_date || null,
+        pickup_time: orderData.pickup_time || null
       }])
       .select()
       .single();
 
-    if (createError) throw createError;
+    if (createError) {
+      console.error('Error creating order:', createError);
+      throw createError;
+    }
+    
+    console.log('Order created successfully:', newOrder);
     return newOrder;
   }
 
