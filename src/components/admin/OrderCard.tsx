@@ -8,6 +8,7 @@ import { DocumentLink } from './DocumentLink';
 import { OrderActions } from './OrderActions';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { WhatsAppNotificationService } from "@/services/whatsapp/WhatsAppNotificationService";
 
 interface Order {
   id: string;
@@ -40,25 +41,26 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
   const handleDelete = async () => {
     try {
-      // First, verify the order exists
-      const { data: existingOrder, error: fetchError } = await supabase
-        .from('orders')
-        .select('id')
-        .eq('id', order.id)
-        .single();
-
-      if (fetchError) {
-        console.error('Error fetching order:', fetchError);
-        throw new Error('Order not found');
-      }
-
-      // Then delete it
       const { error: deleteError } = await supabase
         .from('orders')
         .delete()
         .eq('id', order.id);
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('Error deleting order:', deleteError);
+        throw deleteError;
+      }
+
+      // Notify admin via WhatsApp about the deletion
+      try {
+        await WhatsAppNotificationService.sendOrderUpdate(
+          `Order ${order.id} has been deleted.`,
+          "918777060249" // Admin's number
+        );
+      } catch (notificationError) {
+        console.error('Error sending WhatsApp notification:', notificationError);
+        // Don't throw here, as the order was successfully deleted
+      }
 
       onDelete(order.id);
       toast({

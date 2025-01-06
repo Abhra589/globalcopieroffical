@@ -51,16 +51,8 @@ const AdminPage = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      const processedOrders = (data || []).map(order => ({
-        ...order,
-        street: order.street || '',
-        city: order.city || '',
-        state: order.state || '',
-        pincode: order.pincode || '',
-      })) as Order[];
-      
-      setOrders(processedOrders);
+
+      setOrders(data || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({
@@ -91,10 +83,7 @@ const AdminPage = () => {
   };
 
   const handleDeleteOrder = async (orderId: string) => {
-    // Remove the order from the local state
     setOrders(orders.filter(order => order.id !== orderId));
-    // Refresh the orders list to ensure sync with database
-    await fetchOrders();
   };
 
   if (loading) {
