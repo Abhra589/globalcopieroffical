@@ -14,8 +14,8 @@ interface OrderSubmissionProps {
   selectedType: string;
   selectedSides: string;
   deliveryType: string;
-  pickupDate?: string;  // Added this
-  pickupTime?: string;  // Added this
+  pickupDate?: string;
+  pickupTime?: string;
   fileUrl: string;
   userProfile: UserProfile;
   navigate: NavigateFunction;
@@ -67,7 +67,21 @@ export const useOrderSubmission = ({
   const handleProceedToPayment = useCallback(async () => {
     try {
       const total = calculateTotal();
-      navigate(`/payment?amount=${total}&orderId=new&pages=${pageCount}&copies=${copies}&printType=${selectedType}&deliveryType=${deliveryType}`);
+      const queryParams = new URLSearchParams({
+        amount: total.toString(),
+        orderId: 'new',
+        pages: pageCount.toString(),
+        copies: copies.toString(),
+        printType: selectedType,
+        deliveryType
+      });
+
+      if (deliveryType === 'pickup' && pickupDate && pickupTime) {
+        queryParams.append('pickupDate', pickupDate);
+        queryParams.append('pickupTime', pickupTime);
+      }
+
+      navigate(`/payment?${queryParams.toString()}`);
     } catch (error) {
       console.error('Error proceeding to payment:', error);
       toast.toast({
@@ -76,7 +90,7 @@ export const useOrderSubmission = ({
         variant: "destructive",
       });
     }
-  }, [calculateTotal, navigate, pageCount, copies, selectedType, deliveryType]);
+  }, [calculateTotal, navigate, pageCount, copies, selectedType, deliveryType, pickupDate, pickupTime]);
 
   return {
     handleProceedToPayment,

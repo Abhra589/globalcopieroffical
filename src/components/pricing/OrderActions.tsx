@@ -10,8 +10,8 @@ interface OrderActionsProps {
   selectedType: string;
   selectedSides: string;
   deliveryType: string;
-  pickupDate?: string;  // Added this
-  pickupTime?: string;  // Added this
+  pickupDate?: string;
+  pickupTime?: string;
   total: number;
   fileUrl: string;
   onProceedToPayment: () => void;
