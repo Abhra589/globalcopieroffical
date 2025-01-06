@@ -45,5 +45,5 @@ export const createOrderEnquiryMessage = ({
 
 Please confirm if you'd like to proceed with this order.`;
 
-  return encodeURIComponent(message.trim());
+  return message.trim();
 };
