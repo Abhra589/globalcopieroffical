@@ -22,11 +22,11 @@ export const OrderHeader = ({
       <div className="grid gap-1">
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm min-w-[60px]">Email:</span>
-          <span className="text-sm text-gray-600">{customerEmail || 'Not provided'}</span>
+          <span className="text-sm text-gray-600">{customerEmail}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm min-w-[60px]">Phone:</span>
-          <span className="text-sm text-gray-600">{customerPhone || 'Not provided'}</span>
+          <span className="text-sm text-gray-600">{customerPhone}</span>
         </div>
         {organization && (
           <div className="flex items-center gap-2">
