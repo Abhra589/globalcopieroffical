@@ -1,18 +1,12 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { PriceList } from "./PriceList";
-import { DeliveryOptions } from "./DeliveryOptions";
-import { CopiesInput } from "./CopiesInput";
-import { FileUpload } from "./FileUpload";
-import { OrderSummary } from "./OrderSummary";
-import { PrintOptions } from "./PrintOptions";
-import { OrderActions } from "./OrderActions";
-import { ManualPageCount } from "./ManualPageCount";
-import { CustomerInfoForm } from "./CustomerInfoForm";
 import { useOrderSubmission } from "@/hooks/useOrderSubmission";
 import { useNavigate } from "react-router-dom";
-import { FormHeader } from "./FormHeader";
-import { FormContainer } from "./FormContainer";
+import { CustomerInfoForm } from "./CustomerInfoForm";
+import { DeliveryOptions } from "./DeliveryOptions";
+import { FormContainer } from "./form/FormContainer";
+import { PrintingOptions } from "./form/PrintingOptions";
+import { OrderSummarySection } from "./form/OrderSummarySection";
 import { calculateCourierCharge, calculateTotal } from "@/utils/orderCalculations";
 
 export const OrderForm = () => {
@@ -51,23 +45,16 @@ export const OrderForm = () => {
     selectedType,
     selectedSides,
     deliveryType,
-    fileUrl,
     pickupDate,
     pickupTime,
+    fileUrl,
     userProfile: {
       name: `${customerInfo.firstName} ${customerInfo.lastName}`,
       email: customerInfo.email,
       phone: customerInfo.phone,
     },
     navigate,
-    toast: {
-      toast: (props: { title?: string; description?: string; variant?: "default" | "destructive" }) => {
-        toast({
-          ...props,
-          duration: 3000,
-        });
-      }
-    },
+    toast,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -105,53 +92,45 @@ export const OrderForm = () => {
 
   return (
     <FormContainer onSubmit={handleSubmit}>
-      <FormHeader />
+      <CustomerInfoForm customerInfo={customerInfo} setCustomerInfo={setCustomerInfo} />
       
-      <div className="space-y-6">
-        <CustomerInfoForm customerInfo={customerInfo} setCustomerInfo={setCustomerInfo} />
-        
-        <PrintOptions
-          selectedGsm={selectedGsm}
-          setSelectedGsm={setSelectedGsm}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          selectedSides={selectedSides}
-          setSelectedSides={setSelectedSides}
-        />
+      <PrintingOptions
+        selectedGsm={selectedGsm}
+        setSelectedGsm={setSelectedGsm}
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+        selectedSides={selectedSides}
+        setSelectedSides={setSelectedSides}
+        pageCount={pageCount}
+        setPageCount={setPageCount}
+        copies={copies}
+        setCopies={setCopies}
+        onFileChange={handleFileChange}
+      />
 
-        <PriceList selectedGsm={selectedGsm} />
-        <FileUpload onFileChange={handleFileChange} />
-        <ManualPageCount pageCount={pageCount} onPageCountChange={setPageCount} />
-        <CopiesInput copies={copies} setCopies={setCopies} />
-        <DeliveryOptions 
-          deliveryType={deliveryType} 
-          setDeliveryType={setDeliveryType}
-          pickupDate={pickupDate}
-          pickupTime={pickupTime}
-          onPickupDateChange={setPickupDate}
-          onPickupTimeChange={setPickupTime}
-        />
-        
-        <OrderSummary
-          pageCount={pageCount}
-          calculateCourierCharge={(pages) => calculateCourierCharge(pages, deliveryType)}
-          calculateTotal={() => calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
-        />
-        
-        <OrderActions
-          pageCount={pageCount}
-          copies={copies}
-          selectedGsm={selectedGsm}
-          selectedType={selectedType}
-          selectedSides={selectedSides}
-          deliveryType={deliveryType}
-          pickupDate={pickupDate}
-          pickupTime={pickupTime}
-          total={calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
-          fileUrl={fileUrl}
-          onProceedToPayment={handleProceedToPayment}
-        />
-      </div>
+      <DeliveryOptions 
+        deliveryType={deliveryType} 
+        setDeliveryType={setDeliveryType}
+        pickupDate={pickupDate}
+        pickupTime={pickupTime}
+        onPickupDateChange={setPickupDate}
+        onPickupTimeChange={setPickupTime}
+      />
+      
+      <OrderSummarySection
+        pageCount={pageCount}
+        copies={copies}
+        selectedGsm={selectedGsm}
+        selectedType={selectedType}
+        selectedSides={selectedSides}
+        deliveryType={deliveryType}
+        pickupDate={pickupDate}
+        pickupTime={pickupTime}
+        fileUrl={fileUrl}
+        calculateCourierCharge={calculateCourierCharge}
+        calculateTotal={() => calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
+        onProceedToPayment={handleProceedToPayment}
+      />
     </FormContainer>
   );
 };
