@@ -52,6 +52,10 @@ export const OrderForm = () => {
       name: `${customerInfo.firstName} ${customerInfo.lastName}`,
       email: customerInfo.email,
       phone: customerInfo.phone,
+      street: customerInfo.street,
+      city: customerInfo.city,
+      state: customerInfo.state,
+      pincode: customerInfo.pincode,
     },
     navigate,
     toast: {

@@ -1,6 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { WhatsAppNotificationService } from "@/services/whatsapp/WhatsAppNotificationService";
+import { useOrderDeletion } from "@/hooks/useOrderDeletion";
 import { OrderContainer } from "./OrderContainer";
 import { OrderHeader } from './OrderHeader';
 import { OrderDetails } from './OrderDetails';
@@ -39,40 +37,7 @@ interface OrderCardProps {
 }
 
 export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
-  const { toast } = useToast();
-
-  const handleDelete = async () => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('orders')
-        .delete()
-        .eq('id', order.id);
-
-      if (deleteError) throw deleteError;
-
-      try {
-        await WhatsAppNotificationService.sendOrderUpdate(
-          `Order ${order.id} has been deleted.`,
-          "918777060249"
-        );
-      } catch (notificationError) {
-        console.error('Error sending WhatsApp notification:', notificationError);
-      }
-
-      onDelete(order.id);
-      toast({
-        title: "Order deleted",
-        description: "The order has been permanently deleted",
-      });
-    } catch (error) {
-      console.error('Error deleting order:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete order",
-        variant: "destructive",
-      });
-    }
-  };
+  const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
   return (
     <OrderContainer>

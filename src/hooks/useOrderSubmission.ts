@@ -5,6 +5,10 @@ interface UserProfile {
   name: string;
   email: string;
   phone: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
 }
 
 interface OrderSubmissionProps {
@@ -73,7 +77,14 @@ export const useOrderSubmission = ({
         pages: pageCount.toString(),
         copies: copies.toString(),
         printType: selectedType,
-        deliveryType
+        deliveryType,
+        customerName: userProfile.name,
+        customerEmail: userProfile.email,
+        customerPhone: userProfile.phone,
+        street: userProfile.street || '',
+        city: userProfile.city || '',
+        state: userProfile.state || '',
+        pincode: userProfile.pincode || '',
       });
 
       if (deliveryType === 'pickup' && pickupDate && pickupTime) {
@@ -90,7 +101,7 @@ export const useOrderSubmission = ({
         variant: "destructive",
       });
     }
-  }, [calculateTotal, navigate, pageCount, copies, selectedType, deliveryType, pickupDate, pickupTime]);
+  }, [calculateTotal, navigate, pageCount, copies, selectedType, deliveryType, pickupDate, pickupTime, userProfile]);
 
   return {
     handleProceedToPayment,

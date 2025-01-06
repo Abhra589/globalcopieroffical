@@ -13,6 +13,10 @@ interface OrderData {
   print_sides: string;
   file_path: string;
   file_url: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
   pickup_date?: string;
   pickup_time?: string;
 }
@@ -35,6 +39,10 @@ export class PaymentService {
         print_sides: orderData.print_sides,
         file_path: orderData.file_path,
         file_url: orderData.file_url,
+        street: orderData.street,
+        city: orderData.city,
+        state: orderData.state,
+        pincode: orderData.pincode,
         pickup_date: orderData.pickup_date,
         pickup_time: orderData.pickup_time
       }])
