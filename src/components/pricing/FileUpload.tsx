@@ -23,9 +23,6 @@ export const FileUpload = ({ onFileChange, isRequired = true }: FileUploadProps)
     setError(null);
     
     if (!file) {
-      if (isRequired) {
-        setError("Please upload a file");
-      }
       return;
     }
 
@@ -108,7 +105,7 @@ export const FileUpload = ({ onFileChange, isRequired = true }: FileUploadProps)
             onClick={handleUploadClick}
             isUploading={isUploading}
           />
-          <FileUploadError error={error} />
+          {error && <FileUploadError error={error} />}
         </div>
         <SelectedFile fileName={currentFile?.name || null} />
         <input
