@@ -3,8 +3,9 @@ import { Navbar } from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { OrderCard } from "@/components/admin/OrderCard";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { OrderList } from "@/components/admin/OrderList";
+import { LoadingState } from "@/components/admin/LoadingState";
 import { OrdersTable } from "@/integrations/supabase/types/orders";
 
 type Order = OrdersTable['Row'];
@@ -18,47 +19,6 @@ const AdminPage = () => {
   useEffect(() => {
     checkAdminStatus();
     fetchOrders();
-
-    // Subscribe to both new orders and updates
-    const channel = supabase
-      .channel('admin-orders')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'orders',
-        },
-        (payload) => {
-          console.log('New order received:', payload);
-          if (payload.new) {
-            setOrders(currentOrders => [payload.new as Order, ...currentOrders]);
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'orders',
-        },
-        (payload) => {
-          console.log('Order updated:', payload);
-          if (payload.new) {
-            setOrders(currentOrders =>
-              currentOrders.map(order =>
-                order.id === (payload.new as Order).id ? (payload.new as Order) : order
-              )
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const checkAdminStatus = async () => {
@@ -123,21 +83,8 @@ const AdminPage = () => {
     }
   };
 
-  const handleDeleteOrder = async (orderId: string) => {
-    setOrders(orders.filter(order => order.id !== orderId));
-  };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto py-8">
-          <div className="bg-white p-8 rounded-lg shadow">
-            <p className="text-center text-gray-500">Loading orders...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   return (
@@ -146,18 +93,7 @@ const AdminPage = () => {
       <div className="container mx-auto py-8 px-4 md:px-8">
         <div className="bg-white p-4 md:p-8 rounded-lg shadow">
           <AdminHeader onLogout={handleLogout} />
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <OrderCard
-                key={order.id}
-                order={order}
-                onDelete={handleDeleteOrder}
-              />
-            ))}
-            {orders.length === 0 && (
-              <p className="text-center text-gray-500">No orders yet</p>
-            )}
-          </div>
+          <OrderList initialOrders={orders} />
         </div>
       </div>
     </div>
