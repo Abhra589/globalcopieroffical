@@ -82,6 +82,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
       ) : (
         <UploadButton
           onClick={handleUploadClick}
+          isUploading={isUploading}
           error={error}
         />
       )}
