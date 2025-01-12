@@ -18,7 +18,7 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          event: '*',
           schema: 'public',
           table: 'orders',
           filter: `id=eq.${orderId}`,
@@ -37,20 +37,26 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
 
     // Initial fetch to ensure we have the latest data
     const fetchOrder = async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', orderId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', orderId)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching order:', error);
-        return;
-      }
+        if (error) {
+          console.error('Error fetching order:', error);
+          return;
+        }
 
-      if (data) {
-        console.log('Initial order data:', data);
-        onOrderUpdate(data);
+        if (data) {
+          console.log('Initial order data:', data);
+          onOrderUpdate(data);
+        } else {
+          console.log('No order found with id:', orderId);
+        }
+      } catch (error) {
+        console.error('Error in fetchOrder:', error);
       }
     };
 
