@@ -52,23 +52,34 @@ export const OrderActions = ({
     onProceedToPayment();
   };
 
+  const handleAdminWhatsApp = () => {
+    const message = "Hello, I have a large file order to discuss.";
+    sendWhatsAppMessage(message, "918777060249");
+  };
+
+  const handleAdminEmail = () => {
+    window.location.href = "mailto:globalcopierkly@gmail.com?subject=Large File Order&body=Hello, I have a large file order to discuss.";
+  };
+
   return (
-    <div className="flex gap-4">
-      <Button
-        onClick={handleWhatsAppEnquiry}
-        type="button"
-        className="bg-[#25D366] hover:bg-[#128C7E] text-white animate-scale-in flex-1"
-      >
-        Enquire on WhatsApp
-      </Button>
-      <Button
-        onClick={handleProceedToPayment}
-        type="button"
-        className="bg-primary hover:bg-primary/90 text-white animate-scale-in flex-1"
-        disabled={!pageCount}
-      >
-        Proceed to Payment
-      </Button>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Button
+          onClick={handleWhatsAppEnquiry}
+          type="button"
+          className="bg-[#25D366] hover:bg-[#128C7E] text-white animate-scale-in w-full sm:w-auto"
+        >
+          Enquire on WhatsApp
+        </Button>
+        <Button
+          onClick={handleProceedToPayment}
+          type="button"
+          className="bg-primary hover:bg-primary/90 text-white animate-scale-in w-full sm:w-auto"
+          disabled={!pageCount}
+        >
+          Proceed to Payment
+        </Button>
+      </div>
     </div>
   );
 };
