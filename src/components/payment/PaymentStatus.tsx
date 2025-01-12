@@ -48,7 +48,7 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
           if (payload.new) {
             const newStatus = (payload.new as any).payment_status;
             console.log('Setting new payment status:', newStatus);
-            setStatus(newStatus);
+            setStatus(newStatus || "Payment Pending");
           }
         }
       )

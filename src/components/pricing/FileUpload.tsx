@@ -4,6 +4,7 @@ import { FileUploadError } from "./file-upload/FileUploadError";
 import { UploadButton } from "./file-upload/UploadButton";
 import { SelectedFile } from "./file-upload/SelectedFile";
 import { FileUploadInfo } from "./file-upload/FileUploadInfo";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
   onFileUpload: (file: File | null, url: string, path?: string) => void;
@@ -15,11 +16,18 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     
     if (!event.target.files || event.target.files.length === 0) {
+      setError('Please select a file to upload');
+      toast({
+        title: "Error",
+        description: "Please select a file to upload",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -27,12 +35,22 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
     
     if (file.type !== 'application/pdf') {
       setError('Please upload a PDF file');
+      toast({
+        title: "Error",
+        description: "Please upload a PDF file",
+        variant: "destructive",
+      });
       return;
     }
 
     // Update file size limit to 50MB
     if (file.size > 50 * 1024 * 1024) {
       setError('File size should be less than 50MB');
+      toast({
+        title: "Error",
+        description: "File size should be less than 50MB",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -43,9 +61,18 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
       const { url, path } = await uploadFile(file);
       onFileUpload(file, url, path);
       setError(null);
+      toast({
+        title: "Success",
+        description: "File uploaded successfully",
+      });
     } catch (err) {
       console.error('Error uploading file:', err);
       setError('Failed to upload file. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to upload file. Please try again.",
+        variant: "destructive",
+      });
       setCurrentFile(null);
     } finally {
       setIsUploading(false);
@@ -53,6 +80,15 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
   };
 
   const handleUploadClick = () => {
+    if (!currentFile && isRequired) {
+      setError('Please upload your document');
+      toast({
+        title: "Error",
+        description: "Please upload your document",
+        variant: "destructive",
+      });
+      return;
+    }
     fileInputRef.current?.click();
   };
 
