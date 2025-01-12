@@ -19,6 +19,7 @@ interface OrderData {
   pincode?: string;
   pickup_date?: string;
   pickup_time?: string;
+  payment_status?: string;
 }
 
 export class PaymentService {
@@ -33,7 +34,7 @@ export class PaymentService {
         print_type: orderData.print_type,
         delivery_type: orderData.delivery_type,
         amount: orderData.amount,
-        payment_status: 'Pending',
+        payment_status: orderData.payment_status || 'pending',
         customer_name: orderData.customer_name,
         customer_email: orderData.customer_email,
         customer_phone: orderData.customer_phone,

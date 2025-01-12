@@ -1,7 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentService } from '@/services/payment/PaymentService';
-import { supabase } from "@/integrations/supabase/client";
 
 export const usePaymentProcessor = () => {
   const navigate = useNavigate();
@@ -70,7 +69,8 @@ export const usePaymentProcessor = () => {
           state: state || undefined,
           pincode: pincode || undefined,
           pickup_date: pickupDate,
-          pickup_time: pickupTime
+          pickup_time: pickupTime,
+          payment_status: 'pending'  // Set initial status to pending
         });
         console.log('New order created:', newOrder);
         finalOrderId = newOrder.id;
