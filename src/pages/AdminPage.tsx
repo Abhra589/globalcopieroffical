@@ -18,6 +18,47 @@ const AdminPage = () => {
   useEffect(() => {
     checkAdminStatus();
     fetchOrders();
+
+    // Subscribe to both new orders and updates
+    const channel = supabase
+      .channel('admin-orders')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          console.log('New order received:', payload);
+          if (payload.new) {
+            setOrders(currentOrders => [payload.new as Order, ...currentOrders]);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          console.log('Order updated:', payload);
+          if (payload.new) {
+            setOrders(currentOrders =>
+              currentOrders.map(order =>
+                order.id === (payload.new as Order).id ? (payload.new as Order) : order
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const checkAdminStatus = async () => {
