@@ -18,19 +18,43 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'orders',
           filter: `id=eq.${orderId}`,
         },
         (payload) => {
-          console.log('Order status updated:', payload);
-          if (payload.new) {
+          console.log('Order update received:', payload);
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            console.log('Updating order with new data:', payload.new);
             onOrderUpdate(payload.new as Order);
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Subscription status for order ${orderId}:`, status);
+      });
+
+    // Initial fetch to ensure we have the latest data
+    const fetchOrder = async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching order:', error);
+        return;
+      }
+
+      if (data) {
+        console.log('Initial order data:', data);
+        onOrderUpdate(data);
+      }
+    };
+
+    fetchOrder();
 
     return () => {
       console.log('Cleaning up subscription for order:', orderId);

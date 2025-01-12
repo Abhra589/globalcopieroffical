@@ -18,19 +18,21 @@ interface OrderCardProps {
 }
 
 export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
-  const [currentOrder, setCurrentOrder] = useState(order);
+  const [currentOrder, setCurrentOrder] = useState<Order>(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
   console.log('Current order state:', currentOrder);
+
+  const handleOrderUpdate = (updatedOrder: Order) => {
+    console.log('Order updated in OrderCard:', updatedOrder);
+    setCurrentOrder(updatedOrder);
+  };
 
   return (
     <OrderContainer>
       <OrderRealtime 
         orderId={order.id} 
-        onOrderUpdate={(updatedOrder) => {
-          console.log('Order updated:', updatedOrder);
-          setCurrentOrder(updatedOrder);
-        }} 
+        onOrderUpdate={handleOrderUpdate}
       />
       
       <OrderMetadata

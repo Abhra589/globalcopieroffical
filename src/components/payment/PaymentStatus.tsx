@@ -12,7 +12,6 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initial fetch of payment status
     const fetchInitialStatus = async () => {
       try {
         const { data, error } = await supabase
@@ -34,7 +33,6 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
 
     fetchInitialStatus();
 
-    // Subscribe to real-time updates
     const channel = supabase
       .channel(`payment-${orderId}`)
       .on(
@@ -46,13 +44,17 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
           filter: `id=eq.${orderId}`,
         },
         (payload) => {
-          console.log('Payment status updated:', payload);
+          console.log('Payment status update received:', payload);
           if (payload.new) {
-            setStatus((payload.new as any).payment_status);
+            const newStatus = (payload.new as any).payment_status;
+            console.log('Setting new payment status:', newStatus);
+            setStatus(newStatus);
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Payment status subscription status:`, status);
+      });
 
     return () => {
       console.log('Cleaning up payment status subscription');
@@ -78,7 +80,7 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
         description: "Payment status updated successfully",
       });
 
-      // Update local state immediately
+      // Update local state immediately for better UX
       setStatus('Payment Done');
     } catch (error) {
       console.error('Error updating payment status:', error);
