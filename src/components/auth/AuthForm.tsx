@@ -5,7 +5,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { AuthError, AuthApiError } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 
 interface AuthFormProps {
   isAdmin?: boolean;
@@ -14,12 +13,12 @@ interface AuthFormProps {
 export const AuthForm = ({ isAdmin = false }: AuthFormProps) => {
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
-    // If not admin, sign in anonymously and redirect
+    // If not admin, redirect to order page
     if (!isAdmin) {
-      handleCustomerAccess();
+      navigate('/order');
+      return;
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -43,30 +42,6 @@ export const AuthForm = ({ isAdmin = false }: AuthFormProps) => {
 
     return () => subscription.unsubscribe();
   }, [isAdmin, navigate]);
-
-  const handleCustomerAccess = async () => {
-    try {
-      const { data: { session }, error } = await supabase.auth.signInWithPassword({
-        email: 'customer@globalcopier.com',
-        password: 'customer123',
-      });
-
-      if (error) throw error;
-
-      if (session) {
-        toast({
-          title: "Welcome!",
-          description: "You're now logged in as a customer",
-        });
-        navigate('/order');
-      }
-    } catch (error) {
-      console.error('Error during customer access:', error);
-      if (error instanceof AuthApiError) {
-        setErrorMessage(getErrorMessage(error));
-      }
-    }
-  };
 
   const getErrorMessage = (error: AuthError) => {
     if (error instanceof AuthApiError) {
