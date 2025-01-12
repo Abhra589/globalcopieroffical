@@ -51,6 +51,7 @@ export const usePaymentProcessor = () => {
       let finalOrderId = orderId;
 
       if (orderId === 'new') {
+        // Create order with pending status
         const newOrder = await PaymentService.createNewOrder({
           pages: Number(pages),
           copies: Number(copies),
@@ -72,8 +73,6 @@ export const usePaymentProcessor = () => {
           pickup_time: pickupTime
         });
         finalOrderId = newOrder.id;
-      } else if (orderId) {
-        await PaymentService.updatePaymentStatus(orderId);
       }
 
       return { success: true, orderId: finalOrderId };

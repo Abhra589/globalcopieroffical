@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PaymentButtons } from './PaymentButtons';
 import { PaymentConfirmationDialog } from './PaymentConfirmationDialog';
 import { usePaymentProcessor } from './PaymentProcessor';
+import { PaymentService } from '@/services/payment/PaymentService';
 import { supabase } from "@/integrations/supabase/client";
 
 interface PaymentActionsProps {
@@ -45,6 +46,8 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     const result = await processPayment();
     
     if (result.success) {
+      // Update the payment status to "Payment Done"
+      await PaymentService.updatePaymentStatus(result.orderId);
       setShowConfirmation(true);
       
       // Subscribe to real-time updates for this order
