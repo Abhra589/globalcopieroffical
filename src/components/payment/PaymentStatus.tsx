@@ -18,7 +18,7 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
           .from('orders')
           .select('payment_status')
           .eq('id', orderId)
-          .single();
+          .maybeSingle();
         
         if (error) throw error;
         

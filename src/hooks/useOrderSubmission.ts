@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { NavigateFunction } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserProfile {
   name: string;
@@ -72,10 +73,42 @@ export const useOrderSubmission = ({
 
   const handleProceedToPayment = useCallback(async () => {
     try {
-      const total = calculateTotal();
+      // First create the order in Supabase
+      const { data: newOrder, error: createError } = await supabase
+        .from('orders')
+        .insert([{
+          pages: pageCount,
+          copies: copies,
+          print_type: selectedType,
+          delivery_type: deliveryType,
+          amount: calculateTotal(),
+          customer_name: userProfile.name,
+          customer_email: userProfile.email,
+          customer_phone: userProfile.phone,
+          gsm: selectedGsm,
+          print_sides: selectedSides,
+          file_url: fileUrl,
+          file_path: filePath,
+          street: userProfile.street,
+          city: userProfile.city,
+          state: userProfile.state,
+          pincode: userProfile.pincode,
+          pickup_date: pickupDate,
+          pickup_time: pickupTime,
+          payment_status: 'Payment Pending'
+        }])
+        .select()
+        .single();
+
+      if (createError) {
+        throw createError;
+      }
+
+      console.log('New order created:', newOrder);
+
       const queryParams = new URLSearchParams({
-        amount: total.toString(),
-        orderId: 'new',
+        amount: calculateTotal().toString(),
+        orderId: newOrder.id,
         pages: pageCount.toString(),
         copies: copies.toString(),
         printType: selectedType,
@@ -87,16 +120,17 @@ export const useOrderSubmission = ({
         printSides: selectedSides,
         fileUrl: fileUrl,
         filePath: filePath,
-        street: userProfile.street || '',
-        city: userProfile.city || '',
-        state: userProfile.state || '',
-        pincode: userProfile.pincode || '',
       });
 
       if (deliveryType === 'pickup' && pickupDate && pickupTime) {
         queryParams.append('pickupDate', pickupDate);
         queryParams.append('pickupTime', pickupTime);
       }
+
+      if (userProfile.street) queryParams.append('street', userProfile.street);
+      if (userProfile.city) queryParams.append('city', userProfile.city);
+      if (userProfile.state) queryParams.append('state', userProfile.state);
+      if (userProfile.pincode) queryParams.append('pincode', userProfile.pincode);
 
       navigate(`/payment?${queryParams.toString()}`);
     } catch (error) {
