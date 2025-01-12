@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { OrdersTable } from "@/integrations/supabase/types/orders";
+import { useToast } from "@/hooks/use-toast";
 
 type Order = OrdersTable['Row'];
 
@@ -10,6 +11,8 @@ interface OrderRealtimeProps {
 }
 
 export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) => {
+  const { toast } = useToast();
+
   useEffect(() => {
     console.log('Setting up real-time subscription for order:', orderId);
     
@@ -33,6 +36,13 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
       )
       .subscribe((status) => {
         console.log(`Subscription status for order ${orderId}:`, status);
+        if (status === 'CHANNEL_ERROR') {
+          toast({
+            title: "Connection Error",
+            description: "Failed to connect to real-time updates. Please refresh the page.",
+            variant: "destructive",
+          });
+        }
       });
 
     // Initial fetch to ensure we have the latest data
@@ -46,6 +56,11 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
 
         if (error) {
           console.error('Error fetching order:', error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch order details. Please try again.",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -54,9 +69,19 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
           onOrderUpdate(data);
         } else {
           console.log('No order found with id:', orderId);
+          toast({
+            title: "Not Found",
+            description: "Order not found. It may have been deleted.",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error('Error in fetchOrder:', error);
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please refresh the page.",
+          variant: "destructive",
+        });
       }
     };
 
@@ -66,7 +91,7 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
       console.log('Cleaning up subscription for order:', orderId);
       supabase.removeChannel(channel);
     };
-  }, [orderId, onOrderUpdate]);
+  }, [orderId, onOrderUpdate, toast]);
 
   return null;
 };
