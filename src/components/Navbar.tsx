@@ -13,17 +13,36 @@ export const Navbar = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    checkAuth();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAuth();
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        handleAuthChange(session);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setIsAdmin(false);
+        setIsAuthenticated(false);
+      }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
+        setIsAdmin(false);
+        return;
+      }
+      
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        handleAuthChange(session);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkAuth = async () => {
+  const handleAuthChange = async (session: any) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
       
       if (!session) {
@@ -31,11 +50,12 @@ export const Navbar = () => {
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('is_admin')
         .single();
 
+      if (error) throw error;
       setIsAdmin(profile?.is_admin || false);
     } catch (error) {
       console.error('Error checking auth status:', error);
