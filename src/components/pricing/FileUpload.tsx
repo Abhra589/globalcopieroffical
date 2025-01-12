@@ -97,6 +97,9 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
         <p className="text-sm text-muted-foreground">
           Please upload a file within 50MB. For larger files, contact admin:
         </p>
+        <p className="text-sm text-muted-foreground italic">
+          We will be capable of receiving larger orders of your choice soon!
+        </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
             type="button"
