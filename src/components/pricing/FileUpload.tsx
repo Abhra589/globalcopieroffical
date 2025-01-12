@@ -4,7 +4,6 @@ import { FileUploadError } from "./file-upload/FileUploadError";
 import { UploadButton } from "./file-upload/UploadButton";
 import { SelectedFile } from "./file-upload/SelectedFile";
 import { FileUploadInfo } from "./file-upload/FileUploadInfo";
-import { AdminContact } from "./file-upload/AdminContact";
 
 interface FileUploadProps {
   onFileUpload: (file: File | null, url: string, path?: string) => void;
@@ -57,11 +56,11 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <FileUploadInfo />
       
       <div className="flex flex-col items-center space-y-4">
-        <div className="flex items-center space-x-4">
+        <div className="w-full max-w-md">
           <UploadButton 
             onClick={handleUploadClick}
             isUploading={isUploading}
@@ -77,8 +76,6 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
           className="hidden"
         />
       </div>
-
-      <AdminContact />
     </div>
   );
 };

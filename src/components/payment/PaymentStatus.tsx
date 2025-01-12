@@ -14,14 +14,21 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
   useEffect(() => {
     // Initial fetch of payment status
     const fetchInitialStatus = async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('payment_status')
-        .eq('id', orderId)
-        .single();
-      
-      if (data) {
-        setStatus(data.payment_status || "Payment Pending");
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('payment_status')
+          .eq('id', orderId)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data) {
+          console.log('Initial payment status:', data.payment_status);
+          setStatus(data.payment_status || "Payment Pending");
+        }
+      } catch (error) {
+        console.error('Error fetching payment status:', error);
       }
     };
 
@@ -54,6 +61,8 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
 
   const handlePaymentConfirmation = async () => {
     try {
+      console.log('Updating payment status for order:', orderId);
+      
       const { error } = await supabase
         .from('orders')
         .update({ payment_status: 'Payment Done' })
@@ -61,6 +70,8 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
 
       if (error) throw error;
 
+      console.log('Payment status updated successfully');
+      
       toast({
         title: "Success",
         description: "Payment status updated successfully",
@@ -76,18 +87,23 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
   };
 
   return (
-    <div className="text-center mt-4">
-      <p className="text-lg font-medium mb-2">
+    <div className="text-center mt-4 space-y-4">
+      <p className="text-lg font-medium">
         Current Status: 
-        <span className={status === 'Payment Done' ? 'text-green-600 ml-2' : 'text-yellow-600 ml-2'}>
+        <span className={`ml-2 ${
+          status === 'Payment Done' 
+            ? 'text-green-600' 
+            : 'text-yellow-600'
+        }`}>
           {status}
         </span>
       </p>
+      
       {status !== 'Payment Done' && (
         <Button
           onClick={handlePaymentConfirmation}
           variant="outline"
-          className="text-blue-600 hover:text-blue-800"
+          className="w-full max-w-md text-blue-600 hover:text-blue-800 hover:bg-blue-50"
         >
           Click here if payment is done
         </Button>

@@ -21,11 +21,16 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const [currentOrder, setCurrentOrder] = useState(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
+  console.log('Current order state:', currentOrder);
+
   return (
     <OrderContainer>
       <OrderRealtime 
         orderId={order.id} 
-        onOrderUpdate={(updatedOrder) => setCurrentOrder(updatedOrder)} 
+        onOrderUpdate={(updatedOrder) => {
+          console.log('Order updated:', updatedOrder);
+          setCurrentOrder(updatedOrder);
+        }} 
       />
       
       <OrderMetadata
@@ -47,15 +52,15 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
       {currentOrder.delivery_type === 'pickup' ? (
         <InStorePickupInfo
-          pickupDate={currentOrder.pickup_date}
-          pickupTime={currentOrder.pickup_time}
+          pickupDate={currentOrder.pickup_date || ''}
+          pickupTime={currentOrder.pickup_time || ''}
         />
       ) : (
         <DeliveryAddress
-          street={currentOrder.street}
-          city={currentOrder.city}
-          state={currentOrder.state}
-          pincode={currentOrder.pincode}
+          street={currentOrder.street || ''}
+          city={currentOrder.city || ''}
+          state={currentOrder.state || ''}
+          pincode={currentOrder.pincode || ''}
         />
       )}
 
