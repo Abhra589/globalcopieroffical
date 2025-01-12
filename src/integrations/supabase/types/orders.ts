@@ -20,6 +20,8 @@ export interface OrdersTable {
     city: string | null;
     state: string | null;
     pincode: string | null;
+    pickup_date: string | null;
+    pickup_time: string | null;
   };
   Insert: {
     amount: number;
@@ -42,6 +44,8 @@ export interface OrdersTable {
     city?: string | null;
     state?: string | null;
     pincode?: string | null;
+    pickup_date?: string | null;
+    pickup_time?: string | null;
   };
   Update: {
     amount?: number;
@@ -64,6 +68,8 @@ export interface OrdersTable {
     city?: string | null;
     state?: string | null;
     pincode?: string | null;
+    pickup_date?: string | null;
+    pickup_time?: string | null;
   };
   Relationships: [];
 }
