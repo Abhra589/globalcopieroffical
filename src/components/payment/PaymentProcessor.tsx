@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { PaymentService } from '@/services/payment/PaymentService';
+import { supabase } from "@/integrations/supabase/client";
 
 export const usePaymentProcessor = () => {
   const navigate = useNavigate();

@@ -33,7 +33,7 @@ export class PaymentService {
         print_type: orderData.print_type,
         delivery_type: orderData.delivery_type,
         amount: orderData.amount,
-        payment_status: 'pending',
+        payment_status: 'Pending',
         customer_name: orderData.customer_name,
         customer_email: orderData.customer_email,
         customer_phone: orderData.customer_phone,
@@ -61,11 +61,18 @@ export class PaymentService {
   }
 
   static async updatePaymentStatus(orderId: string) {
+    console.log('Updating payment status for order:', orderId);
+    
     const { error: updateError } = await supabase
       .from('orders')
       .update({ payment_status: 'Payment Done' })
       .eq('id', orderId);
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      console.error('Error updating payment status:', updateError);
+      throw updateError;
+    }
+    
+    console.log('Payment status updated successfully');
   }
 }
