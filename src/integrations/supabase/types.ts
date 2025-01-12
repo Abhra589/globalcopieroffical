@@ -9,585 +9,120 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      appointment_bookings: {
-        Row: {
-          booking_fee: number | null
-          calendly_confirmed: boolean | null
-          client_name: string
-          created_at: string | null
-          id: number
-          status: string | null
-          user_id: string | null
-        }
-        Insert: {
-          booking_fee?: number | null
-          calendly_confirmed?: boolean | null
-          client_name: string
-          created_at?: string | null
-          id?: number
-          status?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          booking_fee?: number | null
-          calendly_confirmed?: boolean | null
-          client_name?: string
-          created_at?: string | null
-          id?: number
-          status?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "appointment_bookings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      custom_requests: {
-        Row: {
-          created_at: string
-          id: number
-          message: string
-          status: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          message: string
-          status?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          message?: string
-          status?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "custom_requests_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      graphic_design_orders: {
-        Row: {
-          created_at: string
-          description: string
-          id: number
-          quantity: number
-          status: string | null
-          total_cost: number
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          id?: number
-          quantity: number
-          status?: string | null
-          total_cost: number
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: number
-          quantity?: number
-          status?: string | null
-          total_cost?: number
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "graphic_design_orders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      package_subscriptions: {
-        Row: {
-          created_at: string
-          end_date: string | null
-          id: number
-          is_free_month: boolean | null
-          package_id: number | null
-          start_date: string
-          status: string | null
-          user_id: string | null
-          website_project_id: number | null
-        }
-        Insert: {
-          created_at?: string
-          end_date?: string | null
-          id?: number
-          is_free_month?: boolean | null
-          package_id?: number | null
-          start_date?: string
-          status?: string | null
-          user_id?: string | null
-          website_project_id?: number | null
-        }
-        Update: {
-          created_at?: string
-          end_date?: string | null
-          id?: number
-          is_free_month?: boolean | null
-          package_id?: number | null
-          start_date?: string
-          status?: string | null
-          user_id?: string | null
-          website_project_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "package_subscriptions_package_id_fkey"
-            columns: ["package_id"]
-            isOneToOne: false
-            referencedRelation: "social_media_packages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "package_subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "package_subscriptions_website_project_id_fkey"
-            columns: ["website_project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      payments: {
+      orders: {
         Row: {
           amount: number
+          city: string | null
+          copies: number
           created_at: string
-          id: number
-          service_id: number | null
-          status: string | null
-          user_id: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_type: string
+          file_path: string
+          file_url: string
+          gsm: string
+          id: string
+          organization: string | null
+          pages: number
+          payment_status: string | null
+          pickup_date: string | null
+          pickup_time: string | null
+          pincode: string | null
+          print_sides: string
+          print_type: string
+          state: string | null
+          street: string | null
         }
         Insert: {
           amount: number
+          city?: string | null
+          copies?: number
           created_at?: string
-          id?: never
-          service_id?: number | null
-          status?: string | null
-          user_id?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_type: string
+          file_path: string
+          file_url: string
+          gsm: string
+          id?: string
+          organization?: string | null
+          pages: number
+          payment_status?: string | null
+          pickup_date?: string | null
+          pickup_time?: string | null
+          pincode?: string | null
+          print_sides: string
+          print_type: string
+          state?: string | null
+          street?: string | null
         }
         Update: {
           amount?: number
+          city?: string | null
+          copies?: number
           created_at?: string
-          id?: never
-          service_id?: number | null
-          status?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payments_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portfolio_items: {
-        Row: {
-          category: string | null
-          created_at: string
-          description: string | null
-          drive_link: string | null
-          id: number
-          image_url: string
-          service_type: string
-          title: string
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string
-          description?: string | null
-          drive_link?: string | null
-          id?: number
-          image_url: string
-          service_type: string
-          title: string
-        }
-        Update: {
-          category?: string | null
-          created_at?: string
-          description?: string | null
-          drive_link?: string | null
-          id?: number
-          image_url?: string
-          service_type?: string
-          title?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          delivery_type?: string
+          file_path?: string
+          file_url?: string
+          gsm?: string
+          id?: string
+          organization?: string | null
+          pages?: number
+          payment_status?: string | null
+          pickup_date?: string | null
+          pickup_time?: string | null
+          pincode?: string | null
+          print_sides?: string
+          print_type?: string
+          state?: string | null
+          street?: string | null
         }
         Relationships: []
-      }
-      post_revisions: {
-        Row: {
-          content: string
-          created_at: string
-          id: number
-          post_id: number | null
-          status: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          id?: number
-          post_id?: number | null
-          status?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          id?: number
-          post_id?: number | null
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "post_revisions_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "scheduled_posts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      post_subscriptions: {
-        Row: {
-          created_at: string
-          end_date: string | null
-          id: number
-          plan_type: string
-          posts_per_month: number | null
-          posts_remaining: number
-          start_date: string
-          status: string | null
-          subscription_type: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          end_date?: string | null
-          id?: number
-          plan_type: string
-          posts_per_month?: number | null
-          posts_remaining: number
-          start_date?: string
-          status?: string | null
-          subscription_type?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          end_date?: string | null
-          id?: number
-          plan_type?: string
-          posts_per_month?: number | null
-          posts_remaining?: number
-          start_date?: string
-          status?: string | null
-          subscription_type?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "post_subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       profiles: {
         Row: {
+          city: string
           created_at: string
-          first_name: string | null
+          email: string
+          first_name: string
           id: string
-          last_name: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
+          is_admin: boolean | null
+          last_name: string
+          phone: string
+          pincode: string
+          state: string
+          street: string
         }
         Insert: {
+          city: string
           created_at?: string
-          first_name?: string | null
+          email: string
+          first_name: string
           id: string
-          last_name?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
+          is_admin?: boolean | null
+          last_name: string
+          phone: string
+          pincode: string
+          state: string
+          street: string
         }
         Update: {
+          city?: string
           created_at?: string
-          first_name?: string | null
+          email?: string
+          first_name?: string
           id?: string
-          last_name?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-        }
-        Relationships: []
-      }
-      project_status_updates: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: number
-          message: string | null
-          progress: number | null
-          project_id: number | null
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: number
-          message?: string | null
-          progress?: number | null
-          project_id?: number | null
-          status: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: number
-          message?: string | null
-          progress?: number | null
-          project_id?: number | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "project_status_updates_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_status_updates_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      projects: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: number
-          manager_id: string | null
-          payment_status: string | null
-          progress: number | null
-          status: string | null
-          title: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          manager_id?: string | null
-          payment_status?: string | null
-          progress?: number | null
-          status?: string | null
-          title: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          manager_id?: string | null
-          payment_status?: string | null
-          progress?: number | null
-          status?: string | null
-          title?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "projects_manager_id_fkey"
-            columns: ["manager_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      refunds: {
-        Row: {
-          amount: number
-          created_at: string
-          id: number
-          payment_id: number | null
-          reason: string | null
-          status: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          id?: never
-          payment_id?: number | null
-          reason?: string | null
-          status?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          id?: never
-          payment_id?: number | null
-          reason?: string | null
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "refunds_payment_id_fkey"
-            columns: ["payment_id"]
-            isOneToOne: false
-            referencedRelation: "payments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      scheduled_posts: {
-        Row: {
-          content: string
-          created_at: string
-          engagement_data: Json | null
-          id: number
-          media_url: string | null
-          platform: string
-          scheduled_time: string
-          status: string | null
-          title: string
-          user_id: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          engagement_data?: Json | null
-          id?: number
-          media_url?: string | null
-          platform: string
-          scheduled_time: string
-          status?: string | null
-          title: string
-          user_id?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          engagement_data?: Json | null
-          id?: number
-          media_url?: string | null
-          platform?: string
-          scheduled_time?: string
-          status?: string | null
-          title?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scheduled_posts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      services: {
-        Row: {
-          category: string
-          created_at: string
-          description: string
-          id: number
-          package_type: string | null
-          price: number
-          title: string
-          type: string
-        }
-        Insert: {
-          category?: string
-          created_at?: string
-          description: string
-          id?: number
-          package_type?: string | null
-          price: number
-          title: string
-          type: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string
-          id?: number
-          package_type?: string | null
-          price?: number
-          title?: string
-          type?: string
-        }
-        Relationships: []
-      }
-      social_media_packages: {
-        Row: {
-          created_at: string
-          description: string
-          features: Json
-          id: number
-          name: string
-          price: number
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          features: Json
-          id?: number
-          name: string
-          price: number
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          features?: Json
-          id?: number
-          name?: string
-          price?: number
+          is_admin?: boolean | null
+          last_name?: string
+          phone?: string
+          pincode?: string
+          state?: string
+          street?: string
         }
         Relationships: []
       }
@@ -596,19 +131,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      clean_old_appointments: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      ensure_admin_role: {
+      create_admin_user: {
         Args: {
-          admin_email: string
+          user_id: string
+          email: string
+          first_name: string
+          last_name: string
+          phone: string
+          street: string
+          city: string
+          pincode: string
+          state: string
         }
         Returns: undefined
       }
     }
     Enums: {
-      user_role: "admin" | "manager" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
