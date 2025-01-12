@@ -30,8 +30,9 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError('File size should be less than 10MB');
+    // Update file size limit to 50MB
+    if (file.size > 50 * 1024 * 1024) {
+      setError('File size should be less than 50MB');
       return;
     }
 
@@ -60,7 +61,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
       <FileUploadInfo />
       
       <div className="flex flex-col items-center space-y-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md relative">
           <UploadButton 
             onClick={handleUploadClick}
             isUploading={isUploading}

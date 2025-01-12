@@ -9,7 +9,7 @@ export const FileUploadInfo = () => {
         Upload PDF Document
       </Label>
       <p className="text-sm text-muted-foreground">
-        Maximum file size: 10MB
+        Maximum file size: 50MB
       </p>
     </div>
   );
