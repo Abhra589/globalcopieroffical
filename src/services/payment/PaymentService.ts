@@ -33,14 +33,14 @@ export class PaymentService {
         print_type: orderData.print_type,
         delivery_type: orderData.delivery_type,
         amount: orderData.amount,
-        payment_status: 'Payment Done',
+        payment_status: 'pending',
         customer_name: orderData.customer_name,
         customer_email: orderData.customer_email,
         customer_phone: orderData.customer_phone,
         gsm: orderData.gsm,
         print_sides: orderData.print_sides,
-        file_path: orderData.file_path || '',  // Ensure file_path is included
-        file_url: orderData.file_url || '',    // Ensure file_url is included
+        file_path: orderData.file_path || '',
+        file_url: orderData.file_url || '',
         street: orderData.street || null,
         city: orderData.city || null,
         state: orderData.state || null,
