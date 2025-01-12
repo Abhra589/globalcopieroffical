@@ -1,6 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { WhatsAppNotificationService } from '@/services/whatsapp/WhatsAppNotificationService';
 import { PaymentService } from '@/services/payment/PaymentService';
 
 export const usePaymentProcessor = () => {
@@ -74,10 +73,6 @@ export const usePaymentProcessor = () => {
         finalOrderId = newOrder.id;
       } else if (orderId) {
         await PaymentService.updatePaymentStatus(orderId);
-      }
-
-      if (customerPhone && amount && finalOrderId) {
-        await WhatsAppNotificationService.sendOrderConfirmation(finalOrderId, amount, customerPhone);
       }
 
       return { success: true, orderId: finalOrderId };

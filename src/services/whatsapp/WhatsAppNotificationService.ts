@@ -13,4 +13,17 @@ export class WhatsAppNotificationService {
       throw error;
     }
   }
+
+  static async sendMessage(message: string, customerPhone: string, silent: boolean = true) {
+    try {
+      await WhatsAppBusinessService.sendMessage({
+        to: customerPhone,
+        text: message,
+        silent
+      });
+    } catch (error) {
+      console.error('Error sending WhatsApp message:', error);
+      throw error;
+    }
+  }
 }
