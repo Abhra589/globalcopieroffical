@@ -15,7 +15,7 @@ interface PrintingOptionsProps {
   setPageCount: (count: number) => void;
   copies: number;
   setCopies: (copies: number) => void;
-  onFileChange: (file: File | null, uploadedUrl: string) => void;
+  onFileChange: (file: File | null, uploadedUrl: string, path?: string) => void;
 }
 
 export const PrintingOptions = ({
@@ -42,7 +42,7 @@ export const PrintingOptions = ({
         setSelectedSides={setSelectedSides}
       />
       <PriceList selectedGsm={selectedGsm} />
-      <FileUpload onFileChange={onFileChange} />
+      <FileUpload onFileUpload={onFileChange} />
       <ManualPageCount pageCount={pageCount} onPageCountChange={setPageCount} />
       <CopiesInput copies={copies} setCopies={setCopies} />
     </div>

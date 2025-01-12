@@ -1,9 +1,26 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { supabase } from "@/integrations/supabase/client";
 
-export const s3Client = new S3Client({
-  region: "ap-south-1",
-  credentials: {
-    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY || "",
-  },
-});
+export const uploadFile = async (file: File) => {
+  const fileExt = file.name.split('.').pop();
+  const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+  const { data, error } = await supabase.storage
+    .from('print_files')
+    .upload(filePath, file, {
+      contentType: file.type,
+      upsert: false
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('print_files')
+    .getPublicUrl(filePath);
+
+  return {
+    url: publicUrl,
+    path: filePath
+  };
+};
