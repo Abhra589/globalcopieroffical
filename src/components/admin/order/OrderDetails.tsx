@@ -19,7 +19,18 @@ export const OrderDetails = ({
   amount,
   paymentStatus
 }: OrderDetailsProps) => {
-  const statusColor = paymentStatus === 'Payment Done' ? 'text-green-600' : 'text-yellow-600';
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'payment done':
+        return 'text-green-600';
+      case 'payment pending':
+        return 'text-yellow-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  const statusColor = getStatusColor(paymentStatus);
   const displayStatus = paymentStatus || 'Payment Pending';
 
   return (
@@ -39,12 +50,15 @@ export const OrderDetails = ({
           <h4 className="font-medium">Payment Information</h4>
           <div className="text-sm space-y-1">
             <p className="text-primary font-medium">Amount: ₹{amount.toFixed(2)}</p>
-            <p className={`${statusColor} font-medium flex items-center gap-2`}>
-              Status: {displayStatus}
-              {displayStatus !== 'Payment Done' && (
-                <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
-              )}
-            </p>
+            <div className="flex items-center gap-2">
+              <span>Status:</span>
+              <span className={`${statusColor} font-medium flex items-center gap-2`}>
+                {displayStatus}
+                {displayStatus.toLowerCase() !== 'payment done' && (
+                  <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                )}
+              </span>
+            </div>
           </div>
         </div>
       </div>
