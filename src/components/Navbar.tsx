@@ -7,18 +7,17 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-primary py-4 shadow-lg">
+    <nav className="bg-primary py-4 shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2">
             <img 
               src="/lovable-uploads/22349649-e79d-4981-988f-12f058600d58.png" 
               alt="GlobalCopier Logo" 
-              className="h-12 w-auto"
+              className="h-8 md:h-12 w-auto"
             />
           </Link>
           
-          {/* Mobile menu button */}
           <Button 
             variant="ghost" 
             className="lg:hidden text-white"
@@ -27,7 +26,6 @@ export const Navbar = () => {
             <Menu className="h-6 w-6" />
           </Button>
 
-          {/* Desktop navigation */}
           <div className="hidden lg:flex space-x-4">
             <Button variant="ghost" className="text-white hover:text-secondary">
               <Link to="/">Home</Link>
@@ -41,17 +39,16 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile navigation */}
         {isMenuOpen && (
-          <div className="lg:hidden mt-4 space-y-2">
-            <Button variant="ghost" className="text-white hover:text-secondary w-full text-left">
-              <Link to="/">Home</Link>
+          <div className="lg:hidden mt-4 space-y-2 animate-fade-in">
+            <Button variant="ghost" className="text-white hover:text-secondary w-full text-left justify-start">
+              <Link to="/" className="w-full">Home</Link>
             </Button>
-            <Button variant="ghost" className="text-white hover:text-secondary w-full text-left">
-              <Link to="/order">Place Order</Link>
+            <Button variant="ghost" className="text-white hover:text-secondary w-full text-left justify-start">
+              <Link to="/order" className="w-full">Place Order</Link>
             </Button>
-            <Button variant="ghost" className="text-white hover:text-secondary w-full text-left">
-              <Link to="/admin">Admin</Link>
+            <Button variant="ghost" className="text-white hover:text-secondary w-full text-left justify-start">
+              <Link to="/admin" className="w-full">Admin</Link>
             </Button>
           </div>
         )}

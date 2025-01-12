@@ -114,45 +114,47 @@ export const OrderForm = () => {
 
   return (
     <FormContainer onSubmit={handleSubmit}>
-      <CustomerInfoForm customerInfo={customerInfo} setCustomerInfo={setCustomerInfo} />
-      
-      <PrintingOptions
-        selectedGsm={selectedGsm}
-        setSelectedGsm={setSelectedGsm}
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        selectedSides={selectedSides}
-        setSelectedSides={setSelectedSides}
-        pageCount={pageCount}
-        setPageCount={setPageCount}
-        copies={copies}
-        setCopies={setCopies}
-        onFileChange={handleFileChange}
-      />
+      <div className="space-y-6 max-w-full overflow-x-hidden">
+        <CustomerInfoForm customerInfo={customerInfo} setCustomerInfo={setCustomerInfo} />
+        
+        <PrintingOptions
+          selectedGsm={selectedGsm}
+          setSelectedGsm={setSelectedGsm}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          selectedSides={selectedSides}
+          setSelectedSides={setSelectedSides}
+          pageCount={pageCount}
+          setPageCount={setPageCount}
+          copies={copies}
+          setCopies={setCopies}
+          onFileChange={handleFileChange}
+        />
 
-      <DeliveryOptions 
-        deliveryType={deliveryType} 
-        setDeliveryType={setDeliveryType}
-        pickupDate={pickupDate}
-        pickupTime={pickupTime}
-        onPickupDateChange={setPickupDate}
-        onPickupTimeChange={setPickupTime}
-      />
-      
-      <OrderSummarySection
-        pageCount={pageCount}
-        copies={copies}
-        selectedGsm={selectedGsm}
-        selectedType={selectedType}
-        selectedSides={selectedSides}
-        deliveryType={deliveryType}
-        pickupDate={pickupDate}
-        pickupTime={pickupTime}
-        fileUrl={fileUrl}
-        calculateCourierCharge={(pages: number) => calculateCourierCharge(pages)}
-        calculateTotal={() => calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
-        onProceedToPayment={handleProceedToPayment}
-      />
+        <DeliveryOptions 
+          deliveryType={deliveryType} 
+          setDeliveryType={setDeliveryType}
+          pickupDate={pickupDate}
+          pickupTime={pickupTime}
+          onPickupDateChange={setPickupDate}
+          onPickupTimeChange={setPickupTime}
+        />
+        
+        <OrderSummarySection
+          pageCount={pageCount}
+          copies={copies}
+          selectedGsm={selectedGsm}
+          selectedType={selectedType}
+          selectedSides={selectedSides}
+          deliveryType={deliveryType}
+          pickupDate={pickupDate}
+          pickupTime={pickupTime}
+          fileUrl={fileUrl}
+          calculateCourierCharge={(pages: number) => calculateCourierCharge(pages)}
+          calculateTotal={() => calculateTotal(pageCount, copies, selectedGsm, selectedType, selectedSides, deliveryType)}
+          onProceedToPayment={handleProceedToPayment}
+        />
+      </div>
     </FormContainer>
   );
 };
