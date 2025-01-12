@@ -17,7 +17,7 @@ export const DocumentLink = ({ fileUrl }: DocumentLinkProps) => {
       href={fileUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-sm text-blue-600 hover:underline flex items-center gap-2"
+      className="text-sm text-blue-600 hover:underline flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-md transition-colors hover:bg-blue-100"
     >
       <FileText className="w-4 h-4" />
       View Document

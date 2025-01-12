@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FileUploadInfo } from "./file-upload/FileUploadInfo";
 import { UploadProgress } from "./file-upload/UploadProgress";
+import { Upload } from "lucide-react";
 
 interface FileUploadProps {
   onFileChange: (file: File | null, uploadedUrl: string, filePath?: string) => void;
@@ -12,6 +14,7 @@ interface FileUploadProps {
 export const FileUpload = ({ onFileChange }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -76,17 +79,32 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
     }
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="space-y-4">
       <FileUploadInfo />
-      <Input
-        id="file"
-        type="file"
-        accept=".pdf"
-        onChange={handleFileChange}
-        disabled={isUploading}
-        className="cursor-pointer"
-      />
+      <div className="flex justify-center">
+        <Button 
+          onClick={handleUploadClick}
+          disabled={isUploading}
+          className="w-48 h-12 text-lg flex items-center gap-2"
+        >
+          <Upload className="w-5 h-5" />
+          Upload PDF
+        </Button>
+        <Input
+          ref={fileInputRef}
+          id="file"
+          type="file"
+          accept=".pdf"
+          onChange={handleFileChange}
+          disabled={isUploading}
+          className="hidden"
+        />
+      </div>
       <UploadProgress isUploading={isUploading} />
     </div>
   );
