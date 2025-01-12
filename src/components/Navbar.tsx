@@ -1,25 +1,31 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
-    checkAdmin();
+    checkAuth();
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAdmin();
+      checkAuth();
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkAdmin = async () => {
+  const checkAuth = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      
       if (!session) {
         setIsAdmin(false);
         return;
@@ -32,8 +38,26 @@ export const Navbar = () => {
 
       setIsAdmin(profile?.is_admin || false);
     } catch (error) {
-      console.error('Error checking admin status:', error);
+      console.error('Error checking auth status:', error);
       setIsAdmin(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Success",
+        description: "Logged out successfully",
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to log out",
+        variant: "destructive",
+      });
     }
   };
 
@@ -57,7 +81,7 @@ export const Navbar = () => {
             <Menu className="h-6 w-6" />
           </Button>
 
-          <div className="hidden lg:flex space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             <Button variant="ghost" className="text-white hover:text-secondary">
               <Link to="/">Home</Link>
             </Button>
@@ -67,6 +91,19 @@ export const Navbar = () => {
             {isAdmin && (
               <Button variant="ghost" className="text-white hover:text-secondary">
                 <Link to="/admin">Admin</Link>
+              </Button>
+            )}
+            {isAuthenticated ? (
+              <Button 
+                variant="ghost" 
+                className="text-white hover:text-secondary"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            ) : (
+              <Button variant="ghost" className="text-white hover:text-secondary">
+                <Link to="/login">Login</Link>
               </Button>
             )}
           </div>
@@ -83,6 +120,19 @@ export const Navbar = () => {
             {isAdmin && (
               <Button variant="ghost" className="text-white hover:text-secondary w-full text-left justify-start">
                 <Link to="/admin" className="w-full">Admin</Link>
+              </Button>
+            )}
+            {isAuthenticated ? (
+              <Button 
+                variant="ghost" 
+                className="text-white hover:text-secondary w-full text-left justify-start"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            ) : (
+              <Button variant="ghost" className="text-white hover:text-secondary w-full text-left justify-start">
+                <Link to="/login" className="w-full">Login</Link>
               </Button>
             )}
           </div>
