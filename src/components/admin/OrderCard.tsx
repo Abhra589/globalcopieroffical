@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useOrderDeletion } from "@/hooks/useOrderDeletion";
 import { OrderContainer } from "./OrderContainer";
 import { OrderMetadata } from "./order/OrderMetadata";
@@ -7,30 +7,10 @@ import { DeliveryAddress } from "./DeliveryAddress";
 import { DocumentLink } from "./DocumentLink";
 import { OrderActions } from "./OrderActions";
 import { InStorePickupInfo } from "./InStorePickupInfo";
-import { supabase } from "@/integrations/supabase/client";
+import { OrderRealtime } from "./order/OrderRealtime";
+import { OrdersTable } from "@/integrations/supabase/types/orders";
 
-interface Order {
-  id: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  pages: number;
-  copies: number;
-  gsm: string;
-  print_type: string;
-  print_sides: string;
-  delivery_type: string;
-  amount: number;
-  payment_status: string;
-  file_url: string;
-  organization: string | null;
-  street: string | null;
-  city: string | null;
-  state: string | null;
-  pincode: string | null;
-  pickup_date?: string;
-  pickup_time?: string;
-}
+type Order = OrdersTable['Row'];
 
 interface OrderCardProps {
   order: Order;
@@ -41,36 +21,13 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const [currentOrder, setCurrentOrder] = useState(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
-  useEffect(() => {
-    console.log('Setting up real-time subscription for order:', order.id);
-    
-    const channel = supabase
-      .channel(`order-${order.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'orders',
-          filter: `id=eq.${order.id}`,
-        },
-        (payload) => {
-          console.log('Order status updated:', payload);
-          if (payload.new) {
-            setCurrentOrder(payload.new as Order);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      console.log('Cleaning up subscription for order:', order.id);
-      supabase.removeChannel(channel);
-    };
-  }, [order.id]);
-
   return (
     <OrderContainer>
+      <OrderRealtime 
+        orderId={order.id} 
+        onOrderUpdate={(updatedOrder) => setCurrentOrder(updatedOrder)} 
+      />
+      
       <OrderMetadata
         customerName={currentOrder.customer_name}
         customerEmail={currentOrder.customer_email}
