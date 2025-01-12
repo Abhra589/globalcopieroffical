@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOrderDeletion } from "@/hooks/useOrderDeletion";
 import { OrderContainer } from "./OrderContainer";
 import { OrderMetadata } from "./order/OrderMetadata";
@@ -7,6 +7,7 @@ import { DeliveryAddress } from "./DeliveryAddress";
 import { DocumentLink } from "./DocumentLink";
 import { OrderActions } from "./OrderActions";
 import { InStorePickupInfo } from "./InStorePickupInfo";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Order {
   id: string;
@@ -40,7 +41,30 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const [currentOrder, setCurrentOrder] = useState(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
-  console.log('Rendering OrderCard with order:', currentOrder);
+  useEffect(() => {
+    const channel = supabase
+      .channel(`order-${order.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${order.id}`,
+        },
+        (payload) => {
+          console.log('Order status updated:', payload);
+          if (payload.new) {
+            setCurrentOrder(payload.new as Order);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [order.id]);
 
   return (
     <OrderContainer>

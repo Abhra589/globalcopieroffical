@@ -8,10 +8,26 @@ interface PaymentStatusProps {
 }
 
 export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
-  const [status, setStatus] = useState<string>("pending");
+  const [status, setStatus] = useState<string>("Payment Pending");
   const { toast } = useToast();
 
   useEffect(() => {
+    // Initial fetch of payment status
+    const fetchInitialStatus = async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('payment_status')
+        .eq('id', orderId)
+        .single();
+      
+      if (data) {
+        setStatus(data.payment_status || "Payment Pending");
+      }
+    };
+
+    fetchInitialStatus();
+
+    // Subscribe to real-time updates
     const channel = supabase
       .channel(`payment-${orderId}`)
       .on(
@@ -70,7 +86,7 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
       {status !== 'Payment Done' && (
         <Button
           onClick={handlePaymentConfirmation}
-          variant="link"
+          variant="outline"
           className="text-blue-600 hover:text-blue-800"
         >
           Click here if payment is done
