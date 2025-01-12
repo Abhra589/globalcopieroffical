@@ -11,9 +11,14 @@ serve(async (req) => {
   }
 
   try {
-    const { to, message } = await req.json()
+    const body = await req.json();
+    const { to, message } = body;
     
-    console.log('Sending WhatsApp message:', { to, message })
+    if (!to || !message) {
+      throw new Error('Missing required parameters: to and message are required');
+    }
+
+    console.log('Sending WhatsApp message:', { to, message });
 
     // For now, we'll simulate success since we don't have WhatsApp Business API credentials yet
     // When you provide the WhatsApp Business API credentials, we'll implement the actual API call here
@@ -26,7 +31,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error sending WhatsApp message:', error)
+    console.error('Error sending WhatsApp message:', error);
     
     return new Response(
       JSON.stringify({ error: error.message }),

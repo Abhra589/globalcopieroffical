@@ -35,13 +35,14 @@ export class WhatsAppBusinessService {
       } else if (text && silent) {
         // For silent messages, use the Edge Function
         const { data, error } = await supabase.functions.invoke('send-whatsapp', {
-          body: {
-            to,
+          body: JSON.stringify({
+            to: to,
             message: text
-          }
+          })
         });
         
         if (error) {
+          console.error('Error sending WhatsApp message:', error);
           throw error;
         }
         
