@@ -42,6 +42,8 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
   useEffect(() => {
+    console.log('Setting up real-time subscription for order:', order.id);
+    
     const channel = supabase
       .channel(`order-${order.id}`)
       .on(
@@ -62,6 +64,7 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
       .subscribe();
 
     return () => {
+      console.log('Cleaning up subscription for order:', order.id);
       supabase.removeChannel(channel);
     };
   }, [order.id]);
