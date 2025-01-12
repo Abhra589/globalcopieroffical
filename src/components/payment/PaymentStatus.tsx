@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface PaymentStatusProps {
   orderId: string;
@@ -61,15 +62,19 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
   return (
     <div className="text-center mt-4">
       <p className="text-lg font-medium mb-2">
-        Current Status: <span className={status === 'Payment Done' ? 'text-green-600' : 'text-yellow-600'}>{status}</span>
+        Current Status: 
+        <span className={status === 'Payment Done' ? 'text-green-600 ml-2' : 'text-yellow-600 ml-2'}>
+          {status}
+        </span>
       </p>
       {status !== 'Payment Done' && (
-        <button
+        <Button
           onClick={handlePaymentConfirmation}
-          className="text-blue-600 hover:underline"
+          variant="link"
+          className="text-blue-600 hover:text-blue-800"
         >
           Click here if payment is done
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -1,14 +1,13 @@
-import React, { useState, useRef } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FileUploadInfo } from "./file-upload/FileUploadInfo";
-import { UploadProgress } from "./file-upload/UploadProgress";
-import { Upload } from "lucide-react";
+import { UploadButton } from "./file-upload/UploadButton";
+import { FileUploadError } from "./file-upload/FileUploadError";
+import { SelectedFile } from "./file-upload/SelectedFile";
 
 interface FileUploadProps {
-  onFileChange: (file: File | null, uploadedUrl: string, filePath?: string) => void;
+  onFileChange: (file: File, url: string, path: string) => void;
   isRequired?: boolean;
 }
 
@@ -51,10 +50,10 @@ export const FileUpload = ({ onFileChange, isRequired = true }: FileUploadProps)
     }
 
     setCurrentFile(file);
+    setIsUploading(true);
 
     try {
-      setIsUploading(true);
-      const timestamp = new Date().getTime();
+      const timestamp = Date.now();
       const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
       const filePath = `${timestamp}-${sanitizedFileName}`;
 
@@ -93,9 +92,6 @@ export const FileUpload = ({ onFileChange, isRequired = true }: FileUploadProps)
       });
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
@@ -108,37 +104,21 @@ export const FileUpload = ({ onFileChange, isRequired = true }: FileUploadProps)
       <FileUploadInfo />
       <div className="flex flex-col items-center gap-2">
         <div className="relative w-full max-w-md">
-          <Button 
+          <UploadButton 
             onClick={handleUploadClick}
-            disabled={isUploading}
-            className="w-full h-12 text-lg flex items-center gap-2"
-          >
-            <Upload className="w-5 h-5" />
-            Upload PDF
-          </Button>
-          {error && (
-            <p className="absolute -right-32 top-1/2 -translate-y-1/2 text-sm text-red-500">
-              {error}
-            </p>
-          )}
+            isUploading={isUploading}
+          />
+          <FileUploadError error={error} />
         </div>
-        {currentFile && (
-          <p className="text-sm text-green-600">
-            Selected file: {currentFile.name}
-          </p>
-        )}
-        <Input
-          ref={fileInputRef}
-          id="file"
+        <SelectedFile fileName={currentFile?.name || null} />
+        <input
           type="file"
-          accept=".pdf"
+          ref={fileInputRef}
           onChange={handleFileChange}
-          disabled={isUploading}
+          accept="application/pdf"
           className="hidden"
-          required={isRequired}
         />
       </div>
-      <UploadProgress isUploading={isUploading} />
     </div>
   );
 };
