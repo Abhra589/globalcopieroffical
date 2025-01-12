@@ -72,6 +72,7 @@ export const usePaymentProcessor = () => {
           pickup_date: pickupDate,
           pickup_time: pickupTime
         });
+        console.log('New order created:', newOrder);
         finalOrderId = newOrder.id;
       }
 

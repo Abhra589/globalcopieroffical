@@ -13,6 +13,8 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
 
   useEffect(() => {
+    console.log('Setting up real-time subscription for orders');
+    
     const channel = supabase
       .channel('admin-orders')
       .on(
@@ -50,6 +52,7 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
       .subscribe();
 
     return () => {
+      console.log('Cleaning up order subscription');
       supabase.removeChannel(channel);
     };
   }, []);
