@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { AnimatedWelcome } from "./AnimatedWelcome";
 
 export const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -12,6 +13,7 @@ export const Hero = () => {
   return (
     <div className="bg-gradient-to-r from-primary to-secondary py-12 md:py-20 relative overflow-hidden">
       <div className="container mx-auto text-center text-white relative px-4">
+        <AnimatedWelcome />
         <h1 
           className={`text-3xl md:text-5xl font-bold mb-4 md:mb-6 transition-all duration-700 transform ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'

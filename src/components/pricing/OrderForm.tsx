@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderSubmission } from "@/hooks/useOrderSubmission";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { CustomerInfoForm } from "./CustomerInfoForm";
 import { DeliveryOptions } from "./DeliveryOptions";
 import { FormContainer } from "./form/FormContainer";
@@ -10,6 +10,7 @@ import { OrderSummarySection } from "./form/OrderSummarySection";
 import { calculateCourierCharge, calculateTotal } from "@/utils/orderCalculations";
 
 export const OrderForm = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const [selectedGsm, setSelectedGsm] = useState<"70" | "100">("70");
   const [selectedType, setSelectedType] = useState<"bw" | "color">("bw");
@@ -33,6 +34,16 @@ export const OrderForm = () => {
     pincode: "",
   });
   const { toast } = useToast();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const type = params.get('type');
+    if (type === 'color') {
+      setSelectedType('color');
+    } else if (type === 'bw') {
+      setSelectedType('bw');
+    }
+  }, [location]);
 
   const handleFileChange = (newFile: File | null, uploadedUrl: string, path?: string) => {
     setFile(newFile);
