@@ -18,7 +18,15 @@ export const OrderMetadata = ({
       <h3 className="text-lg font-semibold">{customerName}</h3>
       <div className="text-sm text-gray-600 space-y-1">
         <p>Email: {customerEmail}</p>
-        <p>Phone: {customerPhone}</p>
+        <p>
+          Phone: 
+          <a 
+            href={`tel:${customerPhone}`}
+            className="text-blue-600 hover:underline ml-1"
+          >
+            {customerPhone}
+          </a>
+        </p>
         {organization && <p>Organization: {organization}</p>}
       </div>
     </div>

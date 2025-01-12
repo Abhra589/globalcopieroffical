@@ -50,7 +50,6 @@ export const usePaymentProcessor = () => {
       let finalOrderId = orderId;
 
       if (orderId === 'new') {
-        // Create order with pending status
         const newOrder = await PaymentService.createNewOrder({
           pages: Number(pages),
           copies: Number(copies),
@@ -70,7 +69,7 @@ export const usePaymentProcessor = () => {
           pincode: pincode || undefined,
           pickup_date: pickupDate,
           pickup_time: pickupTime,
-          payment_status: 'pending'  // Set initial status to pending
+          payment_status: 'Payment Pending'
         });
         console.log('New order created:', newOrder);
         finalOrderId = newOrder.id;

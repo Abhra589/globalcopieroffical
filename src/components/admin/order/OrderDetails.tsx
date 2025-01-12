@@ -20,6 +20,7 @@ export const OrderDetails = ({
   paymentStatus
 }: OrderDetailsProps) => {
   const statusColor = paymentStatus === 'Payment Done' ? 'text-green-600' : 'text-yellow-600';
+  const displayStatus = paymentStatus || 'Payment Pending';
 
   return (
     <div className="space-y-4">
@@ -38,10 +39,10 @@ export const OrderDetails = ({
           <h4 className="font-medium">Payment Information</h4>
           <div className="text-sm space-y-1">
             <p className="text-primary font-medium">Amount: ₹{amount.toFixed(2)}</p>
-            <p className={`${statusColor} font-medium`}>
-              Status: {paymentStatus}
-              {paymentStatus !== 'Payment Done' && (
-                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+            <p className={`${statusColor} font-medium flex items-center gap-2`}>
+              Status: {displayStatus}
+              {displayStatus !== 'Payment Done' && (
+                <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
               )}
             </p>
           </div>
