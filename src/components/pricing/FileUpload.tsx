@@ -9,10 +9,12 @@ import { Upload } from "lucide-react";
 
 interface FileUploadProps {
   onFileChange: (file: File | null, uploadedUrl: string, filePath?: string) => void;
+  isRequired?: boolean;
 }
 
-export const FileUpload = ({ onFileChange }: FileUploadProps) => {
+export const FileUpload = ({ onFileChange, isRequired = true }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -20,11 +22,13 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
     const file = event.target.files?.[0] || null;
     
     if (!file) {
-      toast({
-        title: "Error",
-        description: "Please select a file",
-        variant: "destructive",
-      });
+      if (isRequired) {
+        toast({
+          title: "Error",
+          description: "Please select a file",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
@@ -45,6 +49,8 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
       });
       return;
     }
+
+    setCurrentFile(file);
 
     try {
       setIsUploading(true);
@@ -77,6 +83,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
       });
     } catch (error) {
       console.error('Error uploading file:', error);
+      setCurrentFile(null);
       toast({
         title: "Error",
         description: "Failed to upload file",
@@ -97,7 +104,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
   return (
     <div className="space-y-4">
       <FileUploadInfo />
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-2">
         <Button 
           onClick={handleUploadClick}
           disabled={isUploading}
@@ -106,6 +113,11 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
           <Upload className="w-5 h-5" />
           Upload PDF
         </Button>
+        {currentFile && (
+          <p className="text-sm text-green-600">
+            Selected file: {currentFile.name}
+          </p>
+        )}
         <Input
           ref={fileInputRef}
           id="file"
@@ -114,6 +126,7 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
           onChange={handleFileChange}
           disabled={isUploading}
           className="hidden"
+          required={isRequired}
         />
       </div>
       <UploadProgress isUploading={isUploading} />

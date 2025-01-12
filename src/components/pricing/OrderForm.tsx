@@ -84,6 +84,15 @@ export const OrderForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!file) {
+      toast({
+        title: "Missing Document",
+        description: "Please upload a document to print",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!customerInfo.firstName || !customerInfo.lastName || !customerInfo.email || !customerInfo.phone) {
       toast({
         title: "Missing Information",
@@ -102,19 +111,19 @@ export const OrderForm = () => {
       return;
     }
 
-    if (!file) {
+    if (deliveryType === "pickup" && (!pickupDate || !pickupTime)) {
       toast({
-        title: "Missing Document",
-        description: "Please upload a document to print",
+        title: "Missing Pickup Information",
+        description: "Please select pickup date and time",
         variant: "destructive",
       });
       return;
     }
 
-    if (deliveryType === "pickup" && (!pickupDate || !pickupTime)) {
+    if (!pageCount || pageCount <= 0) {
       toast({
-        title: "Missing Pickup Information",
-        description: "Please select pickup date and time",
+        title: "Invalid Page Count",
+        description: "Please enter a valid number of pages",
         variant: "destructive",
       });
       return;
