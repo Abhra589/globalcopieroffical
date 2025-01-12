@@ -34,7 +34,7 @@ export class PaymentService {
         print_type: orderData.print_type,
         delivery_type: orderData.delivery_type,
         amount: orderData.amount,
-        payment_status: orderData.payment_status || 'Payment Pending',
+        payment_status: 'Payment Pending',
         customer_name: orderData.customer_name,
         customer_email: orderData.customer_email,
         customer_phone: orderData.customer_phone,

@@ -49,13 +49,19 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
     try {
       setIsUploading(true);
       const timestamp = new Date().getTime();
-      const filePath = `${timestamp}-${file.name}`;
+      const sanitizedFileName = file.name.replace(/[^\x00-\x7F]/g, '');
+      const filePath = `${timestamp}-${sanitizedFileName}`;
 
       const { data, error } = await supabase.storage
         .from('print_files')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       console.log('File uploaded successfully:', data);
 
@@ -78,6 +84,9 @@ export const FileUpload = ({ onFileChange }: FileUploadProps) => {
       });
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
