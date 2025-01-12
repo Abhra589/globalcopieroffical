@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -14,66 +14,68 @@ interface FileUploadProps {
 export const FileUpload = ({ onFileChange }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
+    
     if (!file) {
-      onFileChange(null, "", "");
+      toast({
+        title: "Error",
+        description: "Please select a file",
+        variant: "destructive",
+      });
       return;
     }
 
-    if (file.type !== "application/pdf") {
+    if (file.type !== 'application/pdf') {
       toast({
-        title: "Invalid file type",
+        title: "Error",
         description: "Please upload a PDF file",
         variant: "destructive",
       });
       return;
     }
 
-    const fileSizeInMB = file.size / (1024 * 1024);
-    if (fileSizeInMB > 50) {
+    if (file.size > 100 * 1024 * 1024) {
       toast({
-        title: "File too large",
-        description: "Please contact admin for files larger than 50MB",
+        title: "Error",
+        description: "File size should be less than 100MB",
         variant: "destructive",
       });
       return;
     }
 
-    setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      setIsUploading(true);
+      const timestamp = new Date().getTime();
+      const filePath = `${timestamp}-${file.name}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { data, error } = await supabase.storage
         .from('print_files')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (error) throw error;
+
+      console.log('File uploaded successfully:', data);
 
       const { data: { publicUrl } } = supabase.storage
         .from('print_files')
         .getPublicUrl(filePath);
 
-      console.log('File uploaded successfully:', { filePath, publicUrl });
-      
       onFileChange(file, publicUrl, filePath);
-      
+
       toast({
-        title: "File uploaded successfully",
-        description: "Your document has been uploaded",
+        title: "Success",
+        description: "File uploaded successfully",
       });
     } catch (error) {
       console.error('Error uploading file:', error);
       toast({
-        title: "Upload failed",
-        description: "Failed to upload file. Please try again.",
+        title: "Error",
+        description: "Failed to upload file",
         variant: "destructive",
       });
-      onFileChange(null, "", "");
     } finally {
       setIsUploading(false);
     }
