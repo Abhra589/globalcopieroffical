@@ -5,6 +5,7 @@ import { PaymentConfirmationDialog } from './PaymentConfirmationDialog';
 import { usePaymentProcessor } from './PaymentProcessor';
 import { PaymentService } from '@/services/payment/PaymentService';
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from '@/hooks/use-toast';
 
 interface PaymentActionsProps {
   upiLink: string;
@@ -12,6 +13,7 @@ interface PaymentActionsProps {
 
 const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
   const [countdown, setCountdown] = useState(5);
@@ -43,34 +45,39 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   }, [showConfirmation, navigate]);
 
   const handlePaymentDone = async () => {
-    const result = await processPayment();
-    
-    if (result.success) {
-      // Update the payment status to "Payment Done"
-      await PaymentService.updatePaymentStatus(result.orderId);
-      setShowConfirmation(true);
+    try {
+      const result = await processPayment();
       
-      // Subscribe to real-time updates for this order
-      const channel = supabase
-        .channel('order_status')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'orders',
-            filter: `id=eq.${result.orderId}`,
-          },
-          (payload) => {
-            console.log('Order status updated:', payload);
-          }
-        )
-        .subscribe();
+      if (result.success) {
+        // Update the payment status to "Payment Done"
+        const { error } = await supabase
+          .from('orders')
+          .update({ payment_status: 'Payment Done' })
+          .eq('id', result.orderId);
 
-      // Cleanup subscription when component unmounts
-      return () => {
-        supabase.removeChannel(channel);
-      };
+        if (error) {
+          console.error('Error updating payment status:', error);
+          toast({
+            title: "Error",
+            description: "Failed to update payment status. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setShowConfirmation(true);
+        toast({
+          title: "Success",
+          description: "Payment status updated successfully!",
+        });
+      }
+    } catch (error) {
+      console.error('Error in handlePaymentDone:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -83,6 +90,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       <PaymentButtons
         onUPIClick={handleUPIClick}
         onPaymentDone={handlePaymentDone}
+        isLoading={false}
       />
       
       <PaymentConfirmationDialog
