@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState, useEffect } from "react";
 import { AuthError, AuthApiError } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthFormProps {
   isAdmin?: boolean;
@@ -11,8 +13,15 @@ interface AuthFormProps {
 
 export const AuthForm = ({ isAdmin = false }: AuthFormProps) => {
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
+    // If not admin, sign in anonymously and redirect
+    if (!isAdmin) {
+      handleCustomerAccess();
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && isAdmin) {
         // Check if the user is actually an admin
@@ -25,12 +34,39 @@ export const AuthForm = ({ isAdmin = false }: AuthFormProps) => {
           // If not admin, sign them out
           await supabase.auth.signOut();
           setErrorMessage("This account doesn't have admin privileges.");
+        } else {
+          // If admin, redirect to admin page
+          navigate('/admin');
         }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [isAdmin]);
+  }, [isAdmin, navigate]);
+
+  const handleCustomerAccess = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.signInWithPassword({
+        email: 'customer@globalcopier.com',
+        password: 'customer123',
+      });
+
+      if (error) throw error;
+
+      if (session) {
+        toast({
+          title: "Welcome!",
+          description: "You're now logged in as a customer",
+        });
+        navigate('/order');
+      }
+    } catch (error) {
+      console.error('Error during customer access:', error);
+      if (error instanceof AuthApiError) {
+        setErrorMessage(getErrorMessage(error));
+      }
+    }
+  };
 
   const getErrorMessage = (error: AuthError) => {
     if (error instanceof AuthApiError) {
@@ -50,6 +86,7 @@ export const AuthForm = ({ isAdmin = false }: AuthFormProps) => {
     return error.message;
   };
 
+  // Only render the Auth UI for admin login
   return (
     <div className="w-full">
       {errorMessage && (
@@ -57,21 +94,23 @@ export const AuthForm = ({ isAdmin = false }: AuthFormProps) => {
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
-      <Auth
-        supabaseClient={supabase}
-        appearance={{
-          theme: ThemeSupa,
-          variables: {
-            default: {
-              colors: {
-                brand: '#004d40',
-                brandAccent: '#00796b',
+      {isAdmin && (
+        <Auth
+          supabaseClient={supabase}
+          appearance={{
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: '#004d40',
+                  brandAccent: '#00796b',
+                },
               },
             },
-          },
-        }}
-        providers={[]}
-      />
+          }}
+          providers={[]}
+        />
+      )}
     </div>
   );
 };
