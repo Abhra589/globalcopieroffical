@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { OrderCard } from "./OrderCard";
 import { OrdersTable } from "@/integrations/supabase/types/orders";
+import { useToast } from "@/hooks/use-toast";
 
 type Order = OrdersTable['Row'];
 
@@ -11,8 +12,9 @@ interface OrderListProps {
 
 export const OrderList = ({ initialOrders }: OrderListProps) => {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const { toast } = useToast();
 
-  useEffect(() => {
+  const setupRealtimeSubscription = useCallback(() => {
     console.log('Setting up real-time subscription for orders');
     
     const channel = supabase
@@ -49,13 +51,33 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('Subscription error, retrying...');
+          toast({
+            title: "Connection Error",
+            description: "Lost connection to updates. Retrying...",
+            variant: "destructive",
+          });
+          // Retry subscription after a delay
+          setTimeout(() => {
+            console.log('Retrying subscription...');
+            setupRealtimeSubscription();
+          }, 3000);
+        }
+      });
+
+    return channel;
+  }, [toast]);
+
+  useEffect(() => {
+    const channel = setupRealtimeSubscription();
 
     return () => {
       console.log('Cleaning up order subscription');
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [setupRealtimeSubscription]);
 
   const handleDeleteOrder = (orderId: string) => {
     setOrders(orders.filter(order => order.id !== orderId));
