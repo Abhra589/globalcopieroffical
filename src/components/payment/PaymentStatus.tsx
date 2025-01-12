@@ -55,6 +55,7 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
       .subscribe();
 
     return () => {
+      console.log('Cleaning up payment status subscription');
       supabase.removeChannel(channel);
     };
   }, [orderId]);
@@ -76,6 +77,9 @@ export const PaymentStatus = ({ orderId }: PaymentStatusProps) => {
         title: "Success",
         description: "Payment status updated successfully",
       });
+
+      // Update local state immediately
+      setStatus('Payment Done');
     } catch (error) {
       console.error('Error updating payment status:', error);
       toast({

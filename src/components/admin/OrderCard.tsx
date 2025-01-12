@@ -47,7 +47,7 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         printType={currentOrder.print_type}
         printSides={currentOrder.print_sides}
         amount={currentOrder.amount}
-        paymentStatus={currentOrder.payment_status}
+        paymentStatus={currentOrder.payment_status || 'Payment Pending'}
       />
 
       {currentOrder.delivery_type === 'pickup' ? (

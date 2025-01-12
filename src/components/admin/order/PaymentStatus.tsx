@@ -27,7 +27,9 @@ export const PaymentStatus = ({ status, amount }: PaymentStatusProps) => {
       </p>
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">Status:</span>
-        <div className={`px-3 py-2 rounded-md border ${statusColor} text-sm font-medium flex items-center gap-2 w-fit`}>
+        <div 
+          className={`px-3 py-2 rounded-md border ${statusColor} text-sm font-medium flex items-center gap-2 w-fit`}
+        >
           {displayStatus}
           {displayStatus.toLowerCase() === 'payment pending' && (
             <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
