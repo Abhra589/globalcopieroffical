@@ -9,6 +9,7 @@ import { OrderActions } from "./OrderActions";
 import { InStorePickupInfo } from "./InStorePickupInfo";
 import { OrderRealtime } from "./order/OrderRealtime";
 import { OrdersTable } from "@/integrations/supabase/types/orders";
+import { format } from "date-fns";
 
 type Order = OrdersTable['Row'];
 
@@ -28,13 +29,22 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
     setCurrentOrder(updatedOrder);
   };
 
+  const formattedDate = currentOrder.created_at 
+    ? format(new Date(currentOrder.created_at), 'PPpp')
+    : 'Date not available';
+
   return (
     <OrderContainer>
       <OrderRealtime 
-        orderId={order.id} 
+        orderId={currentOrder.id} 
         onOrderUpdate={handleOrderUpdate}
       />
       
+      <div className="mb-4 text-sm text-gray-600">
+        <p>Order ID: {currentOrder.id}</p>
+        <p>Created: {formattedDate}</p>
+      </div>
+
       <OrderMetadata
         customerName={currentOrder.customer_name}
         customerEmail={currentOrder.customer_email}

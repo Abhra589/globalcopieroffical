@@ -79,12 +79,12 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
   }, [setupRealtimeSubscription]);
 
   const handleDeleteOrder = (orderId: string) => {
-    setOrders(currentOrders => {
-      const updatedOrders = currentOrders.filter(order => order.id !== orderId);
-      // Only show "no orders" message if there are no orders after filtering
-      return updatedOrders;
-    });
+    setOrders(currentOrders => currentOrders.filter(order => order.id !== orderId));
   };
+
+  if (orders.length === 0) {
+    return <p className="text-center text-gray-500">No orders found</p>;
+  }
 
   return (
     <div className="space-y-4">
@@ -95,9 +95,6 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
           onDelete={handleDeleteOrder}
         />
       ))}
-      {orders.length === 0 && initialOrders.length === 0 && (
-        <p className="text-center text-gray-500">No orders yet</p>
-      )}
     </div>
   );
 };

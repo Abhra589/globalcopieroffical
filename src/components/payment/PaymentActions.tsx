@@ -51,10 +51,12 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     try {
       const result = await processPayment();
       
-      if (result.success) {
-        // Retry logic for updating payment status
+      if (result.success && result.orderId) {
+        const maxRetries = 3;
         const updatePaymentStatus = async (retryCount = 0) => {
           try {
+            console.log(`Attempting to update payment status for order ${result.orderId}, attempt ${retryCount + 1}`);
+            
             const { error } = await supabase
               .from('orders')
               .update({ payment_status: 'Payment Done' })
@@ -62,14 +64,15 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
 
             if (error) {
               console.error('Error updating payment status:', error);
-              if (retryCount < 3) {
+              if (retryCount < maxRetries) {
                 console.log(`Retrying update attempt ${retryCount + 1}...`);
-                setTimeout(() => updatePaymentStatus(retryCount + 1), 1000);
-                return;
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return updatePaymentStatus(retryCount + 1);
               }
               throw error;
             }
 
+            console.log('Payment status updated successfully');
             setShowConfirmation(true);
             toast({
               title: "Success",
@@ -86,6 +89,8 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         };
 
         await updatePaymentStatus();
+      } else {
+        throw new Error('Invalid order ID');
       }
     } catch (error) {
       console.error('Error in handlePaymentDone:', error);
