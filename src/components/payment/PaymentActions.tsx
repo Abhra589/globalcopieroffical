@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PaymentButtons } from './PaymentButtons';
 import { PaymentConfirmationDialog } from './PaymentConfirmationDialog';
 import { usePaymentProcessor } from './PaymentProcessor';
@@ -13,6 +13,7 @@ interface PaymentActionsProps {
 const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
   const [countdown, setCountdown] = useState(5);
@@ -48,17 +49,19 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     try {
       console.log('Updating payment status for order:', orderId);
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('orders')
         .update({ payment_status: 'Payment Done' })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .select()
+        .single();
 
       if (error) {
         console.error('Error updating payment status:', error);
         throw error;
       }
 
-      console.log('Payment status updated successfully');
+      console.log('Payment status updated successfully:', data);
       return true;
     } catch (error) {
       console.error('Error in updatePaymentStatus:', error);
