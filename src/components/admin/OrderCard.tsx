@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useOrderDeletion } from "@/hooks/useOrderDeletion";
 import { OrderContainer } from "./OrderContainer";
 import { OrderMetadata } from "./order/OrderMetadata";
@@ -22,8 +22,7 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const [currentOrder, setCurrentOrder] = useState<Order>(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
-  // Poll for payment status updates
-  React.useEffect(() => {
+  useEffect(() => {
     const checkPaymentStatus = async () => {
       try {
         const { data, error } = await supabase

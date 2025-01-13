@@ -8,7 +8,7 @@ type Order = OrdersTable['Row'];
 export const useOrderFetch = (orderId: string, onOrderUpdate: (order: Order) => void) => {
   const { toast } = useToast();
 
-  return useCallback(async (retryCount = 0) => {
+  const fetchOrder = useCallback(async (orderId: string, retryCount = 0) => {
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -21,7 +21,7 @@ export const useOrderFetch = (orderId: string, onOrderUpdate: (order: Order) => 
         if (retryCount < 3) {
           const delay = 1000 * (retryCount + 1);
           console.log(`Retrying fetch in ${delay}ms...`);
-          setTimeout(() => useOrderFetch(retryCount + 1), delay);
+          setTimeout(() => fetchOrder(orderId, retryCount + 1), delay);
           return;
         }
         toast({
@@ -46,7 +46,7 @@ export const useOrderFetch = (orderId: string, onOrderUpdate: (order: Order) => 
     } catch (error) {
       console.error('Error in fetchOrder:', error);
       if (retryCount < 3) {
-        setTimeout(() => useOrderFetch(retryCount + 1), 1000 * (retryCount + 1));
+        setTimeout(() => fetchOrder(orderId, retryCount + 1), 1000 * (retryCount + 1));
         return;
       }
       toast({
@@ -56,4 +56,6 @@ export const useOrderFetch = (orderId: string, onOrderUpdate: (order: Order) => 
       });
     }
   }, [orderId, onOrderUpdate, toast]);
+
+  return fetchOrder;
 };

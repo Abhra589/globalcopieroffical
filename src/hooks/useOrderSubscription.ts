@@ -8,7 +8,7 @@ type Order = OrdersTable['Row'];
 export const useOrderSubscription = (orderId: string, onOrderUpdate: (order: Order) => void) => {
   const { toast } = useToast();
 
-  return useCallback(() => {
+  const setupSubscription = useCallback(() => {
     console.log('Setting up real-time subscription for order:', orderId);
     
     const channel = supabase
@@ -39,11 +39,13 @@ export const useOrderSubscription = (orderId: string, onOrderUpdate: (order: Ord
           });
           setTimeout(() => {
             console.log('Retrying subscription...');
-            setupRealtimeSubscription();
+            setupSubscription();
           }, 3000);
         }
       });
 
     return channel;
   }, [orderId, onOrderUpdate, toast]);
+
+  return setupSubscription;
 };
