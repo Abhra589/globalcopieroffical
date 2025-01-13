@@ -19,21 +19,19 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null);
-    
     const file = event.target.files?.[0] || null;
-    const validation = validateFile(file);
+    setError(null); // Clear any existing errors when a new file is selected
+    
+    if (!file) return;
 
+    const validation = validateFile(file);
     if (!validation.isValid) {
-      setError(validation.error);
-      // Only show validation error toast if it's not during initial upload
       if (isSubmitting) {
+        setError(validation.error);
         handleFileValidationError(validation.error!);
       }
       return;
     }
-
-    if (!file) return;
 
     setCurrentFile(file);
     setIsUploading(true);
@@ -48,8 +46,8 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
       });
     } catch (err) {
       console.error('Error uploading file:', err);
-      setError('Failed to upload file. Please try again.');
       if (isSubmitting) {
+        setError('Failed to upload file. Please try again.');
         handleFileValidationError('Failed to upload file. Please try again.');
       }
       setCurrentFile(null);
@@ -59,6 +57,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
   };
 
   const handleUploadClick = () => {
+    setError(null); // Clear any existing errors when upload button is clicked
     fileInputRef.current?.click();
   };
 
@@ -84,7 +83,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
           onClick={handleUploadClick}
           isUploading={isUploading}
           error={error}
-          showError={false} // Never show error on the upload button itself
+          showError={false}
         />
       )}
     </div>
