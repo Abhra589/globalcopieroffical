@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UploadButton } from "./file-upload/UploadButton";
 import { SelectedFile } from "./file-upload/SelectedFile";
 import { FileUploadInfo } from "./file-upload/FileUploadInfo";
-import { validateFile, handleFileValidationError } from '@/utils/fileUpload';
+import { validateFile } from '@/utils/fileUpload';
 import { uploadFile } from '@/utils/s3Config';
 import { toast } from "@/hooks/use-toast";
 
@@ -14,22 +14,13 @@ interface FileUploadProps {
 
 export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = false }: FileUploadProps) => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
-    setError(null);
     
     if (!file) return;
-
-    const validation = validateFile(file);
-    if (!validation.isValid && validation.error && isSubmitting) {
-      setError(validation.error);
-      handleFileValidationError(validation.error);
-      return;
-    }
 
     setCurrentFile(file);
     setIsUploading(true);
@@ -37,17 +28,12 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
     try {
       const { url, path } = await uploadFile(file);
       onFileUpload(file, url, path);
-      setError(null);
       toast({
         title: "Success",
         description: "File uploaded successfully",
       });
     } catch (err) {
       console.error('Error uploading file:', err);
-      if (isSubmitting) {
-        setError('Failed to upload file. Please try again.');
-        handleFileValidationError('Failed to upload file. Please try again.');
-      }
       setCurrentFile(null);
     } finally {
       setIsUploading(false);
@@ -56,10 +42,6 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
-  };
-
-  const handleClearError = () => {
-    setError(null);
   };
 
   return (
@@ -83,9 +65,9 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
         <UploadButton
           onClick={handleUploadClick}
           isUploading={isUploading}
-          error={error}
+          error={null}
           showError={false}
-          onClearError={handleClearError}
+          onClearError={() => {}}
         />
       )}
     </div>
