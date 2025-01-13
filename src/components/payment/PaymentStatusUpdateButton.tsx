@@ -24,7 +24,7 @@ export const PaymentStatusUpdateButton = ({ orderId, onSuccess }: PaymentStatusU
         .from('orders')
         .update({ 
           customer_payment_response: "customer has paid the amount. Did you get it?",
-          payment_status: 'Payment Pending' // Keep as pending for admin verification
+          payment_status: 'Payment Pending'
         })
         .eq('id', orderId);
 

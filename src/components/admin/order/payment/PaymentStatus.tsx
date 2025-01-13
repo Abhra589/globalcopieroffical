@@ -1,8 +1,8 @@
 import React from 'react';
-import { StatusBadge } from './StatusBadge';
-import { CustomerPaymentAlert } from './CustomerPaymentAlert';
-import { ConfirmPaymentButton } from './ConfirmPaymentButton';
+import { PaymentStatusBadge } from './PaymentStatusBadge';
+import { PaymentResponseAlert } from './PaymentResponseAlert';
 import { PaymentAmount } from './PaymentAmount';
+import { ConfirmPaymentButton } from './ConfirmPaymentButton';
 
 interface PaymentStatusProps {
   status: string;
@@ -16,8 +16,8 @@ export const PaymentStatus = ({
   status, 
   amount,
   orderId,
-  customerPaymentResponse,
-  onUpdatePaymentStatus = () => {} 
+  customerPaymentResponse = "customer has not paid the amount",
+  onUpdatePaymentStatus 
 }: PaymentStatusProps) => {
   const isPending = status.toLowerCase() === 'payment pending';
   const hasCustomerConfirmedPayment = customerPaymentResponse === "customer has paid the amount. Did you get it?";
@@ -28,10 +28,10 @@ export const PaymentStatus = ({
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">Status:</span>
         <div className="space-y-2">
-          <StatusBadge status={status} />
-          <CustomerPaymentAlert 
-            show={hasCustomerConfirmedPayment} 
-            message={customerPaymentResponse}
+          <PaymentStatusBadge status={status} />
+          <PaymentResponseAlert 
+            show={hasCustomerConfirmedPayment && isPending}
+            customerPaymentResponse={customerPaymentResponse}
           />
         </div>
 
