@@ -16,6 +16,7 @@ interface PrintingOptionsProps {
   copies: number;
   setCopies: (copies: number) => void;
   onFileChange: (file: File | null, uploadedUrl: string, path?: string) => void;
+  isSubmitting?: boolean;
 }
 
 export const PrintingOptions = ({
@@ -30,6 +31,7 @@ export const PrintingOptions = ({
   copies,
   setCopies,
   onFileChange,
+  isSubmitting = false,
 }: PrintingOptionsProps) => {
   return (
     <div className="space-y-6">
@@ -42,7 +44,10 @@ export const PrintingOptions = ({
         setSelectedSides={setSelectedSides}
       />
       <PriceList selectedGsm={selectedGsm} />
-      <FileUpload onFileUpload={onFileChange} />
+      <FileUpload 
+        onFileUpload={onFileChange} 
+        isSubmitting={isSubmitting}
+      />
       <ManualPageCount pageCount={pageCount} onPageCountChange={setPageCount} />
       <CopiesInput copies={copies} setCopies={setCopies} />
     </div>

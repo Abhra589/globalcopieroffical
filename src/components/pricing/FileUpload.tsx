@@ -9,9 +9,10 @@ import { toast } from "@/hooks/use-toast";
 interface FileUploadProps {
   onFileUpload: (file: File | null, url: string, path?: string) => void;
   isRequired?: boolean;
+  isSubmitting?: boolean;
 }
 
-export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps) => {
+export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = false }: FileUploadProps) => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -78,6 +79,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
           onClick={handleUploadClick}
           isUploading={isUploading}
           error={error}
+          showError={isSubmitting}
         />
       )}
     </div>

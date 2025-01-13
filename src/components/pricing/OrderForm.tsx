@@ -23,6 +23,7 @@ export const OrderForm = () => {
   const [copies, setCopies] = useState(1);
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     firstName: "",
     lastName: "",
@@ -83,6 +84,7 @@ export const OrderForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     if (!customerInfo.firstName || !customerInfo.lastName || !customerInfo.email || !customerInfo.phone) {
       toast({
@@ -90,6 +92,7 @@ export const OrderForm = () => {
         description: "Please fill in all required fields",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -99,6 +102,7 @@ export const OrderForm = () => {
         description: "Please fill in all address fields for delivery",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -108,6 +112,7 @@ export const OrderForm = () => {
         description: "Please select pickup date and time",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -117,10 +122,12 @@ export const OrderForm = () => {
         description: "Please enter a valid number of pages",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 
     handleProceedToPayment();
+    setIsSubmitting(false);
   };
 
   return (
@@ -140,6 +147,7 @@ export const OrderForm = () => {
           copies={copies}
           setCopies={setCopies}
           onFileChange={handleFileChange}
+          isSubmitting={isSubmitting}
         />
 
         <DeliveryOptions 
