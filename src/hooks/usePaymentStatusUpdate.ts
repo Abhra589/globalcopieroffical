@@ -18,11 +18,16 @@ export const usePaymentStatusUpdate = () => {
         .update({ payment_status: 'Payment Done' })
         .eq('id', orderId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating payment status:', error);
         throw error;
+      }
+
+      if (!data) {
+        console.error('No data returned after update');
+        throw new Error('Failed to update payment status');
       }
 
       console.log('Payment status updated successfully:', data);
@@ -34,7 +39,7 @@ export const usePaymentStatusUpdate = () => {
   };
 
   const handlePaymentUpdate = async () => {
-    if (isUpdating) return;
+    if (isUpdating) return false;
     
     setIsUpdating(true);
     try {
@@ -42,6 +47,8 @@ export const usePaymentStatusUpdate = () => {
       if (!orderId) {
         throw new Error('Order ID not found in URL parameters');
       }
+
+      console.log('Processing payment update for order:', orderId);
 
       if (orderId === 'new') {
         const result = await PaymentService.createNewOrder({
@@ -65,6 +72,7 @@ export const usePaymentStatusUpdate = () => {
           pickup_time: searchParams.get('pickupTime'),
           payment_status: 'Payment Pending'
         });
+        console.log('New order created:', result);
         await updatePaymentStatus(result.id);
       } else {
         await updatePaymentStatus(orderId);

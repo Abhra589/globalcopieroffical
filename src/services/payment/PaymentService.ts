@@ -64,16 +64,23 @@ export class PaymentService {
   static async updatePaymentStatus(orderId: string) {
     console.log('Updating payment status for order:', orderId);
     
-    const { error: updateError } = await supabase
+    const { data, error: updateError } = await supabase
       .from('orders')
       .update({ payment_status: 'Payment Done' })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select()
+      .maybeSingle();
 
     if (updateError) {
       console.error('Error updating payment status:', updateError);
       throw updateError;
     }
+
+    if (!data) {
+      throw new Error('No data returned after update');
+    }
     
-    console.log('Payment status updated successfully');
+    console.log('Payment status updated successfully:', data);
+    return data;
   }
 }
