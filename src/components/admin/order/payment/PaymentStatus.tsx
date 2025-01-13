@@ -29,16 +29,18 @@ export const PaymentStatus = ({
         <span className="text-sm font-medium">Status:</span>
         <div className="space-y-2">
           <StatusBadge status={status} />
-          <CustomerPaymentAlert 
-            show={customerPaymentResponse && isPending} 
-          />
+          {customerPaymentResponse && isPending && (
+            <CustomerPaymentAlert show={true} />
+          )}
         </div>
 
-        <ConfirmPaymentButton
-          orderId={orderId}
-          onUpdatePaymentStatus={onUpdatePaymentStatus}
-          show={isPending}
-        />
+        {isPending && (
+          <ConfirmPaymentButton
+            orderId={orderId}
+            onUpdatePaymentStatus={onUpdatePaymentStatus}
+            show={true}
+          />
+        )}
       </div>
     </div>
   );
