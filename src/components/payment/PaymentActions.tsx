@@ -44,6 +44,33 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     };
   }, [showConfirmation, navigate]);
 
+  const updatePaymentStatus = async (orderId: string, retryCount = 0) => {
+    try {
+      console.log(`Attempting to update payment status for order ${orderId}, attempt ${retryCount + 1}`);
+      
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: 'Payment Done' })
+        .eq('id', orderId);
+
+      if (error) {
+        console.error('Error updating payment status:', error);
+        if (retryCount < 3) {
+          console.log(`Retrying update attempt ${retryCount + 1}...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return updatePaymentStatus(orderId, retryCount + 1);
+        }
+        throw error;
+      }
+
+      console.log('Payment status updated successfully');
+      return true;
+    } catch (error) {
+      console.error('Error in updatePaymentStatus:', error);
+      throw error;
+    }
+  };
+
   const handlePaymentDone = async () => {
     if (isUpdating) return;
     
@@ -52,43 +79,12 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       const result = await processPayment();
       
       if (result.success && result.orderId) {
-        const maxRetries = 3;
-        const updatePaymentStatus = async (retryCount = 0) => {
-          try {
-            console.log(`Attempting to update payment status for order ${result.orderId}, attempt ${retryCount + 1}`);
-            
-            const { error } = await supabase
-              .from('orders')
-              .update({ payment_status: 'Payment Done' })
-              .eq('id', result.orderId);
-
-            if (error) {
-              console.error('Error updating payment status:', error);
-              if (retryCount < maxRetries) {
-                console.log(`Retrying update attempt ${retryCount + 1}...`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return updatePaymentStatus(retryCount + 1);
-              }
-              throw error;
-            }
-
-            console.log('Payment status updated successfully');
-            setShowConfirmation(true);
-            toast({
-              title: "Success",
-              description: "Payment status updated successfully!",
-            });
-          } catch (error) {
-            console.error('Error in updatePaymentStatus:', error);
-            toast({
-              title: "Error",
-              description: "Failed to update payment status. Please try again.",
-              variant: "destructive",
-            });
-          }
-        };
-
-        await updatePaymentStatus();
+        await updatePaymentStatus(result.orderId);
+        setShowConfirmation(true);
+        toast({
+          title: "Success",
+          description: "Payment status updated successfully!",
+        });
       } else {
         throw new Error('Invalid order ID');
       }
@@ -96,7 +92,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       console.error('Error in handlePaymentDone:', error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: "Failed to update payment status. Please try again.",
         variant: "destructive",
       });
     } finally {
