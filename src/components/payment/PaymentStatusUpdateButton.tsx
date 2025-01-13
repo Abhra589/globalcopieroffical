@@ -29,8 +29,8 @@ export const PaymentStatusUpdateButton = ({ orderId, onSuccess }: PaymentStatusU
     try {
       console.log('Starting payment status update for order:', orderId);
 
-      // Create WhatsApp message with order details
-      const message = `I ${customerName} have paid Rs.${amount} for my order (Order ID: ${orderId}).\n\nOrder Details:\n- Pages: ${pages}\n- Copies: ${copies}\n- Print Type: ${printType}\n- Delivery: ${deliveryType}`;
+      // Create WhatsApp message with order details and the additional text
+      const message = `I ${customerName} have paid Rs.${amount} for my order (Order ID: ${orderId}).\n\nOrder Details:\n- Pages: ${pages}\n- Copies: ${copies}\n- Print Type: ${printType}\n- Delivery: ${deliveryType}\n\nPlease confirm my order asap`;
       
       // Open WhatsApp with admin number
       const adminPhone = "918777060249"; // Admin's phone number
