@@ -20,28 +20,9 @@ export const PaymentStatusUpdateButton = ({ orderId, onSuccess }: PaymentStatusU
     try {
       console.log('Starting payment status update for order:', orderId);
 
-      // First, verify the order exists
-      const { data: existingOrder, error: fetchError } = await supabase
-        .from('orders')
-        .select('payment_status')
-        .eq('id', orderId)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error('Error fetching order:', fetchError);
-        throw new Error('Failed to fetch order');
-      }
-
-      if (!existingOrder) {
-        throw new Error('Order not found');
-      }
-
-      console.log('Found existing order:', existingOrder);
-
-      // Update payment status with exact string match
       const { error: updateError } = await supabase
         .from('orders')
-        .update({ payment_status: 'Payment Done' })
+        .update({ customer_payment_response: true })
         .eq('id', orderId);
 
       if (updateError) {
@@ -53,7 +34,7 @@ export const PaymentStatusUpdateButton = ({ orderId, onSuccess }: PaymentStatusU
       
       toast({
         title: "Success",
-        description: "Payment status updated successfully!",
+        description: "Payment status updated successfully! Admin will verify the payment.",
       });
 
       if (onSuccess) {

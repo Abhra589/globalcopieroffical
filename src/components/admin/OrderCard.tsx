@@ -22,6 +22,13 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const [currentOrder, setCurrentOrder] = useState<Order>(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
+  const handlePaymentStatusUpdate = (newStatus: string) => {
+    setCurrentOrder(prev => ({
+      ...prev,
+      payment_status: newStatus
+    }));
+  };
+
   useEffect(() => {
     const checkPaymentStatus = async () => {
       try {
@@ -81,6 +88,8 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         printSides={currentOrder.print_sides}
         amount={currentOrder.amount}
         paymentStatus={currentOrder.payment_status || 'Payment Pending'}
+        customerPaymentResponse={currentOrder.customer_payment_response}
+        onUpdatePaymentStatus={handlePaymentStatusUpdate}
       />
 
       {currentOrder.delivery_type === 'pickup' ? (

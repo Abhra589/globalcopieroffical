@@ -10,6 +10,8 @@ interface OrderDetailsProps {
   printSides: string;
   amount: number;
   paymentStatus: string;
+  customerPaymentResponse?: boolean;
+  onUpdatePaymentStatus?: (newStatus: string) => void;
 }
 
 export const OrderDetails = ({
@@ -20,22 +22,24 @@ export const OrderDetails = ({
   printSides,
   amount,
   paymentStatus,
+  customerPaymentResponse,
+  onUpdatePaymentStatus
 }: OrderDetailsProps) => {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <PrintSpecifications
-          pages={pages}
-          copies={copies}
-          gsm={gsm}
-          printType={printType}
-          printSides={printSides}
-        />
-        <div>
-          <h4 className="font-medium mb-2">Payment Information</h4>
-          <PaymentStatus status={paymentStatus} amount={amount} />
-        </div>
-      </div>
+      <PrintSpecifications
+        pages={pages}
+        copies={copies}
+        gsm={gsm}
+        printType={printType}
+        printSides={printSides}
+      />
+      <PaymentStatus 
+        status={paymentStatus} 
+        amount={amount} 
+        customerPaymentResponse={customerPaymentResponse}
+        onUpdatePaymentStatus={onUpdatePaymentStatus}
+      />
     </div>
   );
 };
