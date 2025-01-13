@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PaymentButtons } from './PaymentButtons';
 import { PaymentConfirmationDialog } from './PaymentConfirmationDialog';
-import { usePaymentStatusUpdate } from '@/hooks/usePaymentStatusUpdate';
 
 interface PaymentActionsProps {
   upiLink: string;
 }
 
 const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
+  const [searchParams] = useSearchParams();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
   const [countdown, setCountdown] = useState(5);
-  const { isUpdating, handlePaymentUpdate } = usePaymentStatusUpdate();
 
   React.useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -38,23 +38,22 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     };
   }, [showConfirmation]);
 
-  const handlePaymentDone = async () => {
-    const success = await handlePaymentUpdate();
-    if (success) {
-      setShowConfirmation(true);
-    }
-  };
-
   const handleUPIClick = () => {
     window.location.href = upiLink;
   };
 
+  const handlePaymentSuccess = () => {
+    setShowConfirmation(true);
+  };
+
+  const orderId = searchParams.get('orderId') || '';
+
   return (
     <>
       <PaymentButtons
+        orderId={orderId}
         onUPIClick={handleUPIClick}
-        onPaymentDone={handlePaymentDone}
-        isLoading={isUpdating}
+        onPaymentSuccess={handlePaymentSuccess}
       />
       
       <PaymentConfirmationDialog
