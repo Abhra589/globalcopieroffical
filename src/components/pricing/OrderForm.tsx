@@ -83,15 +83,6 @@ export const OrderForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!file) {
-      toast({
-        title: "Missing Document",
-        description: "Please upload a document to print",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (!customerInfo.firstName || !customerInfo.lastName || !customerInfo.email || !customerInfo.phone) {
       toast({
