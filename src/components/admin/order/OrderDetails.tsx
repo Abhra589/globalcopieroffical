@@ -11,7 +11,7 @@ interface OrderDetailsProps {
   amount: number;
   orderId: string;
   paymentStatus: string;
-  customerPaymentResponse?: boolean;
+  customerPaymentResponse?: string;
   onUpdatePaymentStatus?: (newStatus: string) => void;
 }
 
