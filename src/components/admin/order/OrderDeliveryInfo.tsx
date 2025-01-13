@@ -38,7 +38,9 @@ export const OrderDeliveryInfo = ({
           pincode={pincode}
         />
       )}
-      <DocumentLink fileUrl={fileUrl} />
+      <div className="mt-4">
+        <DocumentLink fileUrl={fileUrl} />
+      </div>
     </div>
   );
 };

@@ -6,7 +6,7 @@ interface DocumentLinkProps {
 }
 
 export const DocumentLink = ({ fileUrl }: DocumentLinkProps) => {
-  if (!fileUrl) {
+  if (!fileUrl || fileUrl === '') {
     return (
       <p className="text-sm text-gray-500">No document uploaded</p>
     );
