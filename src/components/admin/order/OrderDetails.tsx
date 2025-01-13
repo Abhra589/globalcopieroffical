@@ -1,6 +1,6 @@
 import React from 'react';
 import { PrintSpecifications } from './PrintSpecifications';
-import { PaymentStatus } from './PaymentStatus';
+import { PaymentStatus } from './payment/PaymentStatus';
 
 interface OrderDetailsProps {
   pages: number;
