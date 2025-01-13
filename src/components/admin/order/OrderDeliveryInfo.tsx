@@ -39,6 +39,7 @@ export const OrderDeliveryInfo = ({
         />
       )}
       <div className="mt-4">
+        <p className="text-sm font-medium mb-2">Document</p>
         <DocumentLink fileUrl={fileUrl} />
       </div>
     </div>
