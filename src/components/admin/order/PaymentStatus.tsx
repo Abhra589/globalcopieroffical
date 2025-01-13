@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface PaymentStatusProps {
   status: string;
   amount: number;
-  orderId: string; // Add orderId prop
+  orderId: string;
   customerPaymentResponse?: boolean;
   onUpdatePaymentStatus?: (newStatus: string) => void;
 }
@@ -74,22 +74,24 @@ export const PaymentStatus = ({
       </p>
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">Status:</span>
-        <div 
-          className={`px-3 py-2 rounded-md border ${statusColor} text-sm font-medium flex items-center gap-2 w-fit`}
-        >
-          {displayStatus}
-          {displayStatus.toLowerCase() === 'payment pending' && (
-            <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+        <div className="space-y-2">
+          <div 
+            className={`px-3 py-2 rounded-md border ${statusColor} text-sm font-medium flex items-center gap-2 w-fit`}
+          >
+            {displayStatus}
+            {displayStatus.toLowerCase() === 'payment pending' && (
+              <span className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+            )}
+          </div>
+          
+          {customerPaymentResponse && status.toLowerCase() === 'payment pending' && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-700 font-medium">
+                Customer has paid the amount. Please check if you received the payment before confirming.
+              </p>
+            </div>
           )}
         </div>
-        
-        {customerPaymentResponse && status.toLowerCase() === 'payment pending' && (
-          <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-600">
-              Customer has indicated payment is complete. Please verify and confirm.
-            </p>
-          </div>
-        )}
 
         {status.toLowerCase() === 'payment pending' && (
           <Button
