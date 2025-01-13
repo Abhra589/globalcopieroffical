@@ -20,7 +20,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
-    setError(null); // Clear any existing errors when a new file is selected
+    setError(null);
     
     if (!file) return;
 
@@ -57,8 +57,11 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
   };
 
   const handleUploadClick = () => {
-    setError(null); // Clear any existing errors when upload button is clicked
     fileInputRef.current?.click();
+  };
+
+  const handleClearError = () => {
+    setError(null);
   };
 
   return (
@@ -84,6 +87,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
           isUploading={isUploading}
           error={error}
           showError={false}
+          onClearError={handleClearError}
         />
       )}
     </div>

@@ -7,13 +7,27 @@ interface UploadButtonProps {
   isUploading: boolean;
   error: string | null;
   showError?: boolean;
+  onClearError?: () => void;
 }
 
-export const UploadButton = ({ onClick, isUploading, error, showError = false }: UploadButtonProps) => {
+export const UploadButton = ({ 
+  onClick, 
+  isUploading, 
+  error, 
+  showError = false,
+  onClearError 
+}: UploadButtonProps) => {
+  const handleClick = () => {
+    if (onClearError) {
+      onClearError();
+    }
+    onClick();
+  };
+
   return (
     <div className="relative">
       <Button 
-        onClick={onClick}
+        onClick={handleClick}
         disabled={isUploading}
         variant={error && showError ? "destructive" : "default"}
         className="w-full h-12 text-lg flex items-center gap-2"
