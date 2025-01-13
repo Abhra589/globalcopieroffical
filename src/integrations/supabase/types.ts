@@ -17,7 +17,7 @@ export type Database = {
           created_at: string
           customer_email: string
           customer_name: string
-          customer_payment_response: boolean | null
+          customer_payment_response: string | null
           customer_phone: string
           delivery_type: string
           file_path: string
@@ -42,7 +42,7 @@ export type Database = {
           created_at?: string
           customer_email: string
           customer_name: string
-          customer_payment_response?: boolean | null
+          customer_payment_response?: string | null
           customer_phone: string
           delivery_type: string
           file_path: string
@@ -67,7 +67,7 @@ export type Database = {
           created_at?: string
           customer_email?: string
           customer_name?: string
-          customer_payment_response?: boolean | null
+          customer_payment_response?: string | null
           customer_phone?: string
           delivery_type?: string
           file_path?: string
