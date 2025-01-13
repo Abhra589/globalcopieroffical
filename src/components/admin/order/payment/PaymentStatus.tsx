@@ -8,7 +8,7 @@ interface PaymentStatusProps {
   status: string;
   amount: number;
   orderId: string;
-  customerPaymentResponse?: string;
+  customerPaymentResponse: string;
   onUpdatePaymentStatus?: (newStatus: string) => void;
 }
 
@@ -16,17 +16,15 @@ export const PaymentStatus = ({
   status, 
   amount,
   orderId,
-  customerPaymentResponse = "customer has not paid the amount",
+  customerPaymentResponse,
   onUpdatePaymentStatus 
 }: PaymentStatusProps) => {
   const isPending = status.toLowerCase() === 'payment pending';
-  const hasCustomerConfirmedPayment = customerPaymentResponse === "customer has paid the amount. Did you get it?";
 
   console.log('Payment Status Component:', {
     status,
     customerPaymentResponse,
-    isPending,
-    hasCustomerConfirmedPayment
+    isPending
   });
 
   return (
@@ -36,12 +34,10 @@ export const PaymentStatus = ({
         <span className="text-sm font-medium">Status:</span>
         <div className="space-y-2">
           <PaymentStatusBadge status={status} />
-          {hasCustomerConfirmedPayment && isPending && (
-            <PaymentResponseAlert 
-              customerPaymentResponse={customerPaymentResponse}
-              show={true}
-            />
-          )}
+          <PaymentResponseAlert 
+            customerPaymentResponse={customerPaymentResponse}
+            show={true}
+          />
         </div>
 
         <ConfirmPaymentButton
