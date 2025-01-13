@@ -39,19 +39,17 @@ export const PaymentStatusUpdateButton = ({ orderId, onSuccess }: PaymentStatusU
       console.log('Found existing order:', existingOrder);
 
       // Update payment status with exact string match
-      const { data: updatedOrder, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('orders')
         .update({ payment_status: 'Payment Done' })
-        .eq('id', orderId)
-        .select()
-        .single();
+        .eq('id', orderId);
 
       if (updateError) {
         console.error('Error updating payment status:', updateError);
         throw new Error('Failed to update payment status');
       }
 
-      console.log('Successfully updated order:', updatedOrder);
+      console.log('Successfully updated order payment status');
       
       toast({
         title: "Success",
