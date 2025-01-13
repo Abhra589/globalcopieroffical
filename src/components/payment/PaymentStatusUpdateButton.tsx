@@ -23,7 +23,7 @@ export const PaymentStatusUpdateButton = ({ orderId, onSuccess }: PaymentStatusU
       const { error: updateError } = await supabase
         .from('orders')
         .update({ 
-          customer_payment_response: "customer has paid the amount. Did you get it?",
+          customer_payment_response: "customer has paid the amount",
           payment_status: 'Payment Pending'
         })
         .eq('id', orderId);
