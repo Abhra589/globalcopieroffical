@@ -17,7 +17,7 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
 
   useEffect(() => {
     // Initial fetch with retry logic
-    fetchOrder();
+    fetchOrder(orderId);
 
     // Setup realtime subscription with retry logic
     const channel = setupRealtimeSubscription();
