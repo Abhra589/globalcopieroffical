@@ -44,9 +44,9 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     };
   }, [showConfirmation, navigate]);
 
-  const updatePaymentStatus = async (orderId: string, retryCount = 0) => {
+  const updatePaymentStatus = async (orderId: string) => {
     try {
-      console.log(`Attempting to update payment status for order ${orderId}, attempt ${retryCount + 1}`);
+      console.log('Updating payment status for order:', orderId);
       
       const { error } = await supabase
         .from('orders')
@@ -55,11 +55,6 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
 
       if (error) {
         console.error('Error updating payment status:', error);
-        if (retryCount < 3) {
-          console.log(`Retrying update attempt ${retryCount + 1}...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          return updatePaymentStatus(orderId, retryCount + 1);
-        }
         throw error;
       }
 
@@ -83,7 +78,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         setShowConfirmation(true);
         toast({
           title: "Success",
-          description: "Payment status updated successfully!",
+          description: "Payment completed successfully!",
         });
       } else {
         throw new Error('Invalid order ID');

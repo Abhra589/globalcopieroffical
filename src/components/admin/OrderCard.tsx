@@ -7,9 +7,9 @@ import { DeliveryAddress } from "./DeliveryAddress";
 import { DocumentLink } from "./DocumentLink";
 import { OrderActions } from "./OrderActions";
 import { InStorePickupInfo } from "./InStorePickupInfo";
-import { OrderRealtime } from "./order/OrderRealtime";
 import { OrdersTable } from "@/integrations/supabase/types/orders";
 import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 type Order = OrdersTable['Row'];
 
@@ -22,12 +22,39 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const [currentOrder, setCurrentOrder] = useState<Order>(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
-  console.log('Current order state:', currentOrder);
+  // Poll for payment status updates
+  React.useEffect(() => {
+    const checkPaymentStatus = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', order.id)
+          .maybeSingle();
 
-  const handleOrderUpdate = (updatedOrder: Order) => {
-    console.log('Order updated in OrderCard:', updatedOrder);
-    setCurrentOrder(updatedOrder);
-  };
+        if (error) {
+          console.error('Error fetching order:', error);
+          return;
+        }
+
+        if (data && data.payment_status !== currentOrder.payment_status) {
+          console.log('Payment status updated:', data.payment_status);
+          setCurrentOrder(data);
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    };
+
+    // Check every 5 seconds if payment is pending
+    const interval = setInterval(() => {
+      if (currentOrder.payment_status?.toLowerCase() === 'payment pending') {
+        checkPaymentStatus();
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [currentOrder.id, currentOrder.payment_status]);
 
   const formattedDate = currentOrder.created_at 
     ? format(new Date(currentOrder.created_at), 'PPpp')
@@ -35,11 +62,6 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
 
   return (
     <OrderContainer>
-      <OrderRealtime 
-        orderId={currentOrder.id} 
-        onOrderUpdate={handleOrderUpdate}
-      />
-      
       <div className="mb-4 text-sm text-gray-600">
         <p>Order ID: {currentOrder.id}</p>
         <p>Created: {formattedDate}</p>
