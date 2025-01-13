@@ -75,10 +75,11 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
         console.log(`Subscription status for order ${orderId}:`, status);
         if (status === 'CHANNEL_ERROR') {
           console.error('Subscription error, retrying...');
-          setTimeout(() => {
-            console.log('Retrying subscription...');
-            setupRealtimeSubscription();
-          }, 3000);
+          toast({
+            title: "Connection Error",
+            description: "Failed to connect to real-time updates. Retrying...",
+            variant: "destructive",
+          });
         }
       });
 
