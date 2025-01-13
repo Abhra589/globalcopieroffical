@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PaymentButtons } from './PaymentButtons';
 import { PaymentConfirmationDialog } from './PaymentConfirmationDialog';
 import { usePaymentProcessor } from './PaymentProcessor';
-import { PaymentService } from '@/services/payment/PaymentService';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,9 +16,10 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [progress, setProgress] = useState(0);
   const [countdown, setCountdown] = useState(5);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { processPayment } = usePaymentProcessor();
 
-  useEffect(() => {
+  React.useEffect(() => {
     let timer: NodeJS.Timeout;
     
     if (showConfirmation) {
@@ -45,31 +45,47 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
   }, [showConfirmation, navigate]);
 
   const handlePaymentDone = async () => {
+    if (isUpdating) return;
+    
+    setIsUpdating(true);
     try {
       const result = await processPayment();
       
       if (result.success) {
-        // Update the payment status to "Payment Done"
-        const { error } = await supabase
-          .from('orders')
-          .update({ payment_status: 'Payment Done' })
-          .eq('id', result.orderId);
+        // Retry logic for updating payment status
+        const updatePaymentStatus = async (retryCount = 0) => {
+          try {
+            const { error } = await supabase
+              .from('orders')
+              .update({ payment_status: 'Payment Done' })
+              .eq('id', result.orderId);
 
-        if (error) {
-          console.error('Error updating payment status:', error);
-          toast({
-            title: "Error",
-            description: "Failed to update payment status. Please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
+            if (error) {
+              console.error('Error updating payment status:', error);
+              if (retryCount < 3) {
+                console.log(`Retrying update attempt ${retryCount + 1}...`);
+                setTimeout(() => updatePaymentStatus(retryCount + 1), 1000);
+                return;
+              }
+              throw error;
+            }
 
-        setShowConfirmation(true);
-        toast({
-          title: "Success",
-          description: "Payment status updated successfully!",
-        });
+            setShowConfirmation(true);
+            toast({
+              title: "Success",
+              description: "Payment status updated successfully!",
+            });
+          } catch (error) {
+            console.error('Error in updatePaymentStatus:', error);
+            toast({
+              title: "Error",
+              description: "Failed to update payment status. Please try again.",
+              variant: "destructive",
+            });
+          }
+        };
+
+        await updatePaymentStatus();
       }
     } catch (error) {
       console.error('Error in handlePaymentDone:', error);
@@ -78,6 +94,8 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
         description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -90,7 +108,7 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
       <PaymentButtons
         onUPIClick={handleUPIClick}
         onPaymentDone={handlePaymentDone}
-        isLoading={false}
+        isLoading={isUpdating}
       />
       
       <PaymentConfirmationDialog

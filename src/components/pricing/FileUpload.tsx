@@ -21,7 +21,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
     setError(null);
     
     const file = event.target.files?.[0] || null;
-    const validation = validateFile(file, { required: isRequired });
+    const validation = validateFile(file);
 
     if (!validation.isValid) {
       setError(validation.error);
@@ -53,12 +53,6 @@ export const FileUpload = ({ onFileUpload, isRequired = false }: FileUploadProps
   };
 
   const handleUploadClick = () => {
-    if (!currentFile && isRequired) {
-      const error = 'Please upload your document';
-      setError(error);
-      handleFileValidationError(error);
-      return;
-    }
     fileInputRef.current?.click();
   };
 

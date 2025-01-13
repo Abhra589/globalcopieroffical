@@ -59,7 +59,6 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
             description: "Lost connection to updates. Retrying...",
             variant: "destructive",
           });
-          // Retry subscription after a delay
           setTimeout(() => {
             console.log('Retrying subscription...');
             setupRealtimeSubscription();
@@ -80,7 +79,11 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
   }, [setupRealtimeSubscription]);
 
   const handleDeleteOrder = (orderId: string) => {
-    setOrders(orders.filter(order => order.id !== orderId));
+    setOrders(currentOrders => {
+      const updatedOrders = currentOrders.filter(order => order.id !== orderId);
+      // Only show "no orders" message if there are no orders after filtering
+      return updatedOrders;
+    });
   };
 
   return (
@@ -92,7 +95,7 @@ export const OrderList = ({ initialOrders }: OrderListProps) => {
           onDelete={handleDeleteOrder}
         />
       ))}
-      {orders.length === 0 && (
+      {orders.length === 0 && initialOrders.length === 0 && (
         <p className="text-center text-gray-500">No orders yet</p>
       )}
     </div>
