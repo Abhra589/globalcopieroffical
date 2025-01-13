@@ -26,7 +26,10 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
 
     if (!validation.isValid) {
       setError(validation.error);
-      handleFileValidationError(validation.error!);
+      // Only show validation error toast if it's not during initial upload
+      if (isSubmitting) {
+        handleFileValidationError(validation.error!);
+      }
       return;
     }
 
@@ -46,7 +49,9 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
     } catch (err) {
       console.error('Error uploading file:', err);
       setError('Failed to upload file. Please try again.');
-      handleFileValidationError('Failed to upload file. Please try again.');
+      if (isSubmitting) {
+        handleFileValidationError('Failed to upload file. Please try again.');
+      }
       setCurrentFile(null);
     } finally {
       setIsUploading(false);
@@ -79,7 +84,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
           onClick={handleUploadClick}
           isUploading={isUploading}
           error={error}
-          showError={false} // Changed this to false so error only shows on form submission
+          showError={false} // Never show error on the upload button itself
         />
       )}
     </div>
