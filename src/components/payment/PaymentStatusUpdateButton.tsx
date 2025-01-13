@@ -22,7 +22,10 @@ export const PaymentStatusUpdateButton = ({ orderId, onSuccess }: PaymentStatusU
 
       const { error: updateError } = await supabase
         .from('orders')
-        .update({ customer_payment_response: true })
+        .update({ 
+          customer_payment_response: true,
+          payment_status: 'Payment Pending' // Ensure status is set to pending for admin verification
+        })
         .eq('id', orderId);
 
       if (updateError) {

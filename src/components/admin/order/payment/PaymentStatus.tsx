@@ -2,6 +2,7 @@ import React from 'react';
 import { StatusBadge } from './StatusBadge';
 import { CustomerPaymentAlert } from './CustomerPaymentAlert';
 import { ConfirmPaymentButton } from './ConfirmPaymentButton';
+import { PaymentAmount } from './PaymentAmount';
 
 interface PaymentStatusProps {
   status: string;
@@ -22,25 +23,21 @@ export const PaymentStatus = ({
 
   return (
     <div className="space-y-3">
-      <p className="text-primary font-medium text-lg">
-        Amount: ₹{amount.toFixed(2)}
-      </p>
+      <PaymentAmount amount={amount} />
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">Status:</span>
         <div className="space-y-2">
           <StatusBadge status={status} />
-          {customerPaymentResponse && isPending && (
-            <CustomerPaymentAlert show={true} />
-          )}
+          <CustomerPaymentAlert 
+            show={customerPaymentResponse && isPending} 
+          />
         </div>
 
-        {isPending && (
-          <ConfirmPaymentButton
-            orderId={orderId}
-            onUpdatePaymentStatus={onUpdatePaymentStatus}
-            show={true}
-          />
-        )}
+        <ConfirmPaymentButton
+          orderId={orderId}
+          onUpdatePaymentStatus={onUpdatePaymentStatus}
+          show={isPending}
+        />
       </div>
     </div>
   );
