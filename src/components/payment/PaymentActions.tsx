@@ -74,18 +74,26 @@ const PaymentActions = ({ upiLink }: PaymentActionsProps) => {
     
     setIsUpdating(true);
     try {
-      const result = await processPayment();
-      
-      if (result.success && result.orderId) {
-        await updatePaymentStatus(result.orderId);
-        setShowConfirmation(true);
-        toast({
-          title: "Success",
-          description: "Payment completed successfully!",
-        });
-      } else {
-        throw new Error('Invalid order ID');
+      const orderId = searchParams.get('orderId');
+      if (!orderId) {
+        throw new Error('Order ID not found in URL parameters');
       }
+
+      if (orderId === 'new') {
+        const result = await processPayment();
+        if (!result.success || !result.orderId) {
+          throw new Error('Failed to process payment');
+        }
+        await updatePaymentStatus(result.orderId);
+      } else {
+        await updatePaymentStatus(orderId);
+      }
+
+      setShowConfirmation(true);
+      toast({
+        title: "Success",
+        description: "Payment completed successfully!",
+      });
     } catch (error) {
       console.error('Error in handlePaymentDone:', error);
       toast({
