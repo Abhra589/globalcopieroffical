@@ -45,6 +45,21 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         console.log(`Subscription status for order ${order.id}:`, status);
       });
 
+    // Initial fetch of the order
+    const fetchOrder = async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', order.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        setCurrentOrder(data);
+      }
+    };
+
+    fetchOrder();
+
     return () => {
       console.log('Cleaning up subscription for order:', order.id);
       supabase.removeChannel(channel);

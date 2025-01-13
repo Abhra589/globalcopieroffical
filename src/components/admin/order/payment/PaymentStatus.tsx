@@ -22,6 +22,13 @@ export const PaymentStatus = ({
   const isPending = status.toLowerCase() === 'payment pending';
   const hasCustomerConfirmedPayment = customerPaymentResponse === "customer has paid the amount. Did you get it?";
 
+  console.log('Payment Status Component:', {
+    status,
+    customerPaymentResponse,
+    isPending,
+    hasCustomerConfirmedPayment
+  });
+
   return (
     <div className="space-y-3">
       <PaymentAmount amount={amount} />
