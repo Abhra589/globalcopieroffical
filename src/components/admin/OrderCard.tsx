@@ -22,45 +22,36 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
   const [currentOrder, setCurrentOrder] = useState<Order>(order);
   const { handleDelete } = useOrderDeletion(order.id, onDelete);
 
-  const handlePaymentStatusUpdate = (newStatus: string) => {
-    setCurrentOrder(prev => ({
-      ...prev,
-      payment_status: newStatus
-    }));
-  };
-
   useEffect(() => {
-    const checkPaymentStatus = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*')
-          .eq('id', order.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error fetching order:', error);
-          return;
+    console.log('Setting up real-time subscription for order:', order.id);
+    
+    const channel = supabase
+      .channel(`order-${order.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `id=eq.${order.id}`,
+        },
+        (payload) => {
+          console.log('Order update received:', payload);
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            console.log('Updating order with new data:', payload.new);
+            setCurrentOrder(payload.new as Order);
+          }
         }
+      )
+      .subscribe((status) => {
+        console.log(`Subscription status for order ${order.id}:`, status);
+      });
 
-        if (data && data.payment_status !== currentOrder.payment_status) {
-          console.log('Payment status updated:', data.payment_status);
-          setCurrentOrder(data);
-        }
-      } catch (error) {
-        console.error('Error checking payment status:', error);
-      }
+    return () => {
+      console.log('Cleaning up subscription for order:', order.id);
+      supabase.removeChannel(channel);
     };
-
-    // Check every 5 seconds if payment is pending
-    const interval = setInterval(() => {
-      if (currentOrder.payment_status?.toLowerCase() === 'payment pending') {
-        checkPaymentStatus();
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [currentOrder.id, currentOrder.payment_status]);
+  }, [order.id]);
 
   const formattedDate = currentOrder.created_at 
     ? format(new Date(currentOrder.created_at), 'PPpp')
@@ -90,7 +81,12 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         orderId={currentOrder.id}
         paymentStatus={currentOrder.payment_status || 'Payment Pending'}
         customerPaymentResponse={currentOrder.customer_payment_response}
-        onUpdatePaymentStatus={handlePaymentStatusUpdate}
+        onUpdatePaymentStatus={(newStatus) => {
+          setCurrentOrder(prev => ({
+            ...prev,
+            payment_status: newStatus
+          }));
+        }}
       />
 
       {currentOrder.delivery_type === 'pickup' ? (
