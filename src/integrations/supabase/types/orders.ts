@@ -22,6 +22,7 @@ export interface OrdersTable {
     pincode: string | null;
     pickup_date: string | null;
     pickup_time: string | null;
+    customer_payment_response: boolean | null;
   };
   Insert: {
     amount: number;
@@ -46,6 +47,7 @@ export interface OrdersTable {
     pincode?: string | null;
     pickup_date?: string | null;
     pickup_time?: string | null;
+    customer_payment_response?: boolean | null;
   };
   Update: {
     amount?: number;
@@ -70,6 +72,7 @@ export interface OrdersTable {
     pincode?: string | null;
     pickup_date?: string | null;
     pickup_time?: string | null;
+    customer_payment_response?: boolean | null;
   };
   Relationships: [];
 }
