@@ -87,6 +87,7 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         printType={currentOrder.print_type}
         printSides={currentOrder.print_sides}
         amount={currentOrder.amount}
+        orderId={currentOrder.id}
         paymentStatus={currentOrder.payment_status || 'Payment Pending'}
         customerPaymentResponse={currentOrder.customer_payment_response}
         onUpdatePaymentStatus={handlePaymentStatusUpdate}

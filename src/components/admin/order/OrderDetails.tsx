@@ -9,6 +9,7 @@ interface OrderDetailsProps {
   printType: string;
   printSides: string;
   amount: number;
+  orderId: string;
   paymentStatus: string;
   customerPaymentResponse?: boolean;
   onUpdatePaymentStatus?: (newStatus: string) => void;
@@ -21,6 +22,7 @@ export const OrderDetails = ({
   printType,
   printSides,
   amount,
+  orderId,
   paymentStatus,
   customerPaymentResponse,
   onUpdatePaymentStatus
@@ -36,7 +38,8 @@ export const OrderDetails = ({
       />
       <PaymentStatus 
         status={paymentStatus} 
-        amount={amount} 
+        amount={amount}
+        orderId={orderId}
         customerPaymentResponse={customerPaymentResponse}
         onUpdatePaymentStatus={onUpdatePaymentStatus}
       />

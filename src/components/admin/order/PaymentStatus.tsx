@@ -6,13 +6,15 @@ import { supabase } from '@/integrations/supabase/client';
 interface PaymentStatusProps {
   status: string;
   amount: number;
+  orderId: string; // Add orderId prop
   customerPaymentResponse?: boolean;
   onUpdatePaymentStatus?: (newStatus: string) => void;
 }
 
 export const PaymentStatus = ({ 
   status, 
-  amount, 
+  amount,
+  orderId,
   customerPaymentResponse = false,
   onUpdatePaymentStatus 
 }: PaymentStatusProps) => {
