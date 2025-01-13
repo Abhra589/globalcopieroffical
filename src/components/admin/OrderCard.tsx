@@ -3,12 +3,10 @@ import { useOrderDeletion } from "@/hooks/useOrderDeletion";
 import { OrderContainer } from "./OrderContainer";
 import { OrderMetadata } from "./order/OrderMetadata";
 import { OrderDetails } from "./order/OrderDetails";
-import { DeliveryAddress } from "./DeliveryAddress";
-import { DocumentLink } from "./DocumentLink";
 import { OrderActions } from "./OrderActions";
-import { InStorePickupInfo } from "./InStorePickupInfo";
+import { OrderDateTime } from "./order/OrderDateTime";
+import { OrderDeliveryInfo } from "./order/OrderDeliveryInfo";
 import { OrdersTable } from "@/integrations/supabase/types/orders";
-import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
 type Order = OrdersTable['Row'];
@@ -53,16 +51,12 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
     };
   }, [order.id]);
 
-  const formattedDate = currentOrder.created_at 
-    ? format(new Date(currentOrder.created_at), 'PPpp')
-    : 'Date not available';
-
   return (
     <OrderContainer>
-      <div className="mb-4 text-sm text-gray-600">
-        <p>Order ID: {currentOrder.id}</p>
-        <p>Created: {formattedDate}</p>
-      </div>
+      <OrderDateTime 
+        createdAt={currentOrder.created_at}
+        orderId={currentOrder.id}
+      />
 
       <OrderMetadata
         customerName={currentOrder.customer_name}
@@ -89,23 +83,16 @@ export const OrderCard = ({ order, onDelete }: OrderCardProps) => {
         }}
       />
 
-      {currentOrder.delivery_type === 'pickup' ? (
-        <InStorePickupInfo
-          pickupDate={currentOrder.pickup_date || ''}
-          pickupTime={currentOrder.pickup_time || ''}
-        />
-      ) : (
-        <DeliveryAddress
-          street={currentOrder.street || ''}
-          city={currentOrder.city || ''}
-          state={currentOrder.state || ''}
-          pincode={currentOrder.pincode || ''}
-        />
-      )}
-
-      <div className="mt-4">
-        <DocumentLink fileUrl={currentOrder.file_url} />
-      </div>
+      <OrderDeliveryInfo
+        deliveryType={currentOrder.delivery_type}
+        pickupDate={currentOrder.pickup_date}
+        pickupTime={currentOrder.pickup_time}
+        street={currentOrder.street}
+        city={currentOrder.city}
+        state={currentOrder.state}
+        pincode={currentOrder.pincode}
+        fileUrl={currentOrder.file_url}
+      />
 
       <OrderActions
         customerPhone={currentOrder.customer_phone}
