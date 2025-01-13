@@ -29,7 +29,7 @@ export const UploadButton = ({
       <Button 
         onClick={handleClick}
         disabled={isUploading}
-        variant={error && showError ? "destructive" : "default"}
+        variant="default"
         className="w-full h-12 text-lg flex items-center gap-2"
       >
         <Upload className="w-5 h-5" />

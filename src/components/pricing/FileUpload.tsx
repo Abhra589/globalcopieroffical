@@ -25,11 +25,9 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
     if (!file) return;
 
     const validation = validateFile(file);
-    if (!validation.isValid) {
+    if (!validation.isValid && validation.error && isSubmitting) {
       setError(validation.error);
-      if (validation.error) {
-        handleFileValidationError(validation.error);
-      }
+      handleFileValidationError(validation.error);
       return;
     }
 
@@ -46,8 +44,10 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
       });
     } catch (err) {
       console.error('Error uploading file:', err);
-      setError('Failed to upload file. Please try again.');
-      handleFileValidationError('Failed to upload file. Please try again.');
+      if (isSubmitting) {
+        setError('Failed to upload file. Please try again.');
+        handleFileValidationError('Failed to upload file. Please try again.');
+      }
       setCurrentFile(null);
     } finally {
       setIsUploading(false);
