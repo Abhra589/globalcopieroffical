@@ -29,10 +29,12 @@ export const PaymentStatus = ({
         <span className="text-sm font-medium">Status:</span>
         <div className="space-y-2">
           <PaymentStatusBadge status={status} />
-          <PaymentResponseAlert 
-            show={hasCustomerConfirmedPayment && isPending}
-            customerPaymentResponse={customerPaymentResponse}
-          />
+          {hasCustomerConfirmedPayment && isPending && (
+            <PaymentResponseAlert 
+              customerPaymentResponse={customerPaymentResponse}
+              show={true}
+            />
+          )}
         </div>
 
         <ConfirmPaymentButton
