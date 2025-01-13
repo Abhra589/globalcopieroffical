@@ -41,8 +41,6 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
       if (data) {
         console.log('Order data fetched successfully:', data);
         onOrderUpdate(data);
-      } else {
-        console.log('No order found with id:', orderId);
       }
     } catch (error) {
       console.error('Error in fetchOrder:', error);
@@ -52,7 +50,7 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
     }
   }, [orderId, onOrderUpdate, toast]);
 
-  const setupRealtimeSubscription = useCallback(() => {
+  useEffect(() => {
     console.log('Setting up real-time subscription for order:', orderId);
     
     const channel = supabase
@@ -84,18 +82,14 @@ export const OrderRealtime = ({ orderId, onOrderUpdate }: OrderRealtimeProps) =>
         }
       });
 
-    return channel;
-  }, [orderId, onOrderUpdate]);
-
-  useEffect(() => {
+    // Initial fetch
     fetchOrder();
-    const channel = setupRealtimeSubscription();
 
     return () => {
       console.log('Cleaning up subscription for order:', orderId);
       supabase.removeChannel(channel);
     };
-  }, [orderId, fetchOrder, setupRealtimeSubscription]);
+  }, [orderId, fetchOrder, onOrderUpdate]);
 
   return null;
 };
