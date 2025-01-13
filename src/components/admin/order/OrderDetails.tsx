@@ -24,7 +24,6 @@ export const OrderDetails = ({
   amount,
   orderId,
   paymentStatus,
-  customerPaymentResponse,
   onUpdatePaymentStatus
 }: OrderDetailsProps) => {
   return (
@@ -40,7 +39,6 @@ export const OrderDetails = ({
         status={paymentStatus} 
         amount={amount}
         orderId={orderId}
-        customerPaymentResponse={customerPaymentResponse}
         onUpdatePaymentStatus={onUpdatePaymentStatus}
       />
     </div>
