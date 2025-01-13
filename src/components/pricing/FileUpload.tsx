@@ -79,7 +79,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
           onClick={handleUploadClick}
           isUploading={isUploading}
           error={error}
-          showError={isSubmitting}
+          showError={false} // Changed this to false so error only shows on form submission
         />
       )}
     </div>
