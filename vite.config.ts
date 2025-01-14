@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: "0.0.0.0",
     port: 8080,
     cors: true,
     headers: {
@@ -13,6 +13,10 @@ export default defineConfig(({ mode }) => ({
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
     }
+  },
+  preview: {
+    host: "0.0.0.0",
+    port: 8080
   },
   build: {
     outDir: 'dist',
