@@ -2,8 +2,8 @@ import React, { useState, useRef } from 'react';
 import { UploadButton } from "./file-upload/UploadButton";
 import { SelectedFile } from "./file-upload/SelectedFile";
 import { FileUploadInfo } from "./file-upload/FileUploadInfo";
-import { validateFile } from '@/utils/fileUpload';
-import { uploadFile } from '@/utils/s3Config';
+import { FileValidation } from "./file-upload/FileValidation";
+import { FileUploadHandler } from "./file-upload/FileUploadHandler";
 import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
@@ -26,7 +26,7 @@ export const FileUpload = ({
   const { toast } = useToast();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault();
     const file = event.target.files?.[0] || null;
     
     if (!file) {
@@ -34,50 +34,12 @@ export const FileUpload = ({
       return;
     }
 
-    // Validate file type and size
-    const validation = validateFile(file, {
-      maxSize: 50 * 1024 * 1024, // 50MB
-      allowedTypes: ['application/pdf'],
-      required: true
-    });
-
-    if (!validation.isValid) {
-      setError(validation.error || "Invalid file");
-      toast({
-        title: "Error",
-        description: validation.error || "Invalid file",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setCurrentFile(file);
     setIsUploading(true);
-    setError(null);
-
-    try {
-      const { url, path } = await uploadFile(file);
-      onFileUpload(file, url, path);
-      toast({
-        title: "Success",
-        description: "File uploaded successfully",
-      });
-    } catch (err) {
-      console.error('Error uploading file:', err);
-      setCurrentFile(null);
-      setError("Failed to upload file. Please try again.");
-      toast({
-        title: "Error",
-        description: "Failed to upload file",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
   };
 
   const handleUploadClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     if (!pageCount || pageCount <= 0) {
       setError("Please enter the number of pages first");
       toast({
@@ -88,6 +50,27 @@ export const FileUpload = ({
       return;
     }
     fileInputRef.current?.click();
+  };
+
+  const handleValidationComplete = (isValid: boolean, validationError?: string) => {
+    if (!isValid) {
+      setError(validationError || "Validation failed");
+      setCurrentFile(null);
+      setIsUploading(false);
+    }
+  };
+
+  const handleUploadComplete = (url: string, path: string) => {
+    if (currentFile) {
+      onFileUpload(currentFile, url, path);
+    }
+    setIsUploading(false);
+  };
+
+  const handleUploadError = (uploadError: string) => {
+    setError(uploadError);
+    setCurrentFile(null);
+    setIsUploading(false);
   };
 
   const handleClearError = () => {
@@ -106,12 +89,25 @@ export const FileUpload = ({
       
       <FileUploadInfo />
       
-      {currentFile ? (
-        <SelectedFile
-          fileName={currentFile.name}
-          isUploading={isUploading}
-        />
-      ) : (
+      {currentFile && (
+        <>
+          <FileValidation
+            file={currentFile}
+            onValidationComplete={handleValidationComplete}
+          />
+          <FileUploadHandler
+            file={currentFile}
+            onUploadComplete={handleUploadComplete}
+            onUploadError={handleUploadError}
+          />
+          <SelectedFile
+            fileName={currentFile.name}
+            isUploading={isUploading}
+          />
+        </>
+      )}
+      
+      {!currentFile && (
         <UploadButton
           onClick={handleUploadClick}
           isUploading={isUploading}

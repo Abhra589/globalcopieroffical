@@ -5,3 +5,12 @@
   Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
   Access-Control-Allow-Headers: X-Requested-With, content-type, Authorization, Range
   Access-Control-Expose-Headers: Content-Range, Range
+
+/*.js
+  Content-Type: application/javascript; charset=utf-8
+
+/*.css
+  Content-Type: text/css; charset=utf-8
+
+/*.html
+  Content-Type: text/html; charset=utf-8
