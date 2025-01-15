@@ -44,12 +44,12 @@ export const PrintingOptions = ({
         setSelectedSides={setSelectedSides}
       />
       <PriceList selectedGsm={selectedGsm} />
-      <ManualPageCount pageCount={pageCount} onPageCountChange={setPageCount} />
       <FileUpload 
         onFileUpload={onFileChange} 
         isSubmitting={isSubmitting}
         pageCount={pageCount}
       />
+      <ManualPageCount pageCount={pageCount} onPageCountChange={setPageCount} />
       <CopiesInput copies={copies} setCopies={setCopies} />
     </div>
   );
