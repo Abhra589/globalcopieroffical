@@ -9,15 +9,18 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     cors: true,
     headers: {
+      'Content-Type': 'application/javascript; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
-      'Content-Type': 'application/javascript; charset=utf-8'
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization'
     }
   },
   preview: {
     host: "0.0.0.0",
-    port: 8080
+    port: 8080,
+    headers: {
+      'Content-Type': 'application/javascript; charset=utf-8'
+    }
   },
   build: {
     outDir: 'dist',
@@ -31,8 +34,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
