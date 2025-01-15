@@ -10,11 +10,18 @@ interface FileUploadProps {
   onFileUpload: (file: File | null, url: string, path?: string) => void;
   isRequired?: boolean;
   isSubmitting?: boolean;
+  pageCount?: number;
 }
 
-export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = false }: FileUploadProps) => {
+export const FileUpload = ({ 
+  onFileUpload, 
+  isRequired = false, 
+  isSubmitting = false,
+  pageCount
+}: FileUploadProps) => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,6 +31,7 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
 
     setCurrentFile(file);
     setIsUploading(true);
+    setError(null);
 
     try {
       const { url, path } = await uploadFile(file);
@@ -35,12 +43,22 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
     } catch (err) {
       console.error('Error uploading file:', err);
       setCurrentFile(null);
+      setError("Failed to upload file. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to upload file",
+        variant: "destructive",
+      });
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleUploadClick = () => {
+    if (!pageCount || pageCount <= 0) {
+      setError("Please enter the number of pages first");
+      return;
+    }
     fileInputRef.current?.click();
   };
 
@@ -65,9 +83,9 @@ export const FileUpload = ({ onFileUpload, isRequired = false, isSubmitting = fa
         <UploadButton
           onClick={handleUploadClick}
           isUploading={isUploading}
-          error={null}
-          showError={false}
-          onClearError={() => {}}
+          error={error}
+          showError={!!error}
+          onClearError={() => setError(null)}
         />
       )}
     </div>
