@@ -4,7 +4,7 @@ import { SelectedFile } from "./file-upload/SelectedFile";
 import { FileUploadInfo } from "./file-upload/FileUploadInfo";
 import { validateFile } from '@/utils/fileUpload';
 import { uploadFile } from '@/utils/s3Config';
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
   onFileUpload: (file: File | null, url: string, path?: string) => void;
@@ -23,11 +23,32 @@ export const FileUpload = ({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     
-    if (!file) return;
+    if (!file) {
+      setError("Please select a file");
+      return;
+    }
+
+    // Validate file type and size
+    const validation = validateFile(file, {
+      maxSize: 50 * 1024 * 1024, // 50MB
+      allowedTypes: ['application/pdf'],
+      required: true
+    });
+
+    if (!validation.isValid) {
+      setError(validation.error || "Invalid file");
+      toast({
+        title: "Error",
+        description: validation.error || "Invalid file",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setCurrentFile(file);
     setIsUploading(true);
@@ -57,9 +78,18 @@ export const FileUpload = ({
   const handleUploadClick = () => {
     if (!pageCount || pageCount <= 0) {
       setError("Please enter the number of pages first");
+      toast({
+        title: "Error",
+        description: "Please enter the number of pages first",
+        variant: "destructive",
+      });
       return;
     }
     fileInputRef.current?.click();
+  };
+
+  const handleClearError = () => {
+    setError(null);
   };
 
   return (
@@ -85,7 +115,7 @@ export const FileUpload = ({
           isUploading={isUploading}
           error={error}
           showError={!!error}
-          onClearError={() => setError(null)}
+          onClearError={handleClearError}
         />
       )}
     </div>

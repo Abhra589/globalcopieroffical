@@ -7,7 +7,7 @@ export const FileUploadError = ({ error, showError = false }: FileUploadErrorPro
   if (!error || !showError) return null;
   
   return (
-    <p className="absolute -right-32 top-1/2 -translate-y-1/2 text-sm text-red-500">
+    <p className="text-sm text-red-500 mt-2">
       {error}
     </p>
   );

@@ -30,10 +30,10 @@ export const UploadButton = ({
         onClick={handleClick}
         disabled={isUploading}
         variant="default"
-        className="w-full h-12 text-lg flex items-center gap-2"
+        className="w-full h-12 text-lg flex items-center gap-2 transition-all hover:bg-primary/90"
       >
         <Upload className="w-5 h-5" />
-        Upload PDF
+        {isUploading ? 'Uploading...' : 'Upload PDF'}
       </Button>
       <FileUploadError error={error} showError={showError} />
     </div>

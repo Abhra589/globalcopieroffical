@@ -8,12 +8,12 @@ export const SelectedFile = ({ fileName, isUploading }: SelectedFileProps) => {
   
   return (
     <div className="space-y-2">
-      <p className="text-sm text-green-600">
-        Selected file: {fileName}
+      <p className="text-sm text-green-600 flex items-center gap-2">
+        <span className="font-medium">Selected file:</span> {fileName}
       </p>
       {isUploading && (
         <p className="text-sm text-muted-foreground animate-pulse">
-          Uploading document...
+          Uploading document... Please wait
         </p>
       )}
     </div>
