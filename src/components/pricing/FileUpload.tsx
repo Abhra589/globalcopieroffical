@@ -36,6 +36,7 @@ export const FileUpload = ({
 
     setCurrentFile(file);
     setIsUploading(true);
+    setError(null);
   };
 
   const handleUploadClick = (e: React.MouseEvent) => {
@@ -57,20 +58,36 @@ export const FileUpload = ({
       setError(validationError || "Validation failed");
       setCurrentFile(null);
       setIsUploading(false);
+      toast({
+        title: "Error",
+        description: validationError || "File validation failed",
+        variant: "destructive",
+      });
     }
   };
 
   const handleUploadComplete = (url: string, path: string) => {
+    console.log("Upload completed successfully:", { url, path });
     if (currentFile) {
       onFileUpload(currentFile, url, path);
+      toast({
+        title: "Success",
+        description: "File uploaded successfully",
+      });
     }
     setIsUploading(false);
   };
 
   const handleUploadError = (uploadError: string) => {
+    console.error("Upload error:", uploadError);
     setError(uploadError);
     setCurrentFile(null);
     setIsUploading(false);
+    toast({
+      title: "Error",
+      description: uploadError || "Failed to upload file",
+      variant: "destructive",
+    });
   };
 
   const handleClearError = () => {

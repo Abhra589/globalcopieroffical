@@ -1,4 +1,4 @@
-import { validateFile } from '@/utils/fileUpload';
+import { useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
 interface FileValidationProps {
@@ -9,26 +9,34 @@ interface FileValidationProps {
 export const FileValidation = ({ file, onValidationComplete }: FileValidationProps) => {
   const { toast } = useToast();
 
-  const validateUploadedFile = () => {
-    const validation = validateFile(file, {
-      maxSize: 50 * 1024 * 1024,
-      allowedTypes: ['application/pdf'],
-      required: true
-    });
+  useEffect(() => {
+    const validateFile = () => {
+      console.log("Validating file:", file.name);
 
-    if (!validation.isValid) {
-      toast({
-        title: "Error",
-        description: validation.error || "Invalid file",
-        variant: "destructive",
-      });
-      onValidationComplete(false, validation.error);
-      return false;
-    }
+      if (!file) {
+        onValidationComplete(false, "No file selected");
+        return;
+      }
 
-    onValidationComplete(true);
-    return true;
-  };
+      // Check file type
+      if (file.type !== 'application/pdf') {
+        onValidationComplete(false, "Please upload a PDF file");
+        return;
+      }
+
+      // Check file size (50MB limit)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        onValidationComplete(false, "File size should be less than 50MB");
+        return;
+      }
+
+      console.log("File validation successful");
+      onValidationComplete(true);
+    };
+
+    validateFile();
+  }, [file]);
 
   return null;
 };
