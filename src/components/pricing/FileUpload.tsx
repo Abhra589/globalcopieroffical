@@ -26,6 +26,7 @@ export const FileUpload = ({
   const { toast } = useToast();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault(); // Prevent form submission
     const file = event.target.files?.[0] || null;
     
     if (!file) {
@@ -75,7 +76,8 @@ export const FileUpload = ({
     }
   };
 
-  const handleUploadClick = () => {
+  const handleUploadClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
     if (!pageCount || pageCount <= 0) {
       setError("Please enter the number of pages first");
       toast({
